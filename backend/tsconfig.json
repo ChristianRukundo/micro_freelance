@@ -37,8 +37,17 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src/**/*.ts", 
+  "ts-node": {
+    // This tells ts-node to load files specified in the 'files' array
+    "files": true
+  },
+  "files": [
+    // Explicitly include the global type declaration file
+    "src/shared/types/express.d.ts"
+  ],
+ "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
