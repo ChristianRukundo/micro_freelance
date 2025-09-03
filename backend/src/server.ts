@@ -7,7 +7,7 @@ import { initSocket } from './socket';
 process.on('uncaughtException', (err: Error) => {
   console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
   console.error(err.name, err.message, err.stack);
-  process.exit(1); // Exit with failure code
+  process.exit(1); 
 });
 
 const server = http.createServer(app);
@@ -26,7 +26,7 @@ process.on('unhandledRejection', (err: Error) => {
   console.error('UNHANDLED REJECTION! 💥 Shutting down...');
   console.error(err.name, err.message, err.stack);
   server.close(() => {
-    process.exit(1); // Exit with failure code
+    process.exit(1); 
   });
 });
 
