@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 20px 30px;
+            text-align: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .content p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .otp-box {
+            background-color: #e9ecef;
+            color: #333333;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+            letter-spacing: 2px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 0;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Email Verification</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{name}},</p>
+            <p>Thank you for registering with Micro Freelance Platform! To complete your registration and activate your account, please verify your email address using the One-Time Password (OTP) below.</p>
+            <p>Your verification code is:</p>
+            <div class="otp-box">{{otp}}</div>
+            <p>This code is valid for {{OTP_EXPIRY_MINUTES}} minutes. If you did not sign up for this service, you can safely ignore this email.</p>
+            <p>Please enter this code on the verification page of the platform: <a href="{{frontendUrl}}/verify-email" target="_blank">{{frontendUrl}}/verify-email</a></p>
+        </div>
+        <div class="footer">
+            <p>&copy; {{currentYear}} Micro Freelance Platform. All rights reserved.</p>
+            <p>If you have any questions, please contact our support team.</p>
+        </div>
+    </div>
+</body>
+</html>

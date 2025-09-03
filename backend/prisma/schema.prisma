@@ -1,175 +1,220 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+enum UserRole {
+  CLIENT
+  FREELANCER
+  ADMIN
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum MilestoneStatus {
+  PENDING
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REVISION_REQUESTED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  PLATFORM_FEE
+  PAYOUT
+  ESCROW_FUNDING
+  ESCROW_RELEASE
+}
+
+enum NotificationType {
+  NEW_BID
+  BID_ACCEPTED
+  MILESTONE_CREATED
+  MILESTONE_SUBMITTED
+  MILESTONE_APPROVED
+  REVISION_REQUESTED
+  NEW_MESSAGE
+  TASK_CANCELLED
+  PAYMENT_SUCCEEDED
+  EMAIL_VERIFIED
+  PASSWORD_RESET
+  STRIPE_ACCOUNT_UPDATED
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  password      String?
-  image         String?
-  role          Role           @default(USER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  bookings      Booking[]
-  favorites     Favorite[]
-  refreshTokens RefreshToken[]
-  Property      Property[]
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  password             String
+  role                 UserRole
+  emailVerified        DateTime?
+  emailVerificationOTP String?
+  passwordResetOTP     String?
+  otpExpires           DateTime?
+  isSuspended          Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
-  // Chat relations
-  sentMessages             Message[]                 @relation("MessageSender")
-  conversationParticipants ConversationParticipant[]
+  stripeAccountId        String? @unique
+  stripeAccountCompleted Boolean @default(false)
+
+  profile           Profile?
+  tasksAsClient     Task[]         @relation("ClientTasks")
+  tasksAsFreelancer Task[]         @relation("FreelancerTasks")
+  bids              Bid[]
+  messages          Message[]
+  notifications     Notification[]
+  transactions      Transaction[]
 }
 
-model Property {
-  id              String   @id @default(cuid())
-  title           String
-  description     String
-  location        String
-  subLocation     String?
-  pricePerNight   Float
-  guests          Int
-  bedrooms        Int
-  bathrooms       Int
-  squareMeters    Int
-  images          String[]
-  amenities       String[]
-  outdoorFeatures String[] @default([])
-  activities      String[] @default([])
-  coordinates     Json?
-  status          String   @default("active")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  agentId      String
-  agent        User           @relation(fields: [agentId], references: [id])
-  bookings     Booking[]
-  favorites    Favorite[]
-  Conversation Conversation[]
+model Profile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName      String
+  lastName       String
+  avatarUrl      String?
+  bio            String?  @db.Text
+  skills         String[]
+  portfolioLinks String[]
 }
 
-model Booking {
-  id          String   @id @default(cuid())
-  userId      String
-  propertyId  String
-  checkIn     DateTime
-  checkOut    DateTime
-  guests      Int
-  totalAmount Float
-  cleaningFee Float    @default(130)
-  serviceFee  Float
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  property    Property @relation(fields: [propertyId], references: [id])
-  Payment     Payment?
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  tasks Task[]
 }
 
-model Favorite {
-  id         String   @id @default(cuid())
-  userId     String
-  propertyId String
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id])
-  property   Property @relation(fields: [propertyId], references: [id])
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String     @db.Text
+  status      TaskStatus @default(OPEN)
+  budget      Float
+  deadline    DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
-  @@unique([userId, propertyId])
+  clientId     String
+  client       User    @relation("ClientTasks", fields: [clientId], references: [id])
+  freelancerId String?
+  freelancer   User?   @relation("FreelancerTasks", fields: [freelancerId], references: [id])
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  attachments   Attachment[]
+  bids          Bid[]
+  milestones    Milestone[]
+  messages      Message[]
+  transactions  Transaction[]
+  notifications Notification[] @relation("TaskNotifications")
 }
 
-model Payment {
-  id            String        @id @default(cuid())
-  bookingId     String        @unique
-  amount        Float
-  method        PaymentMethod
-  status        PaymentStatus @default(pending)
-  transactionId String?
-  paidAt        DateTime?
-  createdAt     DateTime      @default(now())
-
-  booking Booking @relation(fields: [bookingId], references: [id])
-}
-
-model RefreshToken {
+model Attachment {
   id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
+  url       String
+  fileName  String
+  fileType  String
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
-enum Role {
-  USER
-  AGENT
+model Bid {
+  id           String   @id @default(cuid())
+  proposal     String   @db.Text
+  amount       Float
+  createdAt    DateTime @default(now())
+  status       String   @default("PENDING")
+  freelancerId String
+  freelancer   User     @relation(fields: [freelancerId], references: [id])
+
+  taskId        String
+  task          Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  notifications Notification[] @relation("BidNotifications")
+
+  @@unique([freelancerId, taskId])
 }
 
-enum PaymentMethod {
-  credit_card
-  paypal
-  mobile_money
-  bank_transfer
+model Milestone {
+  id          String          @id @default(cuid())
+  description String
+  dueDate     DateTime
+  amount      Float
+  status      MilestoneStatus @default(PENDING)
+  comments    String?
+
+  taskId        String
+  task          Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  notifications Notification[] @relation("MilestoneNotifications")
 }
 
-enum PaymentStatus {
-  pending
-  paid
-  failed
-  refunded
-}
+model Transaction {
+  id               String            @id @default(cuid())
+  amount           Float
+  status           TransactionStatus
+  type             TransactionType
+  stripeChargeId   String?           @unique
+  stripeTransferId String?           @unique
+  platformFee      Float?
+  createdAt        DateTime          @default(now())
 
-// Chat Models
-model Conversation {
-  id         String   @id @default(cuid())
-  propertyId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
-  property     Property                  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  participants ConversationParticipant[]
-  messages     Message[]
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id])
 
-  @@index([propertyId])
-}
-
-model ConversationParticipant {
-  id             String    @id @default(cuid())
-  conversationId String
-  userId         String
-  joinedAt       DateTime  @default(now())
-  lastReadAt     DateTime?
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([conversationId, userId])
-  @@index([userId])
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
 }
 
 model Message {
-  id             String      @id @default(cuid())
-  conversationId String
-  senderId       String
-  content        String
-  messageType    MessageType @default(TEXT)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
 
-  @@index([conversationId])
-  @@index([senderId])
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 }
 
-enum MessageType {
-  TEXT
-  IMAGE
-  FILE
+model Notification {
+  id        String           @id @default(cuid())
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  url       String
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  taskId      String?
+  task        Task?      @relation("TaskNotifications", fields: [taskId], references: [id])
+  bidId       String?
+  bid         Bid?       @relation("BidNotifications", fields: [bidId], references: [id])
+  milestoneId String?
+  milestone   Milestone? @relation("MilestoneNotifications", fields: [milestoneId], references: [id])
 }

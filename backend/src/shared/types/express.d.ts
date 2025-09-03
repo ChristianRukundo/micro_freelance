@@ -1,14 +1,14 @@
-import { UserRole } from "@prisma/client";
+import { UserRole } from '@prisma/client';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: {
+      user: {
         id: string;
         email: string;
         role: UserRole;
-        stripeAccountId: string | null;
-        stripeAccountCompleted: boolean;
+        stripeAccountId?: string | null;
+        stripeAccountCompleted?: boolean;
       };
     }
   }

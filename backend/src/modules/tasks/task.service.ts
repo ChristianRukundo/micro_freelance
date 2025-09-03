@@ -1,0 +1,261 @@
+import prisma from '@shared/database/prisma';
+import AppError from '@shared/utils/appError';
+import { Attachment, Prisma, TaskStatus, UserRole } from '@prisma/client';
+import { CreateTaskInput, GetTasksQueryInput, UpdateTaskInput } from './task.validation';
+import { createNotification } from '@modules/notifications/notification.service';
+import { NotificationType } from '@prisma/client';
+
+class TaskService {
+  public async createTask(clientId: string, data: CreateTaskInput): Promise<{ task: any; attachments: Attachment[] }> {
+    const { attachments, deadline, ...taskData } = data;
+
+    const task = await prisma.task.create({
+      data: {
+        ...taskData,
+        deadline: deadline ? new Date(deadline) : null, // ✅ pass null instead of undefined
+        clientId,
+        status: TaskStatus.OPEN,
+      },
+    });
+
+    let createdAttachments: Attachment[] = [];
+    if (attachments && attachments.length > 0) {
+      createdAttachments = await Promise.all(
+        attachments.map((att) =>
+          prisma.attachment.create({
+            data: {
+              ...att,
+              taskId: task.id,
+            },
+          }),
+        ),
+      );
+    }
+
+    return { task, attachments: createdAttachments };
+  }
+
+  public async getTasks(query: GetTasksQueryInput) {
+    const { page = 1, limit = 10, categoryId, minBudget, maxBudget, status, q, sortBy, sortOrder } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = {
+      status: status || TaskStatus.OPEN, // Default to open tasks
+    };
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+    if (minBudget !== undefined || maxBudget !== undefined) {
+      where.budget = {};
+      if (minBudget !== undefined) where.budget.gte = minBudget;
+      if (maxBudget !== undefined) where.budget.lte = maxBudget;
+    }
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const tasks = await prisma.task.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: {
+        [sortBy || 'createdAt']: sortOrder || 'desc',
+      },
+      include: {
+        client: {
+          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } },
+        },
+        category: { select: { id: true, name: true } },
+        _count: {
+          select: { bids: true },
+        },
+      },
+    });
+
+    const totalTasks = await prisma.task.count({ where });
+
+    return {
+      tasks,
+      totalTasks,
+      page,
+      limit,
+      totalPages: Math.ceil(totalTasks / limit),
+    };
+  }
+
+  public async getTaskById(taskId: string) {
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        client: {
+          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } },
+        },
+        freelancer: {
+          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } },
+        },
+        category: { select: { id: true, name: true } },
+        attachments: true,
+        bids: {
+          include: {
+            freelancer: {
+              select: {
+                id: true,
+                email: true,
+                profile: { select: { firstName: true, lastName: true, avatarUrl: true, skills: true } },
+              },
+            },
+          },
+        },
+        milestones: {
+          orderBy: { dueDate: 'asc' },
+        },
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                email: true,
+                profile: { select: { firstName: true, lastName: true, avatarUrl: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!task) {
+      throw new AppError('Task not found.', 404);
+    }
+    return task;
+  }
+
+  public async updateTask(userId: string, taskId: string, data: UpdateTaskInput) {
+    const existingTask = await prisma.task.findUnique({ where: { id: taskId } });
+
+    if (!existingTask) {
+      throw new AppError('Task not found.', 404);
+    }
+    if (existingTask.clientId !== userId) {
+      throw new AppError('You are not authorized to update this task.', 403);
+    }
+    if (existingTask.status !== TaskStatus.OPEN && existingTask.status !== TaskStatus.IN_PROGRESS) {
+      if (data.budget || data.categoryId) {
+        throw new AppError('Cannot update budget or category for a task that is not OPEN.', 400);
+      }
+    }
+    if (existingTask.status === TaskStatus.COMPLETED || existingTask.status === TaskStatus.CANCELLED) {
+      throw new AppError('Cannot update a completed or cancelled task.', 400);
+    }
+
+    const { deadline, attachments, ...updateData } = data;
+    const dataToUpdate: Prisma.TaskUpdateInput = {};
+    if (updateData.title) dataToUpdate.title = updateData.title;
+    if (updateData.description) dataToUpdate.description = updateData.description;
+    if (updateData.budget) dataToUpdate.budget = updateData.budget;
+    if (updateData.status) dataToUpdate.status = updateData.status as TaskStatus;
+    if (deadline) dataToUpdate.deadline = new Date(deadline);
+    if (updateData.categoryId) {
+      dataToUpdate.category = { connect: { id: updateData.categoryId } };
+    }
+
+    const updatedTask = await prisma.task.update({
+      where: { id: taskId },
+      data: dataToUpdate,
+    });
+
+    if (attachments !== undefined) {
+      await prisma.attachment.deleteMany({ where: { taskId } });
+      if (attachments.length > 0) {
+        await prisma.attachment.createMany({
+          data: attachments.map((att) => ({ ...att, taskId: updatedTask.id })), // Use updatedTask.id
+        });
+      }
+    }
+
+    return updatedTask;
+  }
+
+  public async deleteTask(userId: string, taskId: string) {
+    const existingTask = await prisma.task.findUnique({ where: { id: taskId } });
+
+    if (!existingTask) {
+      throw new AppError('Task not found.', 404);
+    }
+    if (existingTask.clientId !== userId) {
+      throw new AppError('You are not authorized to delete this task.', 403);
+    }
+    if (existingTask.status !== TaskStatus.OPEN) {
+      throw new AppError('Only tasks with OPEN status can be deleted.', 400);
+    }
+
+    const bidsCount = await prisma.bid.count({ where: { taskId } });
+    if (bidsCount > 0) {
+      throw new AppError('Cannot delete task as it has existing bids. Consider cancelling instead.', 400);
+    }
+
+    await prisma.task.delete({ where: { id: taskId } });
+  }
+
+  public async cancelTask(userId: string, taskId: string) {
+    const existingTask = await prisma.task.findUnique({ where: { id: taskId } });
+
+    if (!existingTask) {
+      throw new AppError('Task not found.', 404);
+    }
+    if (existingTask.clientId !== userId && userId !== UserRole.ADMIN) {
+      // Admin can also cancel
+      throw new AppError('You are not authorized to cancel this task.', 403);
+    }
+    if (existingTask.status === TaskStatus.COMPLETED || existingTask.status === TaskStatus.CANCELLED) {
+      throw new AppError('Task is already completed or cancelled.', 400);
+    }
+
+    const cancelledTask = await prisma.task.update({
+      where: { id: taskId },
+      data: { status: TaskStatus.CANCELLED },
+    });
+
+    if (cancelledTask.freelancerId) {
+      await createNotification(
+        cancelledTask.freelancerId,
+        NotificationType.TASK_CANCELLED,
+        `Task "${cancelledTask.title}" has been cancelled by the client.`,
+        `/dashboard/tasks/${taskId}`,
+        taskId,
+      );
+    }
+
+    // TODO: Implement refund logic for any escrowed funds if task was in progress
+
+    return cancelledTask;
+  }
+
+  public async completeTask(clientId: string, taskId: string): Promise<any> {
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      select: { id: true, clientId: true, status: true },
+    });
+
+    if (!task) {
+      throw new AppError('Task not found.', 404);
+    }
+    if (task.clientId !== clientId) {
+      throw new AppError('You are not authorized to complete this task.', 403);
+    }
+    if (task.status !== TaskStatus.IN_REVIEW) {
+      throw new AppError('Task can only be completed when it is in the IN_REVIEW state.', 400);
+    }
+
+    return prisma.task.update({
+      where: { id: taskId },
+      data: { status: TaskStatus.COMPLETED },
+    });
+  }
+}
+
+export default new TaskService();
