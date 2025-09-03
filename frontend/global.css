@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Primary Palette (e.g., a vibrant green for a freelance marketplace) */
+    --primary-50: 142 80% 96%;
+    --primary-100: 142 75% 91%;
+    --primary-200: 142 70% 80%;
+    --primary-300: 142 65% 65%;
+    --primary-400: 142 60% 50%;
+    --primary-500: 142 60% 40%;
+    --primary-600: 142 55% 30%;
+    --primary-700: 142 50% 20%;
+    --primary-800: 142 45% 15%;
+    --primary-900: 142 40% 10%;
+    --primary-950: 142 35% 5%;
+
+    /* Neutral System (Grayscale for text, backgrounds, borders) */
+    --neutral-50: 210 20% 98%;
+    --neutral-100: 210 18% 95%;
+    --neutral-200: 210 15% 90%;
+    --neutral-300: 210 12% 80%;
+    --neutral-400: 210 10% 60%;
+    --neutral-500: 210 8% 40%;
+    --neutral-600: 210 7% 30%;
+    --neutral-700: 210 6% 20%;
+    --neutral-800: 210 5% 15%;
+    --neutral-900: 210 4% 10%;
+
+    /* Status Colors */
+    --success-50: 145 63% 90%; /* Lighter shade for bg */
+    --success-500: 145 63% 42%;
+    --success-600: 145 63% 35%;
+
+    --warning-50: 36 96% 90%; /* Lighter shade for bg */
+    --warning-500: 36 96% 58%;
+    --warning-600: 36 96% 50%;
+
+    --error-50: 0 84% 90%; /* Lighter shade for bg */
+    --error-500: 0 84% 60%;
+    --error-600: 0 84% 50%;
+
+    /* Custom blue for In Review status */
+    --blue-50: 200 100% 90%;
+    --blue-600: 200 100% 40%;
+    --blue-200: 200 100% 80%;
+
+
+    /* Shadcn/ui specific variables mapped to our palette */
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-900);
+
+    --card: var(--neutral-50);
+    --card-foreground: var(--neutral-900);
+
+    --popover: var(--neutral-50);
+    --popover-foreground: var(--neutral-900);
+
+    --primary: var(--primary-500);
+    --primary-foreground: 210 20% 98%; /* White text on primary */
+
+    --secondary: var(--neutral-200);
+    --secondary-foreground: var(--neutral-900);
+
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+
+    --accent: var(--neutral-200);
+    --accent-foreground: var(--neutral-900);
+
+    --destructive: var(--error-500);
+    --destructive-foreground: 210 20% 98%;
+
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: var(--primary-500);
+
+    --radius: 0.5rem; /* Default border radius for shadcn components */
+  }
+
+  .dark {
+    --background: var(--neutral-900);
+    --foreground: var(--neutral-50);
+
+    --card: var(--neutral-800);
+    --card-foreground: var(--neutral-50);
+
+    --popover: var(--neutral-800);
+    --popover-foreground: var(--neutral-50);
+
+    --primary: var(--primary-400); /* Slightly lighter primary for dark mode contrast */
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: var(--neutral-700);
+    --secondary-foreground: var(--neutral-50);
+
+    --muted: var(--neutral-800);
+    --muted-foreground: var(--neutral-400);
+
+    --accent: var(--neutral-700);
+    --accent-foreground: var(--neutral-50);
+
+    --destructive: var(--error-500);
+    --destructive-foreground: 210 20% 98%;
+
+    --border: var(--neutral-700);
+    --input: var(--neutral-700);
+    --ring: var(--primary-400);
+
+    /* Dark mode specific for status colors if needed */
+    --success-50: 145 63% 20%;
+    --warning-50: 36 96% 20%;
+    --error-50: 0 84% 20%;
+    --blue-50: 200 100% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "liga" 0;
+  }
+}
+
+@layer components {
+  .text-display-lg { @apply text-display-lg font-display; }
+  .text-display-md { @apply text-display-md font-display; }
+  .text-display-sm { @apply text-display-sm font-display; }
+  .text-h1 { @apply text-h1 font-sans; }
+  .text-h2 { @apply text-h2 font-sans; }
+  .text-h3 { @apply text-h3 font-sans; }
+  .text-h4 { @apply text-h4 font-sans; }
+  .text-h5 { @apply text-h5 font-sans; }
+  .text-h6 { @apply text-h6 font-sans; }
+  .text-body-lg { @apply text-body-lg font-sans; }
+  .text-body-md { @apply text-body-md font-sans; }
+  .text-body-sm { @apply text-body-sm font-sans; }
+  .text-caption { @apply text-caption font-sans; }
+}

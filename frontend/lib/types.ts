@@ -1,172 +1,213 @@
+// Shared Frontend Types (Mirroring Backend Prisma Schema)
+
+export enum UserRole {
+  CLIENT = 'CLIENT',
+  FREELANCER = 'FREELANCER',
+  ADMIN = 'ADMIN',
+}
+
+export enum TaskStatus {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  IN_REVIEW = 'IN_REVIEW',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum MilestoneStatus {
+  PENDING = 'PENDING',
+  SUBMITTED = 'SUBMITTED',
+  IN_REVIEW = 'IN_REVIEW',
+  APPROVED = 'APPROVED',
+  REVISION_REQUESTED = 'REVISION_REQUESTED',
+}
+
+export enum TransactionStatus {
+  PENDING = 'PENDING',
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
+
+export enum TransactionType {
+  PLATFORM_FEE = 'PLATFORM_FEE',
+  PAYOUT = 'PAYOUT',
+  ESCROW_FUNDING = 'ESCROW_FUNDING',
+  ESCROW_RELEASE = 'ESCROW_RELEASE',
+}
+
+export enum NotificationType {
+  NEW_BID = 'NEW_BID',
+  BID_ACCEPTED = 'BID_ACCEPTED',
+  MILESTONE_CREATED = 'MILESTONE_CREATED',
+  MILESTONE_SUBMITTED = 'MILESTONE_SUBMITTED',
+  MILESTONE_APPROVED = 'MILESTONE_APPROVED',
+  REVISION_REQUESTED = 'REVISION_REQUESTED',
+  NEW_MESSAGE = 'NEW_MESSAGE',
+  TASK_CANCELLED = 'TASK_CANCELLED',
+  PAYMENT_SUCCEEDED = 'PAYMENT_SUCCEEDED',
+  EMAIL_VERIFIED = 'EMAIL_VERIFIED',
+  PASSWORD_RESET = 'PASSWORD_RESET',
+  STRIPE_ACCOUNT_UPDATED = 'STRIPE_ACCOUNT_UPDATED',
+}
+
+export interface UserProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl?: string | null;
+  bio?: string | null;
+  skills: string[];
+  portfolioLinks: string[];
+}
+
 export interface User {
   id: string;
-  name: string;
   email: string;
-  image?: string;
-  role: "USER" | "AGENT";
-  createdAt: string;
-  updatedAt: string;
-  bookingsCount?: number;
-  favoritesCount?: number;
-  lastLogin?: string;
-  bookings?: Booking[];
+  role: UserRole;
+  emailVerified?: Date | null;
+  isSuspended: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  stripeAccountId?: string | null;
+  stripeAccountCompleted?: boolean;
+  profile?: UserProfile | null;
 }
 
-export interface Property {
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Attachment {
+  id: string;
+  url: string;
+  fileName: string;
+  fileType: string;
+  createdAt: Date;
+}
+
+export interface Task {
   id: string;
   title: string;
   description: string;
-  location: string;
-  subLocation?: string;
-  pricePerNight: number;
-  guests: number;
-  bedrooms: number;
-  bathrooms: number;
-  squareMeters: number;
-  images: string[];
-  amenities: string[];
-  outdoorFeatures: string[];
-  activities: string[];
-  coordinates?: {
-    lat: number;
-    lng: number;
+  status: TaskStatus;
+  budget: number;
+  deadline: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  clientId: string;
+  freelancerId?: string | null;
+  categoryId: string;
+  client?: User;
+  freelancer?: User;
+  category?: Category;
+  attachments?: Attachment[];
+  _count?: {
+    bids: number;
   };
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  isFavorite?: boolean;
 }
 
-export interface PropertyFormData {
-  title: string;
+export interface Bid {
+  id: string;
+  proposal: string;
+  amount: number;
+  createdAt: Date;
+  status: string; // e.g., PENDING, ACCEPTED, REJECTED
+  freelancerId: string;
+  taskId: string;
+  freelancer?: User;
+  task?: Task; // Added for convenience in some contexts
+}
+
+export interface Milestone {
+  id: string;
   description: string;
-  location: string;
-  subLocation?: string;
-  pricePerNight: number;
-  guests: number;
-  bedrooms: number;
-  bathrooms: number;
-  squareMeters: number;
-  images: string[];
-  amenities: string[];
-  outdoorFeatures: string[];
-  activities: string[];
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  status: string;
+  dueDate: Date;
+  amount: number;
+  status: MilestoneStatus;
+  comments?: string | null;
+  taskId: string;
+  task?: Task; // Added for convenience
 }
 
-export interface Booking {
+export interface Message {
   id: string;
-  userId: string;
-  propertyId: string;
-  checkIn: string;
-  checkOut: string;
-  guests: number;
-  totalAmount: number;
-  cleaningFee: number;
-  serviceFee: number;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  property: Property;
-  user: User;
+  content: string;
+  createdAt: Date;
+  senderId: string;
+  taskId: string;
+  sender?: User;
 }
 
-export interface BookingWithDetails extends Booking {
-  property: Property;
-  user: User;
-}
-
-export interface Favorite {
+export interface Notification {
   id: string;
+  message: string;
+  type: NotificationType;
+  isRead: boolean;
+  url: string;
+  createdAt: Date;
   userId: string;
-  propertyId: string;
-  createdAt: string;
-  property?: Property;
+  taskId?: string | null;
+  bidId?: string | null;
+  milestoneId?: string | null;
+  task?: Task;
+  bid?: Bid;
+  milestone?: Milestone;
 }
 
-export interface FavoriteWithProperty {
+export interface Transaction {
   id: string;
+  amount: number;
+  status: TransactionStatus;
+  type: TransactionType;
+  stripeChargeId?: string | null;
+  stripeTransferId?: string | null;
+  platformFee?: number | null;
+  createdAt: Date;
   userId: string;
-  propertyId: string;
-  createdAt: string;
-  property: Property;
+  taskId?: string | null;
+  milestoneId?: string | null;
+  user?: User;
+  task?: Task;
+  milestone?: Milestone;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  error?: string;
-}
 
-export interface AgentStats {
-  totalProperties: number;
-  totalUsers: number;
-  totalBookings: number;
-  totalRevenue: number;
-  newPropertiesThisMonth?: number;
-  newUsersThisMonth?: number;
-  newBookingsThisMonth?: number;
-  revenueThisMonth?: number;
-  recentBookings: {
-    id: string;
-    propertyTitle: string;
-    userName: string;
-    checkIn: string;
-    checkOut: string;
-    totalAmount: number;
-    status: string;
-  }[];
-  topProperties: {
-    id: string;
-    title: string;
-    location: string;
-    subLocation?: string;
-    pricePerNight: number;
-    bookingsCount: number;
-    revenue: number;
-    bookings?: number;
-  }[];
-  topLocations?: {
-    name: string;
-    properties: number;
-  }[];
-  bookingsByLocation: {
-    location: string;
-    count: number;
-  }[];
-  revenueByMonth: {
-    month: string;
-    revenue: number;
-  }[];
-  revenueData?: any[];
-  bookingsData?: any[];
-  userData?: any[];
-}
-
-export interface PropertySearchParams {
-  location?: string;
-  checkIn?: string;
-  checkOut?: string;
-  guests?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  amenities?: string | string[];
-  outdoorFeatures?: string | string[];
-  activities?: string | string[];
-  page?: number;
-  limit?: number;
-  sort?: string;
-}
-
-export interface PropertySearchResult {
-  properties: Property[];
-  totalPages: number;
+// API Response Structures (for paginated endpoints)
+export interface PaginatedResponse<T> {
+  data: T[]; // Renamed to data for consistency with `api` interceptor
+  totalItems: number; // Total number of items across all pages
   currentPage: number;
-  totalProperties: number;
+  totalPages: number;
+  itemsPerPage: number; // Items per page (limit)
+}
+export interface StripeCustomerData {
+  onboardingUrl?: string;
+  clientSecret?: string;
+  paymentIntentId?: string;
+}
+// Specific paginated responses matching backend
+export interface TasksPaginatedResponse extends PaginatedResponse<Task> {
+  tasks: Task[];
+}
+
+export interface BidsPaginatedResponse extends PaginatedResponse<Bid> {
+  bids: Bid[];
+}
+
+export interface MilestonesPaginatedResponse extends PaginatedResponse<Milestone> {
+  milestones: Milestone[];
+}
+
+export interface UsersPaginatedResponse extends PaginatedResponse<User> {
+  users: User[];
+}
+
+export interface NotificationsPaginatedResponse extends PaginatedResponse<Notification> {
+  notifications: Notification[];
+}
+
+export interface TransactionsPaginatedResponse extends PaginatedResponse<Transaction> {
+  transactions: Transaction[];
 }
