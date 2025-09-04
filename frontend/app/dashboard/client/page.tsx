@@ -1,4 +1,6 @@
-import { Metadata } from "next";
+"use client";
+
+// import { Metadata } from "next";
 import {
   Card,
   CardContent,
@@ -13,10 +15,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "Client Dashboard - Micro Freelance Marketplace",
-  description: "Manage your posted projects and track your spending.",
-};
+// export const metadata: Metadata = {
+//   title: "Client Dashboard - Micro Freelance Marketplace",
+//   description: "Manage your posted projects and track your spending.",
+// };
 
 // Client Dashboard page (Client Component due to useAuthStore for user info)
 export default function ClientDashboardPage() {

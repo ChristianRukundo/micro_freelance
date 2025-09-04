@@ -1,165 +1,534 @@
-'use client';
+// components/layouts/Sidebar.tsx
+"use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
-import { useAuthStore, useUIStore } from '@/lib/zustand';
-import { cn } from '@/lib/utils';
-import { LayoutDashboardIcon, BriefcaseIcon, UsersIcon, UserIcon, DollarSignIcon, BellIcon, MessageSquareTextIcon, XIcon, BriefcaseBusinessIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { UserRole } from '@/lib/types';
-import React from 'react';
-import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
-import { AvatarFallback } from '../ui/avatar';
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { useAuthStore, useUIStore } from "@/lib/zustand";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboardIcon,
+  BriefcaseIcon,
+  UsersIcon,
+  UserIcon,
+  DollarSignIcon,
+  BellIcon,
+  XIcon,
+  BriefcaseBusinessIcon,
+  UserCogIcon,
+  LogOutIcon,
+  SearchIcon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { UserRole } from "@/lib/types";
+import React, { useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
 
+// --- Navigation Link Interface ---
+interface NavLinkItem {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  roles?: UserRole[];
+}
+
+// --- Main Navigation Data (Centralized Configuration) ---
+const mainNavLinks: NavLinkItem[] = [
+  {
+    href: "/tasks",
+    icon: <BriefcaseIcon className="h-5 w-5" />,
+    label: "Browse Projects",
+  },
+  {
+    href: "/freelancers",
+    icon: <UsersIcon className="h-5 w-5" />,
+    label: "Find Freelancers",
+  },
+
+  // Client Dashboard Links
+  {
+    href: "/dashboard/client",
+    icon: <LayoutDashboardIcon className="h-5 w-5" />,
+    label: "Client Dashboard",
+    roles: [UserRole.CLIENT],
+  },
+  {
+    href: "/tasks/new",
+    icon: <BriefcaseIcon className="h-5 w-5" />,
+    label: "Post New Project",
+    roles: [UserRole.CLIENT],
+  },
+  {
+    href: "/dashboard/spending",
+    icon: <DollarSignIcon className="h-5 w-5" />,
+    label: "Spending History",
+    roles: [UserRole.CLIENT],
+  },
+
+  // Freelancer Dashboard Links
+  {
+    href: "/dashboard/freelancer",
+    icon: <LayoutDashboardIcon className="h-5 w-5" />,
+    label: "Freelancer Dashboard",
+    roles: [UserRole.FREELANCER],
+  },
+  {
+    href: "/dashboard/earnings",
+    icon: <DollarSignIcon className="h-5 w-5" />,
+    label: "My Earnings",
+    roles: [UserRole.FREELANCER],
+  },
+  {
+    href: "/dashboard/payouts",
+    icon: <DollarSignIcon className="h-5 w-5" />,
+    label: "Payout Settings",
+    roles: [UserRole.FREELANCER],
+  },
+
+  // Admin Links
+  {
+    href: "/admin/users",
+    icon: <UserCogIcon className="h-5 w-5" />,
+    label: "Manage Users",
+    roles: [UserRole.ADMIN],
+  },
+
+  // Common Links for all Authenticated Users
+  {
+    href: "/dashboard/profile",
+    icon: <UserIcon className="h-5 w-5" />,
+    label: "Profile Settings",
+  },
+  {
+    href: "/dashboard/notifications",
+    icon: <BellIcon className="h-5 w-5" />,
+    label: "Notifications",
+  },
+];
+
+// --- Sidebar Navigation Link Component ---
 interface SidebarNavLinkProps {
   href: string;
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
+  isCollapsed: boolean;
 }
 
-function SidebarNavLink({ href, icon, label, onClick }: SidebarNavLinkProps) {
+function SidebarNavLink({
+  href,
+  icon,
+  label,
+  onClick,
+  isCollapsed,
+}: SidebarNavLinkProps) {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive =
+    pathname === href || (pathname.startsWith(href) && href !== "/");
+  const { setSidebarOpen } = useUIStore(); // Use setSidebarOpen for mobile close
+  const isMobile = useIsMobile();
+
+  const handleClick = () => {
+    if (isMobile) {
+      setSidebarOpen(false); // Close sidebar on mobile after clicking a link
+    }
+    onClick?.();
+  };
 
   return (
-    <Link href={href} passHref onClick={onClick}>
-      <Button
-        variant={isActive ? 'secondary' : 'ghost'}
-        className={cn(
-          'w-full justify-start text-body-md font-medium transition-colors',
-          isActive
-            ? 'bg-primary-50 text-primary-700 hover:bg-primary-100'
-            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800',
-        )}
-      >
-        {icon}
-        <span className="ml-3">{label}</span>
-      </Button>
-    </Link>
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>
+        <Link href={href} passHref>
+          <motion.div
+            initial={false}
+            animate={{
+              backgroundColor: isActive
+                ? "hsl(var(--primary-50))"
+                : "transparent",
+              color: isActive
+                ? "hsl(var(--primary-700))"
+                : "hsl(var(--neutral-600))",
+            }}
+            whileHover={{
+              backgroundColor: isActive
+                ? "hsl(var(--primary-100))"
+                : "hsl(var(--neutral-100))",
+              color: isActive
+                ? "hsl(var(--primary-800))"
+                : "hsl(var(--neutral-800))",
+              scale: 1.02,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+            }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className={cn(
+              "flex items-center rounded-lg cursor-pointer h-10",
+              isCollapsed ? "justify-center w-10 p-0" : "px-4 py-2 w-full",
+              isActive ? "font-semibold" : "font-medium"
+            )}
+            onClick={handleClick}
+            aria-current={isActive ? "page" : undefined}
+          >
+            {React.cloneElement(icon as React.ReactElement, {
+              className: cn(
+                "h-5 w-5 flex-shrink-0",
+                isActive ? "text-primary-700" : "text-neutral-500",
+                isCollapsed ? "" : "mr-3"
+              ),
+            })}
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="whitespace-nowrap overflow-hidden text-body-md"
+                >
+                  {label}
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <span className="sr-only">{label}</span>
+          </motion.div>
+        </Link>
+      </TooltipTrigger>
+      {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
+    </Tooltip>
   );
 }
 
+// --- Main Sidebar Component ---
 export function Sidebar() {
-  const { user } = useAuthStore();
-  const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const { isSidebarOpen, setSidebarOpen } = useUIStore(); // Removed toggleSidebar, use setSidebarOpen directly
   const pathname = usePathname();
+  const isMobile = useIsMobile();
 
-  React.useEffect(() => {
-    // Close sidebar on route change for mobile
-    if (isSidebarOpen) {
-      toggleSidebar();
+  // Effect to synchronize initial sidebar state based on device type
+  useEffect(() => {
+    // If on mobile, sidebar should always be closed initially
+    if (isMobile) {
+      setSidebarOpen(false);
     }
-  }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const sidebarVariants: any = {
-    hidden: { x: -300 },
-    visible: { x: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } },
-  };
-
-  const navLinks = React.useMemo(() => {
-    const links = [];
-    if (user?.role === UserRole.CLIENT) {
-      links.push(
-        { href: '/dashboard/client', icon: <LayoutDashboardIcon className="h-5 w-5" />, label: 'Client Dashboard' },
-        { href: '/tasks/new', icon: <BriefcaseIcon className="h-5 w-5" />, label: 'Post New Task' },
-        { href: '/dashboard/spending', icon: <DollarSignIcon className="h-5 w-5" />, label: 'Spending History' },
-      );
-    } else if (user?.role === UserRole.FREELANCER) {
-      links.push(
-        { href: '/dashboard/freelancer', icon: <LayoutDashboardIcon className="h-5 w-5" />, label: 'Freelancer Dashboard' },
-        { href: '/tasks', icon: <BriefcaseIcon className="h-5 w-5" />, label: 'Browse Tasks' },
-        { href: '/dashboard/earnings', icon: <DollarSignIcon className="h-5 w-5" />, label: 'My Earnings' },
-        { href: '/dashboard/payouts', icon: <DollarSignIcon className="h-5 w-5" />, label: 'Payout Settings' },
-      );
-    } else if (user?.role === UserRole.ADMIN) {
-      links.push(
-        { href: '/admin/users', icon: <UsersIcon className="h-5 w-5" />, label: 'Manage Users' },
-        // Add more admin links as needed
-      );
+    // If on desktop, sidebar should always be open initially
+    else {
+      setSidebarOpen(true);
     }
+  }, [isMobile, setSidebarOpen]);
 
-    // Common links for all authenticated users
-    links.push(
-      { href: '/dashboard/profile', icon: <UserIcon className="h-5 w-5" />, label: 'Profile Settings' },
-      { href: '/dashboard/notifications', icon: <BellIcon className="h-5 w-5" />, label: 'Notifications' },
-    );
-    return links;
-  }, [user]);
+  // Effect to close sidebar on route change for mobile
+  useEffect(() => {
+    // If on mobile and the sidebar is currently open (and a navigation occurred)
+    if (isMobile && isSidebarOpen) {
+      setSidebarOpen(false);
+    }
+  }, [pathname, isMobile, isSidebarOpen, setSidebarOpen]);
 
+  const filteredNavLinks = React.useMemo(() => {
+    if (!isAuthenticated || !user) return [];
+    return mainNavLinks.filter((link) => {
+      if (!link.roles) return true;
+      return link.roles.includes(user.role);
+    });
+  }, [user, isAuthenticated]);
+
+  const desktopExpandedWidth = "16rem"; // Tailwind's w-64
+  const desktopCollapsedWidth = "4rem"; // Tailwind's w-16
+
+  // `isCollapsed` now purely reflects `!isSidebarOpen` for desktop
+  const isDesktopCollapsed = !isSidebarOpen && !isMobile;
+
+  // `animate` prop directly uses `isSidebarOpen` to control width
+  const sidebarAnimateProps = isMobile
+    ? { x: isSidebarOpen ? 0 : "-100%" } 
+    : { width: isSidebarOpen ? desktopExpandedWidth : desktopCollapsedWidth }; // Desktop: expand/collapse width
 
   return (
     <>
       {/* Overlay for mobile sidebar */}
-      {isSidebarOpen && (
+      {isSidebarOpen && isMobile && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={toggleSidebar}
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close sidebar"
         />
       )}
 
-      {/* Sidebar container */}
       <motion.aside
-        initial="hidden"
-        animate={isSidebarOpen ? 'visible' : 'hidden'}
-        variants={sidebarVariants}
+        initial={false} // No initial animation, let `animate` prop handle from the start
+        animate={sidebarAnimateProps}
+        transition={{
+          type: "spring",
+          stiffness: 150,
+          damping: 20,
+          duration: 0.3,
+        }}
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-neutral-200 bg-background shadow-lg transition-transform duration-300 md:sticky md:z-auto md:w-64 md:translate-x-0',
-          !isSidebarOpen && '-translate-x-full',
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-neutral-200 bg-background shadow-lg", // Removed transition-transform here, as motion handles it
+          // Fixed desktop widths and positioning. No hover expansion.
+          !isMobile && "md:sticky md:z-auto md:w-64", // Base desktop properties (w-64 is default)
+          !isMobile && !isSidebarOpen && "md:w-16" // Collapsed desktop width
         )}
       >
-        <div className="flex h-16 items-center justify-between px-6">
-          <Link href="/" className="flex items-center space-x-2" aria-label="Home">
-            <BriefcaseBusinessIcon className="h-7 w-7 text-primary-500" />
-            <span className="text-h5 font-semibold text-neutral-800">Dashboard</span>
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={toggleSidebar}
-            aria-label="Close mobile menu"
+        {/* Sidebar Header */}
+        <div
+          className={cn(
+            "flex items-center px-4",
+            isSidebarOpen ? "justify-between h-16" : "justify-center h-16 w-16"
+          )}
+        >
+          <Link
+            href="/"
+            className={cn(
+              "flex items-center",
+              isSidebarOpen ? "space-x-2" : "justify-center"
+            )}
+            aria-label="Home"
           >
-            <XIcon className="h-6 w-6 text-neutral-600" />
-          </Button>
+            <BriefcaseBusinessIcon className={cn("h-7 w-7 text-primary-500")} />
+            <AnimatePresence>
+              {isSidebarOpen && (
+                <motion.span
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-h5 font-semibold text-neutral-800 whitespace-nowrap overflow-hidden"
+                >
+                  FreelanceHub
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+          {isSidebarOpen && isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close mobile menu"
+            >
+              <XIcon className="h-6 w-6 text-neutral-600" />
+            </Button>
+          )}
         </div>
+
         <Separator />
+
+        {/* User Profile Summary */}
+        {isAuthenticated && user && (
+          <div
+            className={cn(
+              "p-4 pb-2",
+              isDesktopCollapsed && "p-2 flex justify-center"
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-center",
+                isSidebarOpen ? "space-x-3" : "flex-col space-y-1"
+              )}
+            >
+              <Avatar
+                className={cn(
+                  "border border-neutral-200 shadow-sm",
+                  isSidebarOpen ? "h-9 w-9" : "h-8 w-8"
+                )}
+              >
+                <AvatarImage
+                  src={
+                    user?.profile?.avatarUrl ||
+                    `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email || "User"}`
+                  }
+                  alt={user?.email || "User"}
+                />
+                <AvatarFallback className="text-body-md font-semibold bg-primary-100 text-primary-700">
+                  {(user?.email || "U").charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <AnimatePresence>
+                {isSidebarOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col flex-1 whitespace-nowrap overflow-hidden"
+                  >
+                    <span className="text-body-md font-semibold text-neutral-800 truncate">
+                      {user.profile?.firstName || user.email}
+                    </span>
+                    <span className="text-caption text-neutral-500 capitalize">
+                      {user.role?.toLowerCase() || "User"}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+
+        <Separator />
+
+        {/* Search Input (Desktop only) */}
+        {!isMobile && (
+          <div
+            className={cn(
+              "p-4",
+              isDesktopCollapsed && "p-2 flex justify-center"
+            )}
+          >
+            <AnimatePresence mode="wait">
+              {isSidebarOpen ? (
+                <motion.div
+                  key="search-expanded"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "100%" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="relative flex items-center"
+                >
+                  <SearchIcon className="absolute left-3 h-4 w-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="flex h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-body-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="search-collapsed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex justify-center"
+                >
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                        <SearchIcon className="h-5 w-5 text-neutral-600" />
+                        <span className="sr-only">Search</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Search</TooltipContent>
+                  </Tooltip>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Main Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-6">
-          <ul className="space-y-2">
-            {navLinks.map((link) => (
+          <ul className={cn("space-y-2", isDesktopCollapsed && "space-y-1")}>
+            {filteredNavLinks.map((link) => (
               <li key={link.href}>
                 <SidebarNavLink
                   href={link.href}
                   icon={link.icon}
                   label={link.label}
-                  onClick={toggleSidebar} // Close sidebar on click for mobile
+                  isCollapsed={isDesktopCollapsed}
                 />
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* User Info / Footer in sidebar if needed */}
-        {user && (
-          <div className="p-4 border-t border-neutral-200">
-             <div className="flex items-center space-x-3 text-body-sm text-neutral-600">
-               <Avatar className="h-8 w-8">
-                 <AvatarImage src={user?.profile?.avatarUrl || undefined} alt={user?.email || ""} />
-                 <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
-               </Avatar>
-               <div className="flex flex-col">
-                 <span className="font-semibold">{user.profile?.firstName || user.email}</span>
-                 <span className="text-caption text-neutral-500">{user?.role?.toLowerCase() || ""}</span>
-               </div>
-             </div>
-          </div>
-        )}
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-neutral-200">
+          <ul className="space-y-2">
+            <li>
+              <div
+                className={cn(
+                  "flex items-center justify-between",
+                  isDesktopCollapsed ? "flex-col space-y-2" : "space-x-2"
+                )}
+              >
+                <AnimatePresence>
+                  {isSidebarOpen ? (
+                    <motion.div
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="whitespace-nowrap overflow-hidden flex-shrink-0"
+                    >
+                      <ShadcnThemeToggle />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <ShadcnThemeToggle />
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          Toggle Theme
+                        </TooltipContent>
+                      </Tooltip>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start text-destructive-500 hover:bg-destructive-50",
+                        isDesktopCollapsed
+                          ? "w-10 h-10 p-0 justify-center"
+                          : "w-full"
+                      )}
+                      onClick={() => logout()}
+                      aria-label="Log out"
+                    >
+                      <LogOutIcon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isSidebarOpen ? "mr-3" : ""
+                        )}
+                      />
+                      <AnimatePresence>
+                        {isSidebarOpen && (
+                          <motion.span
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: "auto" }}
+                            exit={{ opacity: 0, width: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="whitespace-nowrap overflow-hidden text-body-md"
+                          >
+                            Log out
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </Button>
+                  </TooltipTrigger>
+                  {isDesktopCollapsed && (
+                    <TooltipContent side="right">Log out</TooltipContent>
+                  )}
+                </Tooltip>
+              </div>
+            </li>
+          </ul>
+        </div>
       </motion.aside>
     </>
   );

@@ -1,3 +1,4 @@
+// components/layouts/Header.tsx
 "use client";
 
 import Link from "next/link";
@@ -27,7 +28,7 @@ import {
   BellIcon,
 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
-import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle"; // Custom theme toggle
+import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
 import { useAuthStore, useUIStore } from "@/lib/zustand";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/api";
@@ -35,7 +36,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { UserRole } from "@/lib/types";
-import { motion, AnimatePresence } from "framer-motion"; // For animations
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sheet,
   SheetContent,
@@ -43,18 +44,18 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"; // For mobile menu
-import React from "react"; // Explicitly import React
+} from "@/components/ui/sheet";
+import React from "react";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen, toggleSidebar } = useUIStore(); // For desktop sidebar (if used)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false); // For mobile menu sheet
+  const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await api.post("/auth/logout"); // Clears HTTP-only cookies
+      await api.post("/auth/logout");
       logout();
       toast.success("Logged out successfully!");
       router.push("/login");
@@ -67,18 +68,17 @@ export function Header() {
     mutationFn: handleLogout,
   });
 
-  // Dynamically determine dashboard link based on user role
   const getDashboardLink = React.useCallback(() => {
-    if (!user) return "/login"; // Should ideally not happen if authenticated
+    if (!user) return "/login";
     switch (user.role) {
       case UserRole.CLIENT:
         return "/dashboard/client";
       case UserRole.FREELANCER:
         return "/dashboard/freelancer";
       case UserRole.ADMIN:
-        return "/admin/users"; // Admin's main dashboard
+        return "/admin/users";
       default:
-        return "/dashboard"; // Generic dashboard for unhandled roles
+        return "/dashboard";
     }
   }, [user]);
 
@@ -125,8 +125,25 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft transition-all duration-300 ease-in-out-quad">
       <div className="container flex h-16 items-center justify-between">
+        {/* Toggle button for desktop sidebar (moved to the left of the logo) */}
+        {isAuthenticated && ( // Only show sidebar toggle if authenticated (and thus, might be in a dashboard area)
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-3 hidden md:flex" // Show only on desktop, before logo
+            onClick={toggleSidebar}
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isSidebarOpen ? (
+              <XIcon className="h-6 w-6 text-neutral-600" />
+            ) : (
+              <MenuIcon className="h-6 w-6 text-neutral-600" />
+            )}
+          </Button>
+        )}
+
         {/* Logo and Site Title */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
           <Link
             href="/"
             className="flex items-center space-x-2"
@@ -139,8 +156,8 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center space-x-6 md:flex">
+        {/* Desktop Navigation (Center/Right aligned by flex-1 push) */}
+        <nav className="flex-1 hidden items-center justify-center space-x-6 md:flex"> {/* Added justify-center for a potentially more balanced look */}
           <Link
             href="/tasks"
             className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
@@ -167,7 +184,7 @@ export function Header() {
         </nav>
 
         {/* User Actions, Notifications, Theme Toggle, Mobile Menu */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 ml-auto md:ml-0"> {/* ml-auto pushes it to the right on small screens if nav is centered */}
           <ShadcnThemeToggle />
 
           {isAuthenticated && user ? (

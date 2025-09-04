@@ -40,11 +40,11 @@ export default async function AdminLayout({
 
   return (
     <AdminLayoutClientWrapper> {/* Client wrapper needed for Zustand, React Query etc. */}
-      <div className="flex min-h-screen flex-col">
-        <Header />
-        <div className="flex flex-1">
-          <Sidebar />
-          <main className="flex-1 p-6 md:p-8">
+      <div className="flex h-screen bg-background">
+        <Sidebar />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-6 md:p-8">
             {children}
           </main>
         </div>

@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+"use client";
+// import { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSignIcon, BriefcaseIcon, StarIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,10 +7,10 @@ import { useAuthStore } from '@/lib/zustand';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export const metadata: Metadata = {
-  title: 'Freelancer Dashboard - Micro Freelance Marketplace',
-  description: 'Manage your active projects, earnings, and profile.',
-};
+// export const metadata: Metadata = {
+//   title: 'Freelancer Dashboard - Micro Freelance Marketplace',
+//   description: 'Manage your active projects, earnings, and profile.',
+// };
 
 // Freelancer Dashboard page (Client Component due to useAuthStore for user info)
 export default function FreelancerDashboardPage() {

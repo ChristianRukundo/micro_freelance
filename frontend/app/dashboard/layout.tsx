@@ -1,3 +1,4 @@
+// app/(dashboard)/layout.tsx
 'use client';
 
 import { Sidebar } from '@/components/layouts/Sidebar';
@@ -20,8 +21,8 @@ export default function DashboardLayout({
         <main className={cn(
           'flex-1 overflow-y-auto p-6 transition-all duration-300 ease-in-out',
           {
-            'md:ml-64': isSidebarOpen,
-            'md:ml-0': !isSidebarOpen,
+            'md:ml-64': isSidebarOpen, // When sidebar is open on desktop, push main content
+            'md:ml-16': !isSidebarOpen, // Adjusted for new collapsed sidebar width
           }
         )}>
           {children}

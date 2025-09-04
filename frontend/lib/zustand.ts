@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, devtools } from 'zustand/middleware';
-import { UserRole, UserProfile } from './types'; // Assuming types.ts defines UserRole
+import { create } from "zustand";
+import { persist, devtools } from "zustand/middleware";
+import { UserRole, UserProfile } from "./types";
 
 export interface UserState {
   id: string | null;
@@ -11,20 +11,20 @@ export interface UserState {
   avatarUrl?: string | null;
   stripeAccountId?: string | null;
   stripeAccountCompleted?: boolean;
-  profile?: UserProfile; // Include full profile
+  profile?: UserProfile;
 }
 
 interface AuthStore {
   user: UserState | null;
   isAuthenticated: boolean;
-  isLoading: boolean; // For initial auth check
-  // Add role-based getters
+  isLoading: boolean;
+
   isClient: boolean;
   isFreelancer: boolean;
   isAdmin: boolean;
   login: (user: UserState) => void;
   logout: () => void;
-  setUser: (user: UserState) => void; // For updating profile
+  setUser: (user: UserState) => void;
   startLoading: () => void;
   stopLoading: () => void;
 }
@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthStore>()(
         user: null,
         isAuthenticated: false,
         isLoading: true,
-        // Computed properties for role checks
+
         get isClient() {
           return get().user?.role === UserRole.CLIENT;
         },
@@ -47,31 +47,44 @@ export const useAuthStore = create<AuthStore>()(
           return get().user?.role === UserRole.ADMIN;
         },
         login: (user) => set({ user, isAuthenticated: true, isLoading: false }),
-        logout: () => set({ user: null, isAuthenticated: false, isLoading: false }),
-        setUser: (user) => set((state) => ({ ...state, user: { ...state.user, ...user } })), // Merge updates
+        logout: () =>
+          set({ user: null, isAuthenticated: false, isLoading: false }),
+        setUser: (user) =>
+          set((state) => ({ ...state, user: { ...state.user, ...user } })),
         startLoading: () => set({ isLoading: true }),
         stopLoading: () => set({ isLoading: false }),
       }),
       {
-        name: 'auth-storage',
-        storage: typeof window !== 'undefined' ? localStorage : undefined as any,
-      },
+        name: "auth-storage",
+        storage:
+          typeof window !== "undefined" ? localStorage : (undefined as any),
+      }
     ),
-    { name: 'AuthStore' },
-  ),
+    { name: "AuthStore" }
+  )
 );
 
 interface UIStore {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  setSidebarOpen: (isOpen: boolean) => void;
 }
 
 export const useUIStore = create<UIStore>()(
   devtools(
-    (set) => ({
-      isSidebarOpen: false,
-      toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-    }),
-    { name: 'UIStore' },
-  ),
+    persist(
+      (set) => ({
+        isSidebarOpen: true,
+        toggleSidebar: () =>
+          set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+        setSidebarOpen: (isOpen: boolean) => set({ isSidebarOpen: isOpen }),
+      }),
+      {
+        name: "ui-sidebar-storage",
+        storage:
+          typeof window !== "undefined" ? localStorage : (undefined as any),
+      }
+    ),
+    { name: "UIStore" }
+  )
 );

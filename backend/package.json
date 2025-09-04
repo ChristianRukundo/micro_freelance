@@ -54,7 +54,7 @@
     "@types/express-validator": "^2.20.33",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.18.1",
     "@types/nodemailer": "^7.0.1",
     "@types/stripe": "^8.0.416",
     "@types/swagger-jsdoc": "^6.0.4",

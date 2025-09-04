@@ -4,7 +4,13 @@ import api from "./api";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { UserRole, TaskStatus, StripeCustomerData, Task as TaskType, User as UserType } from "./types";
+import {
+  UserRole,
+  TaskStatus,
+  StripeCustomerData,
+  Task as TaskType,
+  User as UserType,
+} from "./types";
 import { cookies } from "next/headers";
 import { toast } from "sonner"; // Server actions can't directly use client-side toast
 import { logger } from "./utils";
@@ -27,7 +33,7 @@ import {
   fundTaskBodySchema,
   updateUserStatusSchema,
   newsletterSchema,
-} from './schemas';
+} from "./schemas";
 
 // --- Server Actions Implementations ---
 
@@ -490,6 +496,7 @@ export async function fetchPopularTasks(): Promise<
         status: TaskStatus.OPEN,
       },
     });
+    console.log(response.data);
     return { success: true, data: response.data.data.tasks };
   } catch (error: any) {
     return handleServerActionError(error);
@@ -539,7 +546,9 @@ export async function newsletterSubscribeAction(
 }
 
 // Server Action to fetch categories
-export async function getCategoriesAction(): Promise<ServerActionResponse<any[]>> {
+export async function getCategoriesAction(): Promise<
+  ServerActionResponse<any[]>
+> {
   try {
     const response = await api.get("/categories");
     return { success: true, data: response.data.data };

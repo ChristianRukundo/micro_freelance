@@ -47,10 +47,10 @@ export function AnimatedTaskSection({ popularTasks }: AnimatedTaskSectionProps) 
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <TaskCardSkeleton key={i} />
-          ))}
+        <div className="flex items-center justify-center h-40 rounded-lg bg-muted/50">
+          <p className="text-body-md text-muted-foreground">
+            No popular projects available at the moment.
+          </p>
         </div>
       )}
     </section>

@@ -190,7 +190,6 @@ export default function AdminUsersPage() {
             <SelectValue placeholder="Filter by Role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Roles</SelectItem>
             <SelectItem value={UserRole.CLIENT}>Client</SelectItem>
             <SelectItem value={UserRole.FREELANCER}>Freelancer</SelectItem>
             <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
@@ -202,7 +201,6 @@ export default function AdminUsersPage() {
             <SelectValue placeholder="Filter by Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
             <SelectItem value="false">Active</SelectItem>
             <SelectItem value="true">Suspended</SelectItem>
           </SelectContent>

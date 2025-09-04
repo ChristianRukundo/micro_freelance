@@ -145,7 +145,6 @@ export default function TaskBrowsePage() {
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
               {isLoadingCategories ? (
                 <div className="p-2 text-center text-neutral-500">Loading...</div>
               ) : isErrorCategories ? (
