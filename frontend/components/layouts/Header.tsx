@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image"; // For optimized images
+// import Image from "next/image"; // Not used directly in this snippet, but keep if used elsewhere
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,21 +22,18 @@ import {
   MenuIcon,
   XIcon,
   UserCogIcon,
-  SettingsIcon,
-  CodeIcon,
-  ChevronRightIcon,
   BellIcon,
 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
-import { useAuthStore, useUIStore } from "@/lib/zustand";
+import { useAuthStore, useUIStore } from "@/lib/zustand"; // Still need useUIStore for Sheet
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { UserRole } from "@/lib/types";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Sheet,
   SheetContent,
@@ -49,7 +46,7 @@ import React from "react";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const { isSidebarOpen } = useUIStore(); // No longer need toggleSidebar here
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const router = useRouter();
 
@@ -125,25 +122,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft transition-all duration-300 ease-in-out-quad">
       <div className="container flex h-16 items-center justify-between">
-        {/* Toggle button for desktop sidebar (moved to the left of the logo) */}
-        {isAuthenticated && ( // Only show sidebar toggle if authenticated (and thus, might be in a dashboard area)
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-3 hidden md:flex" // Show only on desktop, before logo
-            onClick={toggleSidebar}
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {isSidebarOpen ? (
-              <XIcon className="h-6 w-6 text-neutral-600" />
-            ) : (
-              <MenuIcon className="h-6 w-6 text-neutral-600" />
-            )}
-          </Button>
-        )}
+        {/* Removed the desktop sidebar toggle button from here */}
 
-        {/* Logo and Site Title */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2"> {/* Reduced space-x here as there's no button now */}
           <Link
             href="/"
             className="flex items-center space-x-2"
@@ -156,8 +137,7 @@ export function Header() {
           </Link>
         </div>
 
-        {/* Desktop Navigation (Center/Right aligned by flex-1 push) */}
-        <nav className="flex-1 hidden items-center justify-center space-x-6 md:flex"> {/* Added justify-center for a potentially more balanced look */}
+        <nav className="flex-1 hidden items-center justify-center space-x-6 md:flex">
           <Link
             href="/tasks"
             className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
@@ -183,8 +163,7 @@ export function Header() {
           )}
         </nav>
 
-        {/* User Actions, Notifications, Theme Toggle, Mobile Menu */}
-        <div className="flex items-center space-x-3 ml-auto md:ml-0"> {/* ml-auto pushes it to the right on small screens if nav is centered */}
+        <div className="flex items-center space-x-3 ml-auto md:ml-0">
           <ShadcnThemeToggle />
 
           {isAuthenticated && user ? (
@@ -253,7 +232,7 @@ export function Header() {
                         <UserCogIcon className="mr-2 h-4 w-4" />
                         Admin Panel
                       </Link>
-                    </DropdownMenuItem>
+                  </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator className="bg-neutral-200" />
                   <DropdownMenuItem
@@ -293,7 +272,6 @@ export function Header() {
             </motion.div>
           )}
 
-          {/* Mobile Menu Button */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" aria-label="Open mobile menu">

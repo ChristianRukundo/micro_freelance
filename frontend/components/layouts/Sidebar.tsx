@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useAuthStore, useUIStore } from "@/lib/zustand";
 import { cn } from "@/lib/utils";
+import React, { cloneElement, ReactElement, SVGProps, useEffect } from "react";
 import {
   LayoutDashboardIcon,
   BriefcaseIcon,
@@ -18,11 +19,11 @@ import {
   UserCogIcon,
   LogOutIcon,
   SearchIcon,
-} from "lucide-react";
+  MenuIcon,
+} from "lucide-react"; // Added MenuIcon for toggle
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UserRole } from "@/lib/types";
-import React, { useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -133,12 +134,12 @@ function SidebarNavLink({
   const pathname = usePathname();
   const isActive =
     pathname === href || (pathname.startsWith(href) && href !== "/");
-  const { setSidebarOpen } = useUIStore(); // Use setSidebarOpen for mobile close
+  const { setSidebarOpen } = useUIStore();
   const isMobile = useIsMobile();
 
   const handleClick = () => {
     if (isMobile) {
-      setSidebarOpen(false); // Close sidebar on mobile after clicking a link
+      setSidebarOpen(false);
     }
     onClick?.();
   };
@@ -177,7 +178,7 @@ function SidebarNavLink({
             onClick={handleClick}
             aria-current={isActive ? "page" : undefined}
           >
-            {React.cloneElement(icon as React.ReactElement, {
+            {cloneElement(icon as ReactElement<SVGProps<SVGSVGElement>>, {
               className: cn(
                 "h-5 w-5 flex-shrink-0",
                 isActive ? "text-primary-700" : "text-neutral-500",
@@ -209,25 +210,19 @@ function SidebarNavLink({
 // --- Main Sidebar Component ---
 export function Sidebar() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen, setSidebarOpen } = useUIStore(); // Removed toggleSidebar, use setSidebarOpen directly
+  const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore(); // toggleSidebar is used here
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
-  // Effect to synchronize initial sidebar state based on device type
   useEffect(() => {
-    // If on mobile, sidebar should always be closed initially
     if (isMobile) {
       setSidebarOpen(false);
-    }
-    // If on desktop, sidebar should always be open initially
-    else {
+    } else {
       setSidebarOpen(true);
     }
   }, [isMobile, setSidebarOpen]);
 
-  // Effect to close sidebar on route change for mobile
   useEffect(() => {
-    // If on mobile and the sidebar is currently open (and a navigation occurred)
     if (isMobile && isSidebarOpen) {
       setSidebarOpen(false);
     }
@@ -237,24 +232,21 @@ export function Sidebar() {
     if (!isAuthenticated || !user) return [];
     return mainNavLinks.filter((link) => {
       if (!link.roles) return true;
-      return link.roles.includes(user.role);
+      return link.roles.includes(user.role!);
     });
   }, [user, isAuthenticated]);
 
   const desktopExpandedWidth = "16rem"; // Tailwind's w-64
   const desktopCollapsedWidth = "4rem"; // Tailwind's w-16
 
-  // `isCollapsed` now purely reflects `!isSidebarOpen` for desktop
   const isDesktopCollapsed = !isSidebarOpen && !isMobile;
 
-  // `animate` prop directly uses `isSidebarOpen` to control width
   const sidebarAnimateProps = isMobile
-    ? { x: isSidebarOpen ? 0 : "-100%" } 
-    : { width: isSidebarOpen ? desktopExpandedWidth : desktopCollapsedWidth }; // Desktop: expand/collapse width
+    ? { x: isSidebarOpen ? 0 : "-100%" }
+    : { width: isSidebarOpen ? desktopExpandedWidth : desktopCollapsedWidth };
 
   return (
     <>
-      {/* Overlay for mobile sidebar */}
       {isSidebarOpen && isMobile && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -268,7 +260,7 @@ export function Sidebar() {
       )}
 
       <motion.aside
-        initial={false} // No initial animation, let `animate` prop handle from the start
+        initial={false}
         animate={sidebarAnimateProps}
         transition={{
           type: "spring",
@@ -277,10 +269,9 @@ export function Sidebar() {
           duration: 0.3,
         }}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-neutral-200 bg-background shadow-lg", // Removed transition-transform here, as motion handles it
-          // Fixed desktop widths and positioning. No hover expansion.
-          !isMobile && "md:sticky md:z-auto md:w-64", // Base desktop properties (w-64 is default)
-          !isMobile && !isSidebarOpen && "md:w-16" // Collapsed desktop width
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-neutral-200 bg-background shadow-lg",
+          !isMobile && "md:sticky md:z-auto md:w-64",
+          !isMobile && !isSidebarOpen && "md:w-16"
         )}
       >
         {/* Sidebar Header */}
@@ -298,7 +289,11 @@ export function Sidebar() {
             )}
             aria-label="Home"
           >
-            <BriefcaseBusinessIcon className={cn("h-7 w-7 text-primary-500")} />
+            {isSidebarOpen && (
+              <BriefcaseBusinessIcon
+                className={cn("h-7 w-7 text-primary-500")}
+              />
+            )}
             <AnimatePresence>
               {isSidebarOpen && (
                 <motion.span
@@ -313,6 +308,35 @@ export function Sidebar() {
               )}
             </AnimatePresence>
           </Link>
+          {/* Toggle button for desktop sidebar (moved here) */}
+          {!isMobile && (
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSidebar}
+                  aria-label={
+                    isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"
+                  }
+                  className="p-0 h-8 w-8 text-neutral-600 hover:text-primary-500"
+                >
+                  {isSidebarOpen ? (
+                    <XIcon className="h-5 w-5" />
+                  ) : (
+                    <MenuIcon className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">
+                    {isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              </TooltipContent>
+            </Tooltip>
+          )}
+
           {isSidebarOpen && isMobile && (
             <Button
               variant="ghost"
@@ -381,55 +405,6 @@ export function Sidebar() {
         )}
 
         <Separator />
-
-        {/* Search Input (Desktop only) */}
-        {!isMobile && (
-          <div
-            className={cn(
-              "p-4",
-              isDesktopCollapsed && "p-2 flex justify-center"
-            )}
-          >
-            <AnimatePresence mode="wait">
-              {isSidebarOpen ? (
-                <motion.div
-                  key="search-expanded"
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "100%" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative flex items-center"
-                >
-                  <SearchIcon className="absolute left-3 h-4 w-4 text-neutral-400" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="flex h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-body-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="search-collapsed"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex justify-center"
-                >
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-9 w-9">
-                        <SearchIcon className="h-5 w-5 text-neutral-600" />
-                        <span className="sr-only">Search</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Search</TooltipContent>
-                  </Tooltip>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
 
         {/* Main Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-4 py-6">
