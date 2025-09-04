@@ -1,10 +1,14 @@
-import { PageSkeleton, Skeleton, AvatarTextSkeleton } from '@/components/common/SkeletonLoaders';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import {
+  PageSkeleton,
+  Skeleton,
+  AvatarTextSkeleton,
+} from "@/components/common/SkeletonLoaders";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default function ProfileSettingsLoading() {
   return (
     <PageSkeleton className="max-w-7xl mx-auto">
-      <Card className="w-full shadow-medium border-neutral-200 p-6">
+      <Card className="w-full shadow-medium dark:shadow-medium-dark border-neutral-200 p-6">
         <CardHeader className="pb-4">
           <Skeleton className="h-10 w-1/3" /> {/* Title */}
           <Skeleton className="h-6 w-2/3 mt-2" /> {/* Description */}

@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { persist, devtools } from "zustand/middleware";
+import {
+  persist,
+  devtools,
+  PersistStorage,
+  StorageValue,
+} from "zustand/middleware";
 import { UserRole, UserProfile } from "./types";
 
 export interface UserState {
@@ -18,10 +23,6 @@ interface AuthStore {
   user: UserState | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-
-  isClient: boolean;
-  isFreelancer: boolean;
-  isAdmin: boolean;
   login: (user: UserState) => void;
   logout: () => void;
   setUser: (user: UserState) => void;
@@ -29,23 +30,36 @@ interface AuthStore {
   stopLoading: () => void;
 }
 
+const storage: PersistStorage<AuthStore> = {
+  getItem: (name) => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    const str = localStorage.getItem(name);
+    if (!str) {
+      return null;
+    }
+    return JSON.parse(str);
+  },
+  setItem: (name, value) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(name, JSON.stringify(value));
+    }
+  },
+  removeItem: (name) => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(name);
+    }
+  },
+};
+
 export const useAuthStore = create<AuthStore>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         user: null,
         isAuthenticated: false,
         isLoading: true,
-
-        get isClient() {
-          return get().user?.role === UserRole.CLIENT;
-        },
-        get isFreelancer() {
-          return get().user?.role === UserRole.FREELANCER;
-        },
-        get isAdmin() {
-          return get().user?.role === UserRole.ADMIN;
-        },
         login: (user) => set({ user, isAuthenticated: true, isLoading: false }),
         logout: () =>
           set({ user: null, isAuthenticated: false, isLoading: false }),
@@ -56,8 +70,7 @@ export const useAuthStore = create<AuthStore>()(
       }),
       {
         name: "auth-storage",
-        storage:
-          typeof window !== "undefined" ? localStorage : (undefined as any),
+        storage: storage,
       }
     ),
     { name: "AuthStore" }
@@ -72,19 +85,12 @@ interface UIStore {
 
 export const useUIStore = create<UIStore>()(
   devtools(
-    persist(
-      (set) => ({
-        isSidebarOpen: true,
-        toggleSidebar: () =>
-          set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
-        setSidebarOpen: (isOpen: boolean) => set({ isSidebarOpen: isOpen }),
-      }),
-      {
-        name: "ui-sidebar-storage",
-        storage:
-          typeof window !== "undefined" ? localStorage : (undefined as any),
-      }
-    ),
+    (set) => ({
+      isSidebarOpen: false,
+      toggleSidebar: () =>
+        set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
+      setSidebarOpen: (isOpen) => set({ isSidebarOpen: isOpen }),
+    }),
     { name: "UIStore" }
   )
 );

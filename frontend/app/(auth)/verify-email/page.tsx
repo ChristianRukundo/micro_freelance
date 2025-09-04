@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 function VerifyEmailContent({ email }: { email?: string }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 to-background px-4 py-12">
-      <Card className="w-full max-w-md shadow-hard border-neutral-200">
+      <Card className="w-full max-w-md shadow-hard dark:shadow-hard-dark border-neutral-200">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-h2 font-bold text-neutral-800">
             Verify Your Email

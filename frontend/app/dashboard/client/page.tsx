@@ -48,7 +48,7 @@ export default function ClientDashboardPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-display-md font-extrabold text-neutral-800"
+        className="text-display-md font-extrabold text-neutral-800 dark:text-neutral-100"
       >
         Welcome, {user?.firstName || user?.email?.split("@")[0]}!
       </motion.h1>
@@ -65,9 +65,9 @@ export default function ClientDashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="flex flex-col p-6 shadow-medium border-neutral-200">
+            <Card className="flex flex-col p-6 shadow-medium dark:shadow-medium-dark border-neutral-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-3">
-                <CardTitle className="text-h6 font-semibold text-neutral-700">
+                <CardTitle className="text-h6 font-semibold text-neutral-700 dark:text-neutral-300">
                   {stat.title}
                 </CardTitle>
                 <div className="text-neutral-500">{stat.icon}</div>
@@ -95,7 +95,7 @@ export default function ClientDashboardPage() {
             <Button
               variant="gradient"
               size="lg"
-              className="h-auto py-5 shadow-primary group"
+              className="h-auto py-5 shadow-primary dark:shadow-primary-dark group"
             >
               <BriefcaseIcon className="mr-3 h-6 w-6" />
               <span className="text-h5">Post a New Project</span>
@@ -105,7 +105,7 @@ export default function ClientDashboardPage() {
             <Button
               variant="outline"
               size="lg"
-              className="h-auto py-5 border-neutral-300 shadow-soft group"
+              className="h-auto py-5 border-neutral-300 shadow-soft dark:shadow-soft-dark group"
             >
               <UsersIcon className="mr-3 h-6 w-6 text-primary-500" />
               <span className="text-h5 text-neutral-700">Find Freelancers</span>
@@ -115,7 +115,7 @@ export default function ClientDashboardPage() {
             <Button
               variant="outline"
               size="lg"
-              className="h-auto py-5 border-neutral-300 shadow-soft group"
+              className="h-auto py-5 border-neutral-300 shadow-soft dark:shadow-soft-dark group"
             >
               <DollarSignIcon className="mr-3 h-6 w-6 text-primary-500" />
               <span className="text-h5 text-neutral-700">
@@ -136,7 +136,7 @@ export default function ClientDashboardPage() {
         >
           Your Recent Projects
         </motion.h2>
-        <Card className="shadow-medium border-neutral-200">
+        <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
           <CardContent className="p-6">
             <p className="text-body-md text-neutral-600">
               Your recent projects will appear here. For now, this is a

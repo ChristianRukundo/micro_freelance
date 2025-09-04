@@ -120,11 +120,13 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft transition-all duration-300 ease-in-out-quad">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft dark:shadow-soft-dark transition-all duration-300 ease-in-out-quad">
       <div className="container flex h-16 items-center justify-between">
         {/* Removed the desktop sidebar toggle button from here */}
 
-        <div className="flex items-center space-x-2"> {/* Reduced space-x here as there's no button now */}
+        <div className="flex items-center space-x-2">
+          {" "}
+          {/* Reduced space-x here as there's no button now */}
           <Link
             href="/"
             className="flex items-center space-x-2"
@@ -192,7 +194,7 @@ export function Header() {
                   </motion.button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="w-56 rounded-lg shadow-medium border-neutral-200"
+                  className="w-56 rounded-lg shadow-medium dark:shadow-medium-dark border-neutral-200"
                   align="end"
                   forceMount
                 >
@@ -232,7 +234,7 @@ export function Header() {
                         <UserCogIcon className="mr-2 h-4 w-4" />
                         Admin Panel
                       </Link>
-                  </DropdownMenuItem>
+                    </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator className="bg-neutral-200" />
                   <DropdownMenuItem
@@ -264,7 +266,7 @@ export function Header() {
               <Link href="/register" passHref>
                 <Button
                   variant="default"
-                  className="text-body-md font-medium shadow-sm hover:shadow-medium"
+                  className="text-body-md font-medium shadow-sm hover:shadow-medium dark:shadow-medium-dark"
                 >
                   Sign Up
                 </Button>

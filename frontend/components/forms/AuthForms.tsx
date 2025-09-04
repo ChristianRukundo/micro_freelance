@@ -1,23 +1,46 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { toast } from 'sonner';
-import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/lib/zustand';
-import * as actions from '@/lib/actions';
-import { loginSchema, registerSchema, verifyEmailSchema, forgotPasswordSchema, resetPasswordSchema } from '@/lib/schemas';
-import { UserRole } from '@/lib/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { EyeIcon, EyeOffIcon, RefreshCcwIcon } from 'lucide-react';
-import React, { useState } from 'react';
-import { Input } from '../ui/input';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/zustand";
+import * as actions from "@/lib/actions";
+import {
+  loginSchema,
+  registerSchema,
+  verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "@/lib/schemas";
+import { UserRole } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { EyeIcon, EyeOffIcon, RefreshCcwIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Input } from "../ui/input";
 
 // Schemas imported from non-server module
 
@@ -28,7 +51,12 @@ type ForgotPasswordFormInput = z.infer<typeof forgotPasswordSchema>;
 type ResetPasswordFormInput = z.infer<typeof resetPasswordSchema>;
 
 interface AuthFormsProps {
-  formType: 'login' | 'register' | 'verify-email' | 'forgot-password' | 'reset-password';
+  formType:
+    | "login"
+    | "register"
+    | "verify-email"
+    | "forgot-password"
+    | "reset-password";
   initialEmail?: string; // For pre-filling email in verify/reset forms
 }
 
@@ -40,31 +68,42 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
 
   // Determine form schema based on type
   let formSchema: z.ZodSchema<any>;
-  let defaultValues: any = { email: initialEmail || '' };
+  let defaultValues: any = { email: initialEmail || "" };
 
   switch (formType) {
-    case 'login':
+    case "login":
       formSchema = loginSchema;
-      defaultValues = { email: initialEmail || '', password: '' };
+      defaultValues = { email: initialEmail || "", password: "" };
       break;
-    case 'register':
+    case "register":
       formSchema = registerSchema;
-      defaultValues = { firstName: '', lastName: '', email: '', password: '', role: UserRole.CLIENT };
+      defaultValues = {
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        role: UserRole.CLIENT,
+      };
       break;
-    case 'verify-email':
+    case "verify-email":
       formSchema = verifyEmailSchema;
-      defaultValues = { email: initialEmail || '', otp: '' };
+      defaultValues = { email: initialEmail || "", otp: "" };
       break;
-    case 'forgot-password':
+    case "forgot-password":
       formSchema = forgotPasswordSchema;
-      defaultValues = { email: initialEmail || '' };
+      defaultValues = { email: initialEmail || "" };
       break;
-    case 'reset-password':
+    case "reset-password":
       formSchema = resetPasswordSchema;
-      defaultValues = { email: initialEmail || '', otp: '', newPassword: '', confirmNewPassword: '' };
+      defaultValues = {
+        email: initialEmail || "",
+        otp: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      };
       break;
     default:
-      throw new Error('Invalid form type');
+      throw new Error("Invalid form type");
   }
 
   type FormInput = z.infer<typeof formSchema>;
@@ -74,137 +113,180 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
     defaultValues: defaultValues,
   });
 
-
   // --- Mutations ---
   const { mutate: submitLogin, isPending: isLoginPending } = useMutation({
     mutationFn: async (data: LoginFormInput) => {
-      const res = await (await import('@/lib/api')).default.post('/auth/login', data);
-      return { success: true, message: 'Logged in successfully!', data: res.data.data } as const;
+      const res = await (
+        await import("@/lib/api")
+      ).default.post("/auth/login", data);
+      return {
+        success: true,
+        message: "Logged in successfully!",
+        data: res.data.data,
+      } as const;
     },
     onSuccess: (response) => {
       if (response.success && response.data?.user) {
         authStoreLogin(response.data.user);
         toast.success(response.message);
         switch (response.data.user.role) {
-          case UserRole.CLIENT: router.push('/dashboard/client'); break;
-          case UserRole.FREELANCER: router.push('/dashboard/freelancer'); break;
-          case UserRole.ADMIN: router.push('/admin/users'); break;
-          default: router.push('/dashboard'); break;
+          case UserRole.CLIENT:
+            router.push("/dashboard/client");
+            break;
+          case UserRole.FREELANCER:
+            router.push("/dashboard/freelancer");
+            break;
+          case UserRole.ADMIN:
+            router.push("/admin/users");
+            break;
+          default:
+            router.push("/dashboard");
+            break;
         }
       } else {
-        toast.error(response.message || 'Login failed.');
+        toast.error(response.message || "Login failed.");
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Login failed.');
+      toast.error(error.message || "Login failed.");
     },
   });
 
   const { mutate: submitRegister, isPending: isRegisterPending } = useMutation({
     mutationFn: async (data: RegisterFormInput) => {
-      const res = await (await import('@/lib/api')).default.post('/auth/register', data);
-      return { success: true, message: 'Registration successful. Please verify your email.', data: res.data.data } as const;
+      const res = await (
+        await import("@/lib/api")
+      ).default.post("/auth/register", data);
+      return {
+        success: true,
+        message: "Registration successful. Please verify your email.",
+        data: res.data.data,
+      } as const;
     },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
-        router.push(`/verify-email?email=${form.getValues('email')}`);
+        router.push(`/verify-email?email=${form.getValues("email")}`);
       } else {
-        toast.error(response.message || 'Registration failed.');
+        toast.error(response.message || "Registration failed.");
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Registration failed.');
+      toast.error(error.message || "Registration failed.");
     },
   });
 
-  const { mutate: submitVerifyEmail, isPending: isVerifyEmailPending } = useMutation({
-    mutationFn: async (data: VerifyEmailFormInput) => {
-      await (await import('@/lib/api')).default.post('/auth/verify-email', data);
-      return { success: true, message: 'Email verified successfully!' } as const;
-    },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success(response.message);
-        router.push('/login');
-      } else {
-        toast.error(response.message || 'Email verification failed.');
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Email verification failed.');
-    },
-  });
+  const { mutate: submitVerifyEmail, isPending: isVerifyEmailPending } =
+    useMutation({
+      mutationFn: async (data: VerifyEmailFormInput) => {
+        await (
+          await import("@/lib/api")
+        ).default.post("/auth/verify-email", data);
+        return {
+          success: true,
+          message: "Email verified successfully!",
+        } as const;
+      },
+      onSuccess: (response) => {
+        if (response.success) {
+          toast.success(response.message);
+          router.push("/login");
+        } else {
+          toast.error(response.message || "Email verification failed.");
+        }
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Email verification failed.");
+      },
+    });
 
-  const { mutate: submitResendOtp, isPending: isResendOtpPending } = useMutation({
-    mutationFn: async (email: string) => {
-      await (await import('@/lib/api')).default.post('/auth/resend-verification-email', { email });
-      return { success: true, message: 'New verification OTP sent to your email.' } as const;
-    },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success(response.message);
-      } else {
-        toast.error(response.message || 'Failed to resend OTP.');
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to resend OTP.');
-    },
-  });
+  const { mutate: submitResendOtp, isPending: isResendOtpPending } =
+    useMutation({
+      mutationFn: async (email: string) => {
+        await (
+          await import("@/lib/api")
+        ).default.post("/auth/resend-verification-email", { email });
+        return {
+          success: true,
+          message: "New verification OTP sent to your email.",
+        } as const;
+      },
+      onSuccess: (response) => {
+        if (response.success) {
+          toast.success(response.message);
+        } else {
+          toast.error(response.message || "Failed to resend OTP.");
+        }
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Failed to resend OTP.");
+      },
+    });
 
-  const { mutate: submitForgotPassword, isPending: isForgotPasswordPending } = useMutation({
-    mutationFn: async (data: ForgotPasswordFormInput) => {
-      await (await import('@/lib/api')).default.post('/auth/forgot-password', data);
-      return { success: true, message: 'If an account with that email exists, a password reset OTP has been sent.' } as const;
-    },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success(response.message);
-        router.push(`/reset-password?email=${form.getValues('email')}`);
-      } else {
-        toast.error(response.message || 'Password reset request failed.');
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Password reset request failed.');
-    },
-  });
+  const { mutate: submitForgotPassword, isPending: isForgotPasswordPending } =
+    useMutation({
+      mutationFn: async (data: ForgotPasswordFormInput) => {
+        await (
+          await import("@/lib/api")
+        ).default.post("/auth/forgot-password", data);
+        return {
+          success: true,
+          message:
+            "If an account with that email exists, a password reset OTP has been sent.",
+        } as const;
+      },
+      onSuccess: (response) => {
+        if (response.success) {
+          toast.success(response.message);
+          router.push(`/reset-password?email=${form.getValues("email")}`);
+        } else {
+          toast.error(response.message || "Password reset request failed.");
+        }
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Password reset request failed.");
+      },
+    });
 
-  const { mutate: submitResetPassword, isPending: isResetPasswordPending } = useMutation({
-    mutationFn: async (data: ResetPasswordFormInput) => {
-      await (await import('@/lib/api')).default.post('/auth/reset-password', data);
-      return { success: true, message: 'Password has been reset successfully!' } as const;
-    },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success(response.message);
-        router.push('/login');
-      } else {
-        toast.error(response.message || 'Password reset failed.');
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Password reset failed.');
-    },
-  });
-
+  const { mutate: submitResetPassword, isPending: isResetPasswordPending } =
+    useMutation({
+      mutationFn: async (data: ResetPasswordFormInput) => {
+        await (
+          await import("@/lib/api")
+        ).default.post("/auth/reset-password", data);
+        return {
+          success: true,
+          message: "Password has been reset successfully!",
+        } as const;
+      },
+      onSuccess: (response) => {
+        if (response.success) {
+          toast.success(response.message);
+          router.push("/login");
+        } else {
+          toast.error(response.message || "Password reset failed.");
+        }
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Password reset failed.");
+      },
+    });
 
   const onSubmit = (values: FormInput) => {
     switch (formType) {
-      case 'login':
+      case "login":
         submitLogin(values as LoginFormInput);
         break;
-      case 'register':
+      case "register":
         submitRegister(values as RegisterFormInput);
         break;
-      case 'verify-email':
+      case "verify-email":
         submitVerifyEmail(values as VerifyEmailFormInput);
         break;
-      case 'forgot-password':
+      case "forgot-password":
         submitForgotPassword(values as ForgotPasswordFormInput);
         break;
-      case 'reset-password':
+      case "reset-password":
         submitResetPassword(values as ResetPasswordFormInput);
         break;
       default:
@@ -223,7 +305,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {formType === 'register' && (
+        {formType === "register" && (
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
@@ -233,7 +315,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John" {...field} disabled={isPending} />
+                      <Input
+                        placeholder="John"
+                        {...field}
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -246,7 +332,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Doe" {...field} disabled={isPending} />
+                      <Input
+                        placeholder="Doe"
+                        {...field}
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -255,7 +345,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
             </div>
           </>
         )}
-        {(formType !== 'reset-password') && (
+        {formType !== "reset-password" && (
           <FormField
             control={form.control}
             name="email"
@@ -263,7 +353,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="name@example.com" {...field} disabled={isPending || formType === 'verify-email'} />
+                  <Input
+                    placeholder="name@example.com"
+                    {...field}
+                    disabled={isPending || formType === "verify-email"}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -271,17 +365,21 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
           />
         )}
 
-        {(formType === 'login' || formType === 'register' || formType === 'reset-password') && (
+        {(formType === "login" ||
+          formType === "register" ||
+          formType === "reset-password") && (
           <FormField
             control={form.control}
-            name={formType === 'reset-password' ? 'newPassword' : 'password'}
+            name={formType === "reset-password" ? "newPassword" : "password"}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{formType === 'reset-password' ? 'New Password' : 'Password'}</FormLabel>
+                <FormLabel>
+                  {formType === "reset-password" ? "New Password" : "Password"}
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       {...field}
                       disabled={isPending}
@@ -293,7 +391,9 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
                       size="icon"
                       className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOffIcon className="h-5 w-5" />
@@ -309,7 +409,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
           />
         )}
 
-        {(formType === 'verify-email' || formType === 'reset-password') && (
+        {(formType === "verify-email" || formType === "reset-password") && (
           <FormField
             control={form.control}
             name="otp"
@@ -334,7 +434,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
           />
         )}
 
-        {formType === 'reset-password' && (
+        {formType === "reset-password" && (
           <FormField
             control={form.control}
             name="confirmNewPassword"
@@ -344,7 +444,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
                       {...field}
                       disabled={isPending}
@@ -355,8 +455,12 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
                       variant="ghost"
                       size="icon"
                       className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
                     >
                       {showConfirmPassword ? (
                         <EyeOffIcon className="h-5 w-5" />
@@ -372,23 +476,30 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
           />
         )}
 
-
-        {formType === 'register' && (
+        {formType === "register" && (
           <FormField
             control={form.control}
             name="role"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>I am a...</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={isPending}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value={UserRole.CLIENT}>Client (Hire Freelancers)</SelectItem>
-                    <SelectItem value={UserRole.FREELANCER}>Freelancer (Find Work)</SelectItem>
+                    <SelectItem value={UserRole.CLIENT}>
+                      Client (Hire Freelancers)
+                    </SelectItem>
+                    <SelectItem value={UserRole.FREELANCER}>
+                      Freelancer (Find Work)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -396,24 +507,38 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
             )}
           />
         )}
-        <Button type="submit" className="w-full text-body-md shadow-primary group cursor-pointer" aria-busy={isPending} aria-live="polite" disabled={isPending}>
-          {isPending && <LoadingSpinner size="sm" color="text-primary-foreground" className="mr-2" />}
-          {formType === 'login' && 'Log In'}
-          {formType === 'register' && 'Create Account'}
-          {formType === 'verify-email' && 'Verify Email'}
-          {formType === 'forgot-password' && 'Send Reset OTP'}
-          {formType === 'reset-password' && 'Reset Password'}
+        <Button
+          type="submit"
+          className="w-full text-body-md shadow-primary dark:shadow-primary-dark group cursor-pointer"
+          aria-busy={isPending}
+          aria-live="polite"
+          disabled={isPending}
+        >
+          {isPending && (
+            <LoadingSpinner
+              size="sm"
+              color="text-primary-foreground"
+              className="mr-2"
+            />
+          )}
+          {formType === "login" && "Log In"}
+          {formType === "register" && "Create Account"}
+          {formType === "verify-email" && "Verify Email"}
+          {formType === "forgot-password" && "Send Reset OTP"}
+          {formType === "reset-password" && "Reset Password"}
         </Button>
 
-        {formType === 'verify-email' && (
+        {formType === "verify-email" && (
           <Button
             type="button"
             variant="outline"
             className="w-full mt-4 text-body-md"
-            onClick={() => submitResendOtp(form.getValues('email') as string)}
+            onClick={() => submitResendOtp(form.getValues("email") as string)}
             disabled={isResendOtpPending || isPending}
           >
-            {isResendOtpPending && <LoadingSpinner size="sm" className="mr-2" />}
+            {isResendOtpPending && (
+              <LoadingSpinner size="sm" className="mr-2" />
+            )}
             <RefreshCcwIcon className="mr-2 h-4 w-4" /> Resend OTP
           </Button>
         )}

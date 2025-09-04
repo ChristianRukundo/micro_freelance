@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useNotifications } from '@/hooks/useNotifications';
-import { NotificationCard } from '@/components/cards/NotificationCard';
-import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { TriangleAlertIcon, BellOffIcon, CheckCheckIcon, MoveRightIcon } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
-import { Skeleton } from '@/components/common/SkeletonLoaders';
-import { motion } from 'framer-motion';
+import React from "react";
+import { useNotifications } from "@/hooks/useNotifications";
+import { NotificationCard } from "@/components/cards/NotificationCard";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  TriangleAlertIcon,
+  BellOffIcon,
+  CheckCheckIcon,
+  MoveRightIcon,
+} from "lucide-react";
+import { useInView } from "react-intersection-observer";
+import { Skeleton } from "@/components/common/SkeletonLoaders";
+import { motion } from "framer-motion";
 
 export function NotificationList() {
   const {
@@ -27,10 +32,21 @@ export function NotificationList() {
   const { ref, inView } = useInView();
 
   React.useEffect(() => {
-    if (inView && hasNextPageNotifications && !isFetchingNextPageNotifications && !isLoadingNotifications) {
+    if (
+      inView &&
+      hasNextPageNotifications &&
+      !isFetchingNextPageNotifications &&
+      !isLoadingNotifications
+    ) {
       fetchNextPageNotifications();
     }
-  }, [inView, hasNextPageNotifications, isFetchingNextPageNotifications, isLoadingNotifications, fetchNextPageNotifications]);
+  }, [
+    inView,
+    hasNextPageNotifications,
+    isFetchingNextPageNotifications,
+    isLoadingNotifications,
+    fetchNextPageNotifications,
+  ]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -47,7 +63,9 @@ export function NotificationList() {
       <Alert variant="destructive">
         <TriangleAlertIcon className="h-4 w-4" />
         <AlertTitle>Error loading notifications</AlertTitle>
-        <AlertDescription>Failed to load notifications: {errorNotifications?.message}</AlertDescription>
+        <AlertDescription>
+          Failed to load notifications: {errorNotifications?.message}
+        </AlertDescription>
       </Alert>
     );
   }
@@ -55,14 +73,16 @@ export function NotificationList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-h4 font-bold text-neutral-800">Your Notifications</h3>
+        <h3 className="text-h4 font-bold text-neutral-800">
+          Your Notifications
+        </h3>
         {!isEmpty && (
           <Button
             variant="outline"
             size="sm"
             onClick={handleMarkAllRead}
             disabled={isMarkingAllNotificationsAsRead || isLoadingNotifications}
-            className="shadow-soft group"
+            className="shadow-soft dark:shadow-soft-dark group"
           >
             {isMarkingAllNotificationsAsRead ? (
               <LoadingSpinner size="sm" className="mr-2" />
@@ -89,11 +109,15 @@ export function NotificationList() {
       ) : (
         <div className="space-y-4">
           {notifications.map((notification) => (
-            <NotificationCard key={notification.id} notification={notification} />
+            <NotificationCard
+              key={notification.id}
+              notification={notification}
+            />
           ))}
           {isFetchingNextPageNotifications && (
             <div className="flex justify-center py-4">
-              <LoadingSpinner size="md" className="mr-2" /> Loading more notifications...
+              <LoadingSpinner size="md" className="mr-2" /> Loading more
+              notifications...
             </div>
           )}
           {hasNextPageNotifications && !isFetchingNextPageNotifications && (
@@ -102,9 +126,10 @@ export function NotificationList() {
                 onClick={() => fetchNextPageNotifications()}
                 disabled={isFetchingNextPageNotifications}
                 variant="outline"
-                className="shadow-soft group"
+                className="shadow-soft dark:shadow-soft-dark group"
               >
-                Load More <MoveRightIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                Load More{" "}
+                <MoveRightIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
           )}

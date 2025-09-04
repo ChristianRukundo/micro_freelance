@@ -1,20 +1,26 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { useMutation } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { SendIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { SendIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 const newsletterSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email("Please enter a valid email address"),
 });
 
 type NewsletterFormInput = z.infer<typeof newsletterSchema>;
@@ -23,14 +29,14 @@ export function NewsletterForm() {
   const form = useForm<NewsletterFormInput>({
     resolver: zodResolver(newsletterSchema),
     defaultValues: {
-      email: '',
+      email: "",
     },
   });
 
   const { mutate: subscribe, isPending } = useMutation({
     mutationFn: async (data: NewsletterFormInput) => {
-      const res = await api.post('/newsletter/subscribe', data);
-      return { success: true, message: 'Thanks for subscribing!' } as const;
+      const res = await api.post("/newsletter/subscribe", data);
+      return { success: true, message: "Thanks for subscribing!" } as const;
     },
     onSuccess: (response) => {
       toast.success(response.message);
@@ -62,14 +68,18 @@ export function NewsletterForm() {
                     placeholder="Your email address"
                     {...field}
                     disabled={isPending}
-                    className="rounded-full shadow-soft"
+                    className="rounded-full shadow-soft dark:shadow-soft-dark"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="rounded-full shadow-primary group" disabled={isPending}>
+          <Button
+            type="submit"
+            className="rounded-full shadow-primary dark:shadow-primary-dark group"
+            disabled={isPending}
+          >
             {isPending ? (
               <LoadingSpinner size="sm" color="text-primary-foreground" />
             ) : (

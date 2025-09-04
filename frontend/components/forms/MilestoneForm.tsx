@@ -1,26 +1,46 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { createMultipleMilestonesSchema, createMilestoneSchema } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from 'sonner';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Milestone, TaskStatus } from '@/lib/types';
-import { format } from 'date-fns';
-import { CalendarIcon, DollarSignIcon, PlusCircleIcon, MinusCircleIcon, ListChecksIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import React from 'react';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import * as actions from '@/lib/actions';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  createMultipleMilestonesSchema,
+  createMilestoneSchema,
+} from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Milestone, TaskStatus } from "@/lib/types";
+import { format } from "date-fns";
+import {
+  CalendarIcon,
+  DollarSignIcon,
+  PlusCircleIcon,
+  MinusCircleIcon,
+  ListChecksIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import React from "react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import * as actions from "@/lib/actions";
 
 // Schemas from lib/schemas
 
@@ -37,9 +57,9 @@ interface MilestoneFormProps {
 
 export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
   const queryClient = useQueryClient();
-  const [milestonesFields, setMilestonesFields] = React.useState<SingleMilestoneInput[]>([
-    { description: '', dueDate: new Date().toISOString(), amount: 0 },
-  ]);
+  const [milestonesFields, setMilestonesFields] = React.useState<
+    SingleMilestoneInput[]
+  >([{ description: "", dueDate: new Date().toISOString(), amount: 0 }]);
 
   const form = useForm<MultipleMilestonesInput>({
     resolver: zodResolver(createMultipleMilestonesSchema),
@@ -48,7 +68,10 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
   });
 
   const addMilestoneField = () => {
-    setMilestonesFields((prev) => [...prev, { description: '', dueDate: new Date().toISOString(), amount: 0 }]);
+    setMilestonesFields((prev) => [
+      ...prev,
+      { description: "", dueDate: new Date().toISOString(), amount: 0 },
+    ]);
   };
 
   const removeMilestoneField = (index: number) => {
@@ -57,40 +80,48 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
   };
 
   // Update a specific field in a milestone
-  const updateMilestoneField = (index: number, fieldName: keyof SingleMilestoneInput, value: any) => {
+  const updateMilestoneField = (
+    index: number,
+    fieldName: keyof SingleMilestoneInput,
+    value: any
+  ) => {
     setMilestonesFields((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, [fieldName]: value } : m)),
+      prev.map((m, i) => (i === index ? { ...m, [fieldName]: value } : m))
     );
     form.trigger(`${String(index)}.${String(fieldName)}` as any);
   };
 
-
-  const { mutate: createMilestones, isPending: isCreatingMilestones } = useMutation({
-    mutationFn: async (milestonesData: MultipleMilestonesInput) => {
-      // Convert Date objects to ISO strings for the backend
-      const dataToSend = milestonesData.map((m: SingleMilestoneInput) => ({
-        ...m,
-        dueDate: m.dueDate,
-      }));
-      return actions.createMilestonesAction(taskId, dataToSend);
-    },
-    onSuccess: (response) => {
-      if (response.success) {
-        toast.success(response.message);
-        queryClient.invalidateQueries({ queryKey: ['milestones', taskId] });
-        queryClient.invalidateQueries({ queryKey: ['task', taskId] });
-        form.reset(); // Reset form fields
-        setMilestonesFields([{ description: '', dueDate: new Date().toISOString(), amount: 0 }]); // Reset state
-        onSuccess?.();
-      } else {
-        toast.error(response.message || 'Failed to create milestones.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
-      }
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to create milestones.');
-    },
-  });
+  const { mutate: createMilestones, isPending: isCreatingMilestones } =
+    useMutation({
+      mutationFn: async (milestonesData: MultipleMilestonesInput) => {
+        // Convert Date objects to ISO strings for the backend
+        const dataToSend = milestonesData.map((m: SingleMilestoneInput) => ({
+          ...m,
+          dueDate: m.dueDate,
+        }));
+        return actions.createMilestonesAction(taskId, dataToSend);
+      },
+      onSuccess: (response) => {
+        if (response.success) {
+          toast.success(response.message);
+          queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
+          queryClient.invalidateQueries({ queryKey: ["task", taskId] });
+          form.reset(); // Reset form fields
+          setMilestonesFields([
+            { description: "", dueDate: new Date().toISOString(), amount: 0 },
+          ]); // Reset state
+          onSuccess?.();
+        } else {
+          toast.error(response.message || "Failed to create milestones.");
+          response.errors?.forEach((err) =>
+            toast.error(`${err.path}: ${err.message}`)
+          );
+        }
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "Failed to create milestones.");
+      },
+    });
 
   const onSubmit = (values: MultipleMilestonesInput) => {
     createMilestones(values);
@@ -105,9 +136,11 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="rounded-lg border border-neutral-200 p-4 shadow-soft space-y-4 relative"
+            className="rounded-lg border border-neutral-200 p-4 shadow-soft dark:shadow-soft-dark space-y-4 relative"
           >
-            <h4 className="text-h6 font-semibold text-neutral-800 mb-4">Milestone {index + 1}</h4>
+            <h4 className="text-h6 font-semibold text-neutral-800 mb-4">
+              Milestone {index + 1}
+            </h4>
             {milestonesFields.length > 1 && (
               <Button
                 type="button"
@@ -133,7 +166,13 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
                       className="min-h-[80px]"
                       {...field}
                       value={milestone.description} // Explicitly bind value from state
-                      onChange={(e) => updateMilestoneField(index, 'description', e.target.value)}
+                      onChange={(e) =>
+                        updateMilestoneField(
+                          index,
+                          "description",
+                          e.target.value
+                        )
+                      }
                       disabled={isCreatingMilestones}
                     />
                   </FormControl>
@@ -156,7 +195,13 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
                         placeholder="e.g., 500"
                         {...field}
                         value={milestone.amount} // Explicitly bind value from state
-                        onChange={(e) => updateMilestoneField(index, 'amount', parseFloat(e.target.value))}
+                        onChange={(e) =>
+                          updateMilestoneField(
+                            index,
+                            "amount",
+                            parseFloat(e.target.value)
+                          )
+                        }
                         disabled={isCreatingMilestones}
                       />
                     </FormControl>
@@ -174,14 +219,18 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={'outline'}
+                            variant={"outline"}
                             className={cn(
-                              'w-full pl-3 text-left font-normal shadow-soft',
-                              !field.value && 'text-muted-foreground',
+                              "w-full pl-3 text-left font-normal shadow-soft dark:shadow-soft-dark",
+                              !field.value && "text-muted-foreground"
                             )}
                             disabled={isCreatingMilestones}
                           >
-                            {milestone.dueDate ? format(milestone.dueDate, 'PPP') : <span>Pick a date</span>}
+                            {milestone.dueDate ? (
+                              format(milestone.dueDate, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -189,9 +238,17 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={milestone.dueDate ? new Date(milestone.dueDate) : undefined}
-                          onSelect={(date) => updateMilestoneField(index, 'dueDate', date)}
-                          disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
+                          selected={
+                            milestone.dueDate
+                              ? new Date(milestone.dueDate)
+                              : undefined
+                          }
+                          onSelect={(date) =>
+                            updateMilestoneField(index, "dueDate", date)
+                          }
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
                           initialFocus
                         />
                       </PopoverContent>
@@ -209,13 +266,23 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
           variant="outline"
           onClick={addMilestoneField}
           disabled={isCreatingMilestones}
-          className="w-full text-body-md shadow-soft group"
+          className="w-full text-body-md shadow-soft dark:shadow-soft-dark group"
         >
           <PlusCircleIcon className="mr-2 h-4 w-4" /> Add Another Milestone
         </Button>
 
-        <Button type="submit" className="w-full text-body-md shadow-primary group" disabled={isCreatingMilestones}>
-          {isCreatingMilestones && <LoadingSpinner size="sm" color="text-primary-foreground" className="mr-2" />}
+        <Button
+          type="submit"
+          className="w-full text-body-md shadow-primary dark:shadow-primary-dark group"
+          disabled={isCreatingMilestones}
+        >
+          {isCreatingMilestones && (
+            <LoadingSpinner
+              size="sm"
+              color="text-primary-foreground"
+              className="mr-2"
+            />
+          )}
           <ListChecksIcon className="mr-2 h-4 w-4" /> Create Milestones
         </Button>
       </form>

@@ -4,7 +4,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @layer base {
-    :root {
+  :root {
     /* New Professional Color Palette */
 
     /* Primary Palette (Professional Blue) */
@@ -30,7 +30,8 @@
     --neutral-600: 215 8% 40%;
     --neutral-700: 215 6% 30%;
     --neutral-800: 215 4% 20%;
-    --neutral-900: 215 2% 10%;
+    --neutral-900: 215 2% 15%; /* Made slightly lighter for more range */
+    --neutral-950: 215 2% 10%; /* New darkest neutral for background */
 
     /* Status Colors */
     --success-50: 145 63% 94%;
@@ -74,77 +75,52 @@
     --input: var(--neutral-200);
     --ring: var(--primary-500);
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Slightly larger radius for a modern feel */
   }
 
   .dark {
-    --background: var(--neutral-900);
-    --foreground: var(--neutral-50);
+    /* --- Dark Mode Overhaul --- */
 
-    --card: var(--neutral-800);
-    --card-foreground: var(--neutral-50);
+    /* 1. Softer, elevated background palette for better depth */
+    --background: hsl(var(--neutral-950)); /* Deep charcoal, not pure black */
+    --foreground: hsl(
+      var(--neutral-200)
+    ); /* Soft white text, not stark white */
 
-    --popover: var(--neutral-800);
-    --popover-foreground: var(--neutral-50);
+    --card: hsl(
+      var(--neutral-900)
+    ); /* Card surface, slightly lighter than background */
+    --card-foreground: hsl(var(--neutral-100));
 
-    .dark {
-    /* Dark Mode Palette - Improved Contrast */
-    --background: var(--neutral-900);
-    --foreground: var(--neutral-50); /* Brighter text */
+    --popover: hsl(
+      var(--neutral-800)
+    ); /* Popovers/Modals are even lighter to feel "on top" */
+    --popover-foreground: hsl(var(--neutral-100));
 
-    --card: var(--neutral-800);
-    --card-foreground: var(--neutral-50);
+    /* 2. Accessible and less jarring accent colors */
+    --primary: hsl(
+      var(--primary-400)
+    ); /* A lighter blue for better contrast and less glare */
+    --primary-foreground: hsl(
+      var(--neutral-950)
+    ); /* Dark text on the lighter primary color */
 
-    --popover: var(--neutral-800);
-    --popover-foreground: var(--neutral-50);
+    --secondary: hsl(var(--neutral-800));
+    --secondary-foreground: hsl(var(--neutral-100));
 
-    --primary: var(--primary-500);
-    --primary-foreground: 0 0% 100%;
+    --muted: hsl(var(--neutral-800));
+    --muted-foreground: hsl(var(--neutral-400));
 
-    --secondary: var(--neutral-700);
-    --secondary-foreground: var(--neutral-50);
+    --accent: hsl(var(--neutral-800));
+    --accent-foreground: hsl(var(--neutral-100));
 
-    --muted: var(--neutral-800);
-    --muted-foreground: var(--neutral-300); /* Lighter muted text */
+    --destructive: hsl(var(--error-500));
+    --destructive-foreground: hsl(var(--neutral-50));
 
-    --accent: var(--neutral-700);
-    --accent-foreground: var(--neutral-50);
-
-    --destructive: var(--error-500);
-    --destructive-foreground: 0 0% 100%;
-
-    --border: var(--neutral-700);
-    --input: var(--neutral-700);
-    --ring: var(--primary-500);
-
-    /* Dark mode specific for status colors */
-    --success-50: 145 63% 10%;
-    --warning-50: 36 96% 10%;
-    --error-50: 0 84% 10%;
-  }
-    --primary-foreground: 210 20% 98%;
-
-    --secondary: var(--neutral-700);
-    --secondary-foreground: var(--neutral-50);
-
-    --muted: var(--neutral-800);
-    --muted-foreground: var(--neutral-400);
-
-    --accent: var(--neutral-700);
-    --accent-foreground: var(--neutral-50);
-
-    --destructive: var(--error-500);
-    --destructive-foreground: 210 20% 98%;
-
-    --border: var(--neutral-700);
-    --input: var(--neutral-700);
-    --ring: var(--primary-400);
-
-    /* Dark mode specific for status colors if needed */
-    --success-50: 145 63% 20%;
-    --warning-50: 36 96% 20%;
-    --error-50: 0 84% 20%;
-    --blue-50: 200 100% 20%;
+    /* 3. Subtle, "glowing" borders using semi-transparent white */
+    --border: 215 10% 50% / 0.2; /* REFINED: More subtle but crisp border */
+    --input: 215 10% 50% / 0.3; /* Input border slightly more subtle */
+    --ring: hsl(var(--primary-400));
   }
 }
 
@@ -157,45 +133,53 @@
     font-feature-settings: "liga" 0;
   }
 }
-
 @layer components {
+  /* --- TYPOGRAPHY HIERARCHY WITH AUTOMATIC DARK MODE COLORS --- */
+
+  /* Display Headings - Highest Contrast */
   .text-display-lg {
-    @apply text-display-lg font-display;
+    @apply text-display-lg font-display text-neutral-800 dark:text-neutral-100;
   }
   .text-display-md {
-    @apply text-display-md font-display;
+    @apply text-display-md font-display text-neutral-800 dark:text-neutral-100;
   }
   .text-display-sm {
-    @apply text-display-sm font-display;
+    @apply text-display-sm font-display text-neutral-800 dark:text-neutral-100;
   }
+
+  /* Standard Headings - High Contrast */
   .text-h1 {
-    @apply text-h1 font-sans;
+    @apply text-h1 font-sans font-bold text-neutral-800 dark:text-neutral-100;
   }
   .text-h2 {
-    @apply text-h2 font-sans;
+    @apply text-h2 font-sans font-bold text-neutral-800 dark:text-neutral-200;
   }
   .text-h3 {
-    @apply text-h3 font-sans;
+    @apply text-h3 font-sans font-semibold text-neutral-800 dark:text-neutral-200;
   }
   .text-h4 {
-    @apply text-h4 font-sans;
+    @apply text-h4 font-sans font-semibold text-neutral-800 dark:text-neutral-200;
   }
   .text-h5 {
-    @apply text-h5 font-sans;
+    @apply text-h5 font-sans font-semibold text-neutral-700 dark:text-neutral-300;
   }
   .text-h6 {
-    @apply text-h6 font-sans;
+    @apply text-h6 font-sans font-semibold text-neutral-700 dark:text-neutral-300;
   }
+
+  /* Body Text - Standard Contrast for Readability */
   .text-body-lg {
-    @apply text-body-lg font-sans;
+    @apply text-body-lg font-sans text-neutral-700 dark:text-neutral-300;
   }
   .text-body-md {
-    @apply text-body-md font-sans;
+    @apply text-body-md font-sans text-neutral-600 dark:text-neutral-400;
   }
   .text-body-sm {
-    @apply text-body-sm font-sans;
+    @apply text-body-sm font-sans text-neutral-600 dark:text-neutral-400;
   }
+
+  /* Caption / Muted Text - Lower Contrast */
   .text-caption {
-    @apply text-caption font-sans;
+    @apply text-caption font-sans text-neutral-500 dark:text-neutral-500;
   }
 }

@@ -37,7 +37,7 @@ export function HowItWorksCard({
       transition={{ duration: 0.6 }}
       className="space-y-6"
     >
-      <Card className="h-full shadow-medium border-neutral-200 p-8 flex flex-col justify-between">
+      <Card className="h-full shadow-medium dark:shadow-medium-dark border-neutral-200 p-8 flex flex-col justify-between">
         <CardHeader className="p-0 pb-6">
           <h3 className="text-h3 font-bold text-neutral-800">{title}</h3>
           <CardDescription className="text-body-md text-neutral-600 mt-2">

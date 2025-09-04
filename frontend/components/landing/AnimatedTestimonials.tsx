@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export function AnimatedTestimonials() {
               viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 0.6, delay: 0.1 * index }}
             >
-              <Card className="shadow-medium border-neutral-200 p-6 text-left relative overflow-hidden group">
+              <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 text-left relative overflow-hidden group">
                 <span className="absolute top-0 right-0 h-24 w-24 translate-x-1/4 -translate-y-1/4 rotate-45 transform bg-primary-500/5 text-primary-500/10 text-display-lg font-extrabold -z-10 opacity-70">
                   "
                 </span>
@@ -34,8 +34,7 @@ export function AnimatedTestimonials() {
                   <p className="text-body-lg italic text-neutral-700">
                     &ldquo;This platform has revolutionized how I find and
                     manage my freelance projects. The escrow system gives me
-                    peace of mind, and the talent pool is
-                    exceptional!&rdquo;
+                    peace of mind, and the talent pool is exceptional!&rdquo;
                   </p>
                   <div className="flex items-center mt-4">
                     <Avatar className="h-12 w-12 mr-3 border-2 border-primary-500">

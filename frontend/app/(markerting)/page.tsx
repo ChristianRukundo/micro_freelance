@@ -170,7 +170,10 @@ export default async function MarketingPage() {
             ]}
             cta={
               <Link href="/tasks/new" passHref>
-                <Button variant="gradient" className="group shadow-primary">
+                <Button
+                  variant="gradient"
+                  className="group shadow-primary dark:shadow-primary-dark"
+                >
                   Post Your First Project{" "}
                   <ArrowRightIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>

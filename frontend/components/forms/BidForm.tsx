@@ -1,22 +1,29 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { submitBidSchema } from '@/lib/schemas';
-import { Button } from '@/components/ui/button';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { submitBidSchema } from "@/lib/schemas";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { useBids } from '@/hooks/useBids';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { DollarSignIcon, MessageSquareTextIcon, SendIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useAuthStore } from '@/lib/zustand';
-import { UserRole } from '@/lib/types';
-import Link from 'next/link';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { useBids } from "@/hooks/useBids";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { DollarSignIcon, MessageSquareTextIcon, SendIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import { useAuthStore } from "@/lib/zustand";
+import { UserRole } from "@/lib/types";
+import Link from "next/link";
 
 // use imported submitBidSchema
 
@@ -33,7 +40,7 @@ export function BidForm({ taskId }: BidFormProps) {
   const form = useForm<BidFormInput>({
     resolver: zodResolver(submitBidSchema),
     defaultValues: {
-      proposal: '',
+      proposal: "",
       amount: 0,
     },
   });
@@ -49,14 +56,22 @@ export function BidForm({ taskId }: BidFormProps) {
 
   if (!isAuthenticated || user?.role !== UserRole.FREELANCER) {
     return (
-      <Card className="shadow-soft border-neutral-200 bg-neutral-50 p-6 text-center">
+      <Card className="shadow-soft dark:shadow-soft-dark border-neutral-200 bg-neutral-50 p-6 text-center">
         <h4 className="text-h4 font-bold text-neutral-800">Ready to Bid?</h4>
         <p className="text-body-md text-neutral-600 mt-2">
           Only registered freelancers can submit bids.
         </p>
-        <Link href="/register?role=freelancer" passHref className="mt-4 inline-block">
-          <Button variant="gradient" className="shadow-primary group">
-            Become a Freelancer <SendIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+        <Link
+          href="/register?role=freelancer"
+          passHref
+          className="mt-4 inline-block"
+        >
+          <Button
+            variant="gradient"
+            className="shadow-primary dark:shadow-primary-dark group"
+          >
+            Become a Freelancer{" "}
+            <SendIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </Link>
       </Card>
@@ -78,12 +93,13 @@ export function BidForm({ taskId }: BidFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center">
-                  <MessageSquareTextIcon className="mr-2 h-4 w-4" /> Your Proposal
+                  <MessageSquareTextIcon className="mr-2 h-4 w-4" /> Your
+                  Proposal
                 </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Describe your approach, experience, and why you're the best fit for this project..."
-                    className="min-h-[120px] shadow-soft"
+                    className="min-h-[120px] shadow-soft dark:shadow-soft-dark"
                     {...field}
                     disabled={isSubmittingBid}
                   />
@@ -98,7 +114,8 @@ export function BidForm({ taskId }: BidFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center">
-                  <DollarSignIcon className="mr-2 h-4 w-4" /> Proposed Amount ($)
+                  <DollarSignIcon className="mr-2 h-4 w-4" /> Proposed Amount
+                  ($)
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -107,16 +124,27 @@ export function BidForm({ taskId }: BidFormProps) {
                     {...field}
                     onChange={(e) => field.onChange(parseFloat(e.target.value))}
                     disabled={isSubmittingBid}
-                    className="shadow-soft"
+                    className="shadow-soft dark:shadow-soft-dark"
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full text-body-md shadow-primary group" disabled={isSubmittingBid}>
-            {isSubmittingBid && <LoadingSpinner size="sm" color="text-primary-foreground" className="mr-2" />}
-            Submit Bid <SendIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <Button
+            type="submit"
+            className="w-full text-body-md shadow-primary dark:shadow-primary-dark group"
+            disabled={isSubmittingBid}
+          >
+            {isSubmittingBid && (
+              <LoadingSpinner
+                size="sm"
+                color="text-primary-foreground"
+                className="mr-2"
+              />
+            )}
+            Submit Bid{" "}
+            <SendIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </form>
       </Form>

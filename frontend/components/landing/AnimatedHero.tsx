@@ -1,15 +1,11 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  MoveRightIcon,
-  SearchIcon,
-  ArrowRightIcon,
-} from "lucide-react";
+import { MoveRightIcon, SearchIcon, ArrowRightIcon } from "lucide-react";
 
 export function AnimatedHero() {
   return (
@@ -51,7 +47,7 @@ export function AnimatedHero() {
             <Button
               size="lg"
               variant="gradient"
-              className="shadow-lg shadow-primary-500/30 group px-8 py-3 text-h6 font-semibold"
+              className="shadow-lg shadow-primary dark:shadow-primary-dark-500/30 group px-8 py-3 text-h6 font-semibold"
             >
               Post a Project
               <MoveRightIcon className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -78,7 +74,7 @@ export function AnimatedHero() {
           <Input
             type="search"
             placeholder="What project are you looking for?"
-            className="w-full pl-12 pr-4 py-3 rounded-full text-neutral-800 bg-white/95 border-none shadow-medium focus:ring-primary-500 focus:ring-2"
+            className="w-full pl-12 pr-4 py-3 rounded-full text-neutral-800 bg-white/95 border-none shadow-medium dark:shadow-medium-dark focus:ring-primary-500 focus:ring-2"
             aria-label="Quick search projects"
           />
           <Button
