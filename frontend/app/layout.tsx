@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google'; // Import Inter font from Google Fonts
-import './globals.css';
+import { Inter } from 'next/font/google';
+import "./global.css"
 import { cn } from '@/lib/utils';
-import { Providers } from './providers'; // All global context providers
-import { Toaster } from 'sonner'; // Global toast provider
+import { Providers } from './providers';
+import { SonnerToaster as Toaster } from '@/components/ui/sonner'; // Corrected import path
 
-// Configure Inter font with desired subsets and variable font for different weights
+// Configure Inter font
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -16,17 +16,16 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Micro Freelance Marketplace',
   description: 'Connect clients with freelancers for project-based work.',
-  // Add more meta tags for SEO, social sharing etc.
   keywords: ['freelance', 'marketplace', 'tasks', 'gigs', 'remote work', 'hiring'],
   authors: [{ name: 'Your Name' }],
   openGraph: {
     title: 'Micro Freelance Marketplace',
     description: 'Connect clients with freelancers for project-based work.',
-    url: 'https://your-marketplace.com', // Replace with your actual domain
+    url: 'https://your-marketplace.com',
     siteName: 'Micro Freelance Marketplace',
     images: [
       {
-        url: 'https://your-marketplace.com/og-image.jpg', // Replace with your OG image
+        url: 'https://your-marketplace.com/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Micro Freelance Marketplace',
@@ -39,8 +38,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Micro Freelance Marketplace',
     description: 'Connect clients with freelancers for project-based work.',
-    creator: '@your_twitter_handle', // Replace with your Twitter handle
-    images: ['https://your-marketplace.com/twitter-image.jpg'], // Replace with your Twitter image
+    creator: '@your_twitter_handle',
+    images: ['https://your-marketplace.com/twitter-image.jpg'],
   },
 };
 
@@ -52,11 +51,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={cn('min-h-screen bg-background antialiased', inter.variable)}>
-        {/* Providers wrap the entire app for global contexts like TanStack Query, Zustand, etc. */}
         <Providers>
           {children}
-          {/* Global toast component for notifications */}
-          <Toaster richColors position="top-right" /> 
+          <Toaster richColors position="top-right" />
         </Providers>
       </body>
     </html>

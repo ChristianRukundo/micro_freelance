@@ -1,0 +1,58 @@
+'use client';
+
+import { motion } from "framer-motion";
+import { TaskCard } from "@/components/cards/TaskCard";
+import { TaskCardSkeleton } from "@/components/common/SkeletonLoaders";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Task as TaskType } from "@/lib/types";
+
+interface AnimatedTaskSectionProps {
+  popularTasks?: TaskType[];
+}
+
+export function AnimatedTaskSection({ popularTasks }: AnimatedTaskSectionProps) {
+  return (
+    <section className="container my-24">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="mb-12 text-center"
+      >
+        <h2 className="text-display-md font-bold text-neutral-800">
+          Popular Projects
+        </h2>
+        <p className="text-body-lg text-neutral-600 mt-4 max-w-2xl mx-auto">
+          Explore some of the most exciting and in-demand projects on our
+          platform.
+        </p>
+      </motion.div>
+      {popularTasks && popularTasks.length > 0 ? (
+        <ScrollArea className="w-full whitespace-nowrap rounded-lg pb-4">
+          <div className="flex w-max space-x-6 p-4">
+            {popularTasks.map((task, index) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, delay: 0.1 * index }}
+                className="inline-block w-[320px] lg:w-[350px]"
+              >
+                <TaskCard task={task} showApplyButton={false} />
+              </motion.div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <TaskCardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}

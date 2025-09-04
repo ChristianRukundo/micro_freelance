@@ -3,7 +3,9 @@ import api from '@/lib/api';
 import { Task, PaginatedResponse, UserRole } from '@/lib/types';
 import { toast } from 'sonner';
 import * as actions from '@/lib/actions';
-import { createTaskSchema } from '@/lib/actions'; // Import schema from actions for consistency
+import { createTaskSchema } from '@/lib/schemas';
+import { z } from "zod";
+import { TaskStatus } from "@/lib/types";
 
 interface TaskQueryFilters {
   q?: string;
@@ -101,7 +103,16 @@ export function useTasks(filters?: TaskQueryFilters) {
     onMutate: async ({ taskId, values }) => {
       await queryClient.cancelQueries({ queryKey: ['task', taskId] });
       const previousTask = queryClient.getQueryData<Task>(['task', taskId]);
-      queryClient.setQueryData<Task>(['task', taskId], (old) => (old ? { ...old, ...values } : old));
+      queryClient.setQueryData<Task>(['task', taskId], (old) => {
+        if (!old) return old as any;
+        const updated: Task = {
+          ...old,
+          ...values as any,
+          deadline: (values as any).deadline ? new Date((values as any).deadline) : old.deadline,
+          attachments: old.attachments, // keep existing typed attachments
+        };
+        return updated;
+      });
       return { previousTask };
     },
     onSuccess: (response, { taskId }) => {

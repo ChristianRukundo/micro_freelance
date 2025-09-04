@@ -1,35 +1,65 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BellIcon, LogOutIcon, UserIcon, LayoutDashboardIcon, BriefcaseBusinessIcon, UsersIcon, MenuIcon, XIcon } from 'lucide-react';
-import { Logo } from '@/components/common/Logo';
-import { ShadcnThemeToggle } from '@/components/common/ShadcnThemeToggle';
-import { useAuthStore } from '@/lib/zustand';
-import { useMutation } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { useUIStore } from '@/lib/zustand'; // For mobile sidebar toggle
-import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { UserRole } from '@/lib/types'; // Ensure UserRole is imported
+import Link from "next/link";
+import Image from "next/image"; // For optimized images
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  LogOutIcon,
+  UserIcon,
+  LayoutDashboardIcon,
+  BriefcaseBusinessIcon,
+  UsersIcon,
+  MenuIcon,
+  XIcon,
+  UserCogIcon,
+  SettingsIcon,
+  CodeIcon,
+  ChevronRightIcon,
+  BellIcon,
+} from "lucide-react";
+import { Logo } from "@/components/common/Logo";
+import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle"; // Custom theme toggle
+import { useAuthStore, useUIStore } from "@/lib/zustand";
+import { useMutation } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { UserRole } from "@/lib/types";
+import { motion, AnimatePresence } from "framer-motion"; // For animations
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"; // For mobile menu
+import React from "react"; // Explicitly import React
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const { isSidebarOpen, toggleSidebar } = useUIStore(); // For desktop sidebar (if used)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false); // For mobile menu sheet
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      // Call backend logout API (clears HTTP-only cookies)
-      await api.post('/auth/logout');
+      await api.post("/auth/logout"); // Clears HTTP-only cookies
       logout();
-      toast.success('Logged out successfully!');
-      router.push('/login');
+      toast.success("Logged out successfully!");
+      router.push("/login");
     } catch (error) {
-      toast.error('Failed to log out.');
+      toast.error("Failed to log out.");
     }
   };
 
@@ -37,56 +67,106 @@ export function Header() {
     mutationFn: handleLogout,
   });
 
-  const getDashboardLink = () => {
-    if (!user) return '/login'; // Should ideally not happen if authenticated
+  // Dynamically determine dashboard link based on user role
+  const getDashboardLink = React.useCallback(() => {
+    if (!user) return "/login"; // Should ideally not happen if authenticated
     switch (user.role) {
       case UserRole.CLIENT:
-        return '/dashboard/client';
+        return "/dashboard/client";
       case UserRole.FREELANCER:
-        return '/dashboard/freelancer';
+        return "/dashboard/freelancer";
       case UserRole.ADMIN:
-        return '/admin/users'; // Admin's main dashboard
+        return "/admin/users"; // Admin's main dashboard
       default:
-        return '/dashboard'; // Generic dashboard for unhandled roles
+        return "/dashboard"; // Generic dashboard for unhandled roles
     }
-  };
+  }, [user]);
+
+  const mobileNavLinks = [
+    {
+      href: "/tasks",
+      label: "Browse Tasks",
+      icon: <BriefcaseBusinessIcon className="mr-2 h-4 w-4" />,
+    },
+    {
+      href: "/freelancers",
+      label: "Find Freelancers",
+      icon: <UsersIcon className="mr-2 h-4 w-4" />,
+    },
+  ];
+
+  if (isAuthenticated) {
+    mobileNavLinks.push(
+      {
+        href: getDashboardLink(),
+        label: "Dashboard",
+        icon: <LayoutDashboardIcon className="mr-2 h-4 w-4" />,
+      },
+      {
+        href: "/dashboard/profile",
+        label: "Profile",
+        icon: <UserIcon className="mr-2 h-4 w-4" />,
+      },
+      {
+        href: "/dashboard/notifications",
+        label: "Notifications",
+        icon: <BellIcon className="mr-2 h-4 w-4" />,
+      }
+    );
+    if (user?.role === UserRole.ADMIN) {
+      mobileNavLinks.push({
+        href: "/admin/users",
+        label: "Admin Panel",
+        icon: <UserCogIcon className="mr-2 h-4 w-4" />,
+      });
+    }
+  }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft transition-all duration-300 ease-in-out-quad">
       <div className="container flex h-16 items-center justify-between">
-        {/* Mobile Menu Toggle & Logo */}
+        {/* Logo and Site Title */}
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={toggleSidebar}
-            aria-label="Toggle mobile menu"
+          <Link
+            href="/"
+            className="flex items-center space-x-2"
+            aria-label="Home"
           >
-            {isSidebarOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
-          </Button>
-          <Link href="/" className="flex items-center space-x-2" aria-label="Home">
-            <Logo className="h-8 w-auto text-primary-500" />
-            <span className="text-h5 font-semibold text-neutral-800">FreelanceHub</span>
+            <Logo className="h-8 w-auto text-primary-500 transition-colors hover:text-primary-600" />
+            <span className="text-h5 font-semibold text-neutral-800 transition-colors hover:text-primary-700">
+              FreelanceHub
+            </span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden items-center space-x-6 md:flex">
-          <Link href="/tasks" className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          <Link
+            href="/tasks"
+            className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+            prefetch={false}
+          >
             Browse Tasks
           </Link>
-          <Link href="/freelancers" className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+          <Link
+            href="/freelancers"
+            className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+            prefetch={false}
+          >
             Find Freelancers
           </Link>
           {isAuthenticated && (
-            <Link href={getDashboardLink()} className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors">
+            <Link
+              href={getDashboardLink()}
+              className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+              prefetch={false}
+            >
               Dashboard
             </Link>
           )}
         </nav>
 
-        {/* User Actions & Theme Toggle */}
+        {/* User Actions, Notifications, Theme Toggle, Mobile Menu */}
         <div className="flex items-center space-x-3">
           <ShadcnThemeToggle />
 
@@ -95,63 +175,170 @@ export function Header() {
               <NotificationBell />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full" aria-label="User menu">
-                    <Avatar className="h-9 w-9 border border-neutral-200">
-                      <AvatarImage src={user?.profile?.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName || user?.email}`} alt={user?.email || 'User'} />
-                      <AvatarFallback>{(user?.email || 'U').charAt(0).toUpperCase()}</AvatarFallback>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    className="relative h-9 w-9 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200"
+                    aria-label="User menu"
+                  >
+                    <Avatar className="h-9 w-9 border border-neutral-200 transition-all duration-200 group-hover:border-primary-500">
+                      <AvatarImage
+                        src={
+                          user?.profile?.avatarUrl ||
+                          `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName || user?.email}`
+                        }
+                        alt={user?.email || "User"}
+                      />
+                      <AvatarFallback className="text-body-md font-semibold bg-primary-100 text-primary-700">
+                        {(user?.email || "U").charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
-                  </Button>
+                    <span className="sr-only">User menu</span>
+                  </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-body-md font-medium leading-none">{user?.profile?.firstName || user?.email}</p>
-                      <p className="text-caption text-neutral-500">{user?.email}</p>
-                    </div>
-                  </div>
-                  <DropdownMenuSeparator />
+                <DropdownMenuContent
+                  className="w-56 rounded-lg shadow-medium border-neutral-200"
+                  align="end"
+                  forceMount
+                >
+                  <DropdownMenuLabel className="flex flex-col space-y-1 p-2">
+                    <p className="text-body-md font-semibold leading-none text-neutral-800">
+                      {user?.profile?.firstName || user?.email}
+                    </p>
+                    <p className="text-caption text-neutral-500">
+                      {user?.email}
+                    </p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-neutral-200" />
                   <DropdownMenuItem asChild>
-                    <Link href={getDashboardLink()} className="flex cursor-pointer items-center text-body-sm text-neutral-700 hover:text-primary-500">
+                    <Link
+                      href={getDashboardLink()}
+                      className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                    >
                       <LayoutDashboardIcon className="mr-2 h-4 w-4" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/profile" className="flex cursor-pointer items-center text-body-sm text-neutral-700 hover:text-primary-500">
+                    <Link
+                      href="/dashboard/profile"
+                      className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                    >
                       <UserIcon className="mr-2 h-4 w-4" />
-                      Profile
+                      Profile Settings
                     </Link>
                   </DropdownMenuItem>
                   {user?.role === UserRole.ADMIN && (
                     <DropdownMenuItem asChild>
-                      <Link href="/admin/users" className="flex cursor-pointer items-center text-body-sm text-neutral-700 hover:text-primary-500">
-                        <UsersIcon className="mr-2 h-4 w-4" />
+                      <Link
+                        href="/admin/users"
+                        className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                      >
+                        <UserCogIcon className="mr-2 h-4 w-4" />
                         Admin Panel
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending} className="text-body-sm text-destructive-500 hover:!bg-destructive-50 hover:!text-destructive-600 focus:bg-destructive-50 focus:text-destructive-600 cursor-pointer">
+                  <DropdownMenuSeparator className="bg-neutral-200" />
+                  <DropdownMenuItem
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    className="flex cursor-pointer items-center p-2 text-body-sm text-destructive-500 transition-colors hover:bg-destructive-50 hover:text-destructive-600 focus:bg-destructive-50 focus:text-destructive-600 rounded-md"
+                  >
                     <LogOutIcon className="mr-2 h-4 w-4" />
-                    {logoutMutation.isPending ? 'Logging out...' : 'Log out'}
+                    {logoutMutation.isPending ? "Logging out..." : "Log out"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </>
           ) : (
-            <div className="flex items-center space-x-2">
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center space-x-2"
+            >
               <Link href="/login" passHref>
-                <Button variant="ghost" className="text-body-md font-medium">
+                <Button
+                  variant="ghost"
+                  className="text-body-md font-medium text-neutral-700 hover:text-primary-500"
+                >
                   Login
                 </Button>
               </Link>
               <Link href="/register" passHref>
-                <Button variant="default" className="text-body-md font-medium">
+                <Button
+                  variant="default"
+                  className="text-body-md font-medium shadow-sm hover:shadow-medium"
+                >
                   Sign Up
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           )}
+
+          {/* Mobile Menu Button */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" aria-label="Open mobile menu">
+                <MenuIcon className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="w-[280px] sm:w-[320px] p-6 pt-12 flex flex-col"
+            >
+              <SheetHeader className="text-left mb-6">
+                <SheetTitle className="text-h3 font-bold text-neutral-800">
+                  Navigation
+                </SheetTitle>
+                <SheetDescription className="text-body-md text-neutral-600">
+                  Explore projects, find freelancers, or manage your account.
+                </SheetDescription>
+              </SheetHeader>
+              <nav className="flex-1 space-y-2">
+                {mobileNavLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    passHref
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-body-md font-medium text-neutral-700 hover:text-primary-500"
+                    >
+                      {item.icon} {item.label}
+                    </Button>
+                  </Link>
+                ))}
+              </nav>
+              <div className="mt-auto pt-6 border-t border-neutral-200">
+                {isAuthenticated ? (
+                  <Button
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    className="w-full justify-start text-destructive-500 hover:bg-destructive-50"
+                  >
+                    <LogOutIcon className="mr-2 h-4 w-4" />
+                    {logoutMutation.isPending ? "Logging out..." : "Log out"}
+                  </Button>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Link href="/login" passHref>
+                      <Button variant="outline" className="w-full">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/register" passHref>
+                      <Button variant="default" className="w-full">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

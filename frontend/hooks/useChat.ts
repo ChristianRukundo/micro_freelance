@@ -42,8 +42,8 @@ export function useChat(taskId?: string) {
       return response.data.data;
     },
     getNextPageParam: (lastPage) => {
-      if (lastPage.currentPage < lastPage.totalPages) {
-        return lastPage.currentPage + 1;
+      if ((lastPage as any).currentPage < lastPage.totalPages) {
+        return (lastPage as any).currentPage + 1;
       }
       return undefined;
     },
@@ -138,6 +138,9 @@ export function useChat(taskId?: string) {
           id: user.id,
           email: user.email!,
           role: user.role!,
+          isSuspended: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
           profile: {
             id: user.id, // Assuming profile ID matches user ID for temp messages
             firstName: user.firstName || user.email!.split('@')[0],

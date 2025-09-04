@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { fontFamily } from 'tailwindcss/defaultTheme';
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 const config = {
   darkMode: 'class',
@@ -122,8 +122,8 @@ const config = {
         'full-circle': '9999px',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', ...fontFamily.sans],
-        display: ['var(--font-inter)', ...fontFamily.sans], // For display headings
+        sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
+        display: ['var(--font-inter)', ...defaultTheme.fontFamily.sans], // For display headings
       },
       fontSize: {
         // Typography scale (from style guide)

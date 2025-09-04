@@ -12,7 +12,7 @@ import * as actions from '@/lib/actions';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCardIcon, LockIcon } from 'lucide-react';
+import { CreditCardIcon, LockIcon, DollarSignIcon, AlertCircleIcon } from "lucide-react";
 import {
   Elements,
   PaymentElement,
@@ -85,7 +85,7 @@ function CheckoutForm({ taskId, taskBudget, onPaymentSuccess }: PaymentFormProps
 
     setIsProcessing(true);
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
+    const result = await stripe.confirmPayment({
       elements,
       clientSecret,
       confirmParams: {
@@ -94,10 +94,10 @@ function CheckoutForm({ taskId, taskBudget, onPaymentSuccess }: PaymentFormProps
       },
     });
 
-    if (error) {
-      setMessage(error.message || 'An unexpected error occurred.');
-      toast.error(error.message || 'Payment failed.');
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+    if (result.error) {
+      setMessage(result.error.message || 'An unexpected error occurred.');
+      toast.error(result.error.message || 'Payment failed.');
+    } else if ((result as any).paymentIntent && (result as any).paymentIntent.status === 'succeeded') {
       setMessage('Payment succeeded!');
       toast.success('Payment successful! Funds are now in escrow.');
       onPaymentSuccess?.(); // Callback for parent component

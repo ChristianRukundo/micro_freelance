@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import {  Skeleton, TaskDetailsSkeleton } from '@/components/common/SkeletonLoaders';
+import { cn } from "@/lib/utils";
 import { LoadingSpinner } from '../common/LoadingSpinner';
 import { useAuthStore } from '@/lib/zustand';
 import { useTasks } from '@/hooks/useTasks';
@@ -30,6 +31,7 @@ import { Form, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import * as actions from '@/lib/actions';
+import { requestRevisionSchema } from '@/lib/schemas';
 import { toast } from 'sonner';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Separator } from '@radix-ui/react-dropdown-menu';
@@ -438,14 +440,14 @@ function MilestoneCard({ milestone, isTaskOwner, isAssignedFreelancer }: Milesto
 
   const [isRevisionDialogValid, setIsRevisionDialogValid] = React.useState(false);
   const revisionForm = useForm<{ comments: string }>({
-    resolver: zodResolver(actions.requestRevisionSchema),
+    resolver: zodResolver(requestRevisionSchema),
     defaultValues: { comments: milestone.comments || '' },
   });
 
 
-  const handleAction = async (actionFn: (id: string, values?: any) => Promise<any>, values?: any) => {
+  const handleAction = async (actionFn: (vars: { milestoneId: string; values?: any }) => Promise<any>, values?: any) => {
     try {
-      await actionFn(milestone.id, values);
+      await actionFn({ milestoneId: milestone.id, values });
       toast.success('Milestone updated successfully!');
     } catch (error) {
       // Toast handled by hook
@@ -494,7 +496,7 @@ function MilestoneCard({ milestone, isTaskOwner, isAssignedFreelancer }: Milesto
         {isAssignedFreelancer && (milestone.status === MilestoneStatus.PENDING || milestone.status === MilestoneStatus.REVISION_REQUESTED) && (
           <Button
             size="sm"
-            onClick={() => handleAction(submitMilestone)}
+            onClick={() => handleAction(submitMilestone, milestone.id)}
             disabled={isSubmittingMilestone}
             className="shadow-soft group"
           >
@@ -550,7 +552,7 @@ function MilestoneCard({ milestone, isTaskOwner, isAssignedFreelancer }: Milesto
 
             <Button
               size="sm"
-              onClick={() => handleAction(approveMilestone)}
+              onClick={() => handleAction(approveMilestone, milestone.id)}
               disabled={isApprovingMilestone}
               className="bg-success-500 hover:bg-success-600 shadow-primary group"
             >

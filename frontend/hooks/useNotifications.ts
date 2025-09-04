@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Notification, NotificationType, PaginatedResponse } from '@/lib/types';
 import { toast } from 'sonner';
@@ -121,9 +121,9 @@ export function useNotifications() {
       const previousNotifications = queryClient.getQueryData<NotificationsPaginatedResponse>(['notifications']);
       queryClient.setQueryData<NotificationsPaginatedResponse>(['notifications'], (old) => {
         if (!old) return old;
-        const newPages = old.pages.map((page) => ({
+        const newPages = (old as any).pages.map((page: any) => ({
           ...page,
-          notifications: page.notifications.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
+          notifications: page.notifications.map((n: any) => (n.id === notificationId ? { ...n, isRead: true } : n)),
         }));
         return { ...old, pages: newPages };
       });

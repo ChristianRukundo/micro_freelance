@@ -10,19 +10,15 @@ import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/zustand';
-import * as actions from '@/lib/actions'; // Import server actions
+import * as actions from '@/lib/actions';
+import { loginSchema, registerSchema, verifyEmailSchema, forgotPasswordSchema, resetPasswordSchema } from '@/lib/schemas';
 import { UserRole } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { RefreshCcwIcon } from 'lucide-react';
 import React from 'react';
 
-// Schemas for auth forms from lib/actions.ts
-const loginSchema = actions.loginSchema;
-const registerSchema = actions.registerSchema;
-const verifyEmailSchema = actions.verifyEmailSchema;
-const forgotPasswordSchema = actions.forgotPasswordSchema;
-const resetPasswordSchema = actions.resetPasswordSchema;
+// Schemas imported from non-server module
 
 type LoginFormInput = z.infer<typeof loginSchema>;
 type RegisterFormInput = z.infer<typeof registerSchema>;
@@ -78,7 +74,10 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
 
   // --- Mutations ---
   const { mutate: submitLogin, isPending: isLoginPending } = useMutation({
-    mutationFn: (data: LoginFormInput) => actions.loginAction(convertToFormData(data)),
+    mutationFn: async (data: LoginFormInput) => {
+      const res = await (await import('@/lib/api')).default.post('/auth/login', data);
+      return { success: true, message: 'Logged in successfully!', data: res.data.data } as const;
+    },
     onSuccess: (response) => {
       if (response.success && response.data?.user) {
         authStoreLogin(response.data.user);
@@ -91,7 +90,6 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
         }
       } else {
         toast.error(response.message || 'Login failed.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
       }
     },
     onError: (error: any) => {
@@ -100,14 +98,16 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   });
 
   const { mutate: submitRegister, isPending: isRegisterPending } = useMutation({
-    mutationFn: (data: RegisterFormInput) => actions.registerAction(convertToFormData(data)),
+    mutationFn: async (data: RegisterFormInput) => {
+      const res = await (await import('@/lib/api')).default.post('/auth/register', data);
+      return { success: true, message: 'Registration successful. Please verify your email.', data: res.data.data } as const;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
-        router.push(`/verify-email?email=${response.data?.email}`); // Pass email for convenience
+        router.push(`/verify-email?email=${form.getValues('email')}`);
       } else {
         toast.error(response.message || 'Registration failed.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
       }
     },
     onError: (error: any) => {
@@ -116,14 +116,16 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   });
 
   const { mutate: submitVerifyEmail, isPending: isVerifyEmailPending } = useMutation({
-    mutationFn: (data: VerifyEmailFormInput) => actions.verifyEmailAction(convertToFormData(data)),
+    mutationFn: async (data: VerifyEmailFormInput) => {
+      await (await import('@/lib/api')).default.post('/auth/verify-email', data);
+      return { success: true, message: 'Email verified successfully!' } as const;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
         router.push('/login');
       } else {
         toast.error(response.message || 'Email verification failed.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
       }
     },
     onError: (error: any) => {
@@ -132,7 +134,10 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   });
 
   const { mutate: submitResendOtp, isPending: isResendOtpPending } = useMutation({
-    mutationFn: (email: string) => actions.resendVerificationEmailAction(convertToFormData({ email })),
+    mutationFn: async (email: string) => {
+      await (await import('@/lib/api')).default.post('/auth/resend-verification-email', { email });
+      return { success: true, message: 'New verification OTP sent to your email.' } as const;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
@@ -146,14 +151,16 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   });
 
   const { mutate: submitForgotPassword, isPending: isForgotPasswordPending } = useMutation({
-    mutationFn: (data: ForgotPasswordFormInput) => actions.forgotPasswordAction(convertToFormData(data)),
+    mutationFn: async (data: ForgotPasswordFormInput) => {
+      await (await import('@/lib/api')).default.post('/auth/forgot-password', data);
+      return { success: true, message: 'If an account with that email exists, a password reset OTP has been sent.' } as const;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
-        router.push(`/reset-password?email=${data.email}`); // Pass email to reset form
+        router.push(`/reset-password?email=${form.getValues('email')}`);
       } else {
         toast.error(response.message || 'Password reset request failed.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
       }
     },
     onError: (error: any) => {
@@ -162,14 +169,16 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
   });
 
   const { mutate: submitResetPassword, isPending: isResetPasswordPending } = useMutation({
-    mutationFn: (data: ResetPasswordFormInput) => actions.resetPasswordAction(convertToFormData(data)),
+    mutationFn: async (data: ResetPasswordFormInput) => {
+      await (await import('@/lib/api')).default.post('/auth/reset-password', data);
+      return { success: true, message: 'Password has been reset successfully!' } as const;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
         router.push('/login');
       } else {
         toast.error(response.message || 'Password reset failed.');
-        response.errors?.forEach(err => toast.error(`${err.path}: ${err.message}`));
       }
     },
     onError: (error: any) => {
@@ -331,7 +340,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
             )}
           />
         )}
-        <Button type="submit" className="w-full text-body-md shadow-primary group" disabled={isPending}>
+        <Button type="submit" className="w-full text-body-md shadow-primary group cursor-pointer" aria-busy={isPending} aria-live="polite" disabled={isPending}>
           {isPending && <LoadingSpinner size="sm" color="text-primary-foreground" className="mr-2" />}
           {formType === 'login' && 'Log In'}
           {formType === 'register' && 'Create Account'}

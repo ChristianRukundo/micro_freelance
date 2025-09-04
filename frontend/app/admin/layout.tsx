@@ -12,13 +12,13 @@ export const metadata: Metadata = {
   description: 'Administrator access to manage users, tasks, and system settings.',
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   // Server-side check for admin role
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
   let userRole: UserRole | null = null;

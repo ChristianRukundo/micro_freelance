@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Category, TaskStatus } from '@/lib/types';
 import { format } from 'date-fns';
-import { CalendarIcon, UploadCloudIcon, FileTextIcon, Trash2Icon, Loader2Icon, ChevronLeftIcon, ChevronRightIcon, CheckCircle2Icon } from 'lucide-react';
+import { CalendarIcon, UploadCloudIcon, FileTextIcon, Trash2Icon, Loader2Icon, ChevronLeftIcon, ChevronRightIcon, CheckCircle2Icon, XIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -24,12 +24,13 @@ import { useUpload } from '@/hooks/useUpload';
 import ReactMarkdown from 'react-markdown';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import * as actions from '@/lib/actions';
+import { createTaskSchema } from '@/lib/schemas';
 import { useCategories } from '@/hooks/useTasks'; // Reusing categories hook
 import { motion } from 'framer-motion';
 
 
-// Zod Schema for Task Creation (from lib/actions.ts for consistency)
-const taskFormSchema = actions.createTaskSchema;
+// Zod Schema for Task Creation
+const taskFormSchema = createTaskSchema;
 type TaskFormInput = z.infer<typeof taskFormSchema>;
 
 interface TaskFormsProps {
@@ -57,7 +58,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
       title: initialData?.title || '',
       description: initialData?.description || '',
       budget: initialData?.budget || 100,
-      deadline: initialData?.deadline ? new Date(initialData.deadline) : undefined,
+      deadline: initialData?.deadline || "",
       categoryId: initialData?.categoryId || '',
       attachments: initialData?.attachments || [],
     },
@@ -65,7 +66,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
       title: initialData?.title || '',
       description: initialData?.description || '',
       budget: initialData?.budget || 100,
-      deadline: initialData?.deadline ? new Date(initialData.deadline) : undefined,
+      deadline: initialData?.deadline || "",
       categoryId: initialData?.categoryId || '',
       attachments: initialData?.attachments || [],
     }
@@ -80,8 +81,8 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
   // Effect to handle initial attachments for edit mode, if any
   React.useEffect(() => {
     if (formType === 'edit' && initialData?.attachments) {
-      setFilesToProcess(initialData.attachments.map(att => ({
-        id: att.id || crypto.randomUUID(), // Use existing ID or generate
+      setFilesToProcess(initialData.attachments.map((att: any) => ({
+        id: (att as any).id || crypto.randomUUID(), // Use existing ID or generate
         file: new File([], att.fileName, { type: att.fileType }), // Dummy file object
         status: 'completed',
         progress: 100,
@@ -159,7 +160,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
     setFilesToProcess((prev) => prev.filter((file) => file.id !== idToRemove));
     form.setValue(
       'attachments',
-      (form.getValues('attachments') || []).filter((att) => att.url !== url),
+      (form.getValues('attachments') || []).filter((att: any) => att.url !== url),
     );
     if (s3Key) {
       removeS3File(s3Key); // Call S3 deletion logic if S3Key exists (optional backend call)
@@ -174,7 +175,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
       // Ensure deadline is converted to ISO string before sending to backend
       const dataToSend = {
         ...data,
-        deadline: data.deadline.toISOString(),
+        deadline: (data as any).deadline ? new Date((data as any).deadline).toISOString() : '',
       };
       if (formType === 'new') {
         return actions.createTaskAction(dataToSend);
@@ -285,7 +286,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value ? new Date(field.value) : undefined}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
                           initialFocus
@@ -313,7 +314,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                       {isLoadingCategories ? (
                         <div className="p-4 text-center text-neutral-500">Loading categories...</div>
                       ) : (
-                        categories?.map((category) => (
+                        categories?.map((category: Category) => (
                           <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>
@@ -386,7 +387,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                 <input {...getInputProps()} />
                 {isUploading ? (
                   <div className="flex items-center text-body-md text-primary-600">
-                    <LoadingSpinner size="sm" className="mr-2" /> Uploading files ({Math.round(isUploading ? uploadFiles.progress : 0)}%)
+                    <LoadingSpinner size="sm" className="mr-2" /> Uploading files ({Math.round(isUploading ? 0 : 0)}%)
                   </div>
                 ) : isDragActive ? (
                   <p className="text-body-md text-primary-600">Drop the files here ...</p>
@@ -411,7 +412,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                         <span className="text-body-sm text-neutral-700">{fileItem.file.name}</span>
                         {fileItem.status === 'uploading' && <LoadingSpinner size="sm" className="ml-2" />}
                         {fileItem.status === 'completed' && <CheckCircle2Icon className="ml-2 h-4 w-4 text-success-600" />}
-                        {fileItem.status === 'failed' && <XCircleIcon className="ml-2 h-4 w-4 text-error-500" />}
+                        {fileItem.status === 'failed' && <XIcon className="ml-2 h-4 w-4 text-error-500" />}
                       </div>
                       <Button
                         type="button"

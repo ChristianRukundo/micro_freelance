@@ -1,11 +1,16 @@
 import { cn } from '@/lib/utils';
+
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Skeleton } from '@/components/common/SkeletonLoaders'; // Ensure this is imported for self-reference
+
 
 interface SkeletonProps {
   className?: string;
 }
+
+
+
+
 
 // Generic skeleton rectangle (already existing, but good for context)
 export function Skeleton({ className }: SkeletonProps) {

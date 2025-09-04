@@ -11,6 +11,7 @@ import { formatRelativeTime } from '@/lib/date';
 import { NotificationType } from '@/lib/types';
 import { MessageSquareTextIcon, CheckCircle2Icon, DollarSignIcon, AlertCircleIcon } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 interface NotificationBellProps {
   className?: string;

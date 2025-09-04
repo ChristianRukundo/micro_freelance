@@ -12,6 +12,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/zustand';
 import * as actions from '@/lib/actions';
+import { updateProfileSchema, changePasswordSchema } from '@/lib/schemas';
 import api from '@/lib/api';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { User, UserRole } from '@/lib/types';
@@ -25,9 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '../ui/separator';
 
-// Schemas for profile update from lib/actions.ts
-const updateProfileSchema = actions.updateProfileSchema;
-const changePasswordSchema = actions.changePasswordSchema;
+// Schemas imported from lib/schemas
 
 type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
@@ -119,7 +118,7 @@ export function ProfileForm() {
         toast.success(response.message);
         // Update Zustand store with the latest profile data if applicable
         if (response.data) {
-            setUser({ ...authUser, profile: response.data.profile } as User); // Update profile part of user object
+            setUser({ ...authUser, profile: response.data.profile } as any); // Update profile part of user object
         }
         queryClient.invalidateQueries({ queryKey: ['userProfile', authUser?.id] });
       } else {
@@ -355,7 +354,7 @@ export function ProfileForm() {
                 <FormItem>
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Tell us about yourself..." className="min-h-[100px]" {...field} disabled={isUpdatingProfile} />
+                    <Textarea placeholder="Tell us about yourself..." className="min-h-[100px]" {...field} value={field.value || ''} disabled={isUpdatingProfile} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

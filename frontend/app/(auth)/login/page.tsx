@@ -25,7 +25,7 @@ export default function LoginPage() {
           <Separator className="my-6 bg-neutral-200" />
           <p className="text-center text-body-sm text-neutral-600">
             Don't have an account?{' '}
-            <Link href="/register" className="text-primary-500 font-medium hover:underline flex items-center justify-center mt-2">
+            <Link href="/register" className="text-primary-500 font-medium hover:underline flex items-center justify-center mt-2 cursor-pointer" aria-label="Go to register page">
               Sign Up Now <MoveRightIcon className="ml-1 h-4 w-4" />
             </Link>
           </p>

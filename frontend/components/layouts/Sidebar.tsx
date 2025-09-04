@@ -54,9 +54,9 @@ export function Sidebar() {
     }
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const sidebarVariants = {
-    hidden: { x: '-100%' },
-    visible: { x: '0%', transition: { type: 'spring', stiffness: 100, damping: 15 } },
+  const sidebarVariants: any = {
+    hidden: { x: -300 },
+    visible: { x: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } },
   };
 
   const navLinks = React.useMemo(() => {
@@ -150,12 +150,12 @@ export function Sidebar() {
           <div className="p-4 border-t border-neutral-200">
              <div className="flex items-center space-x-3 text-body-sm text-neutral-600">
                <Avatar className="h-8 w-8">
-                 <AvatarImage src={user?.profile?.avatarUrl} alt={user.email} />
-                 <AvatarFallback>{user.email.charAt(0).toUpperCase()}</AvatarFallback>
+                 <AvatarImage src={user?.profile?.avatarUrl || undefined} alt={user?.email || ""} />
+                 <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                </Avatar>
                <div className="flex flex-col">
                  <span className="font-semibold">{user.profile?.firstName || user.email}</span>
-                 <span className="text-caption text-neutral-500">{user.role.toLowerCase()}</span>
+                 <span className="text-caption text-neutral-500">{user?.role?.toLowerCase() || ""}</span>
                </div>
              </div>
           </div>

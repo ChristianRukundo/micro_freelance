@@ -13,12 +13,13 @@ import api from '@/lib/api';
 import { PaginatedResponse, User, UserRole } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, SearchIcon, FilterIcon, Loader2Icon, UserCogIcon, BanIcon, SlashIcon, UserCheckIcon, MoveRightIcon, Trash2Icon } from 'lucide-react';
+import { Check, X, SearchIcon, FilterIcon, Loader2Icon, UserCogIcon, BanIcon, SlashIcon, UserCheckIcon, MoveRightIcon, Trash2Icon, XIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { TextBlockSkeleton, Skeleton, AvatarTextSkeleton } from '@/components/common/SkeletonLoaders';
 import * as actions from '@/lib/actions';
+import { updateUserStatusSchema } from '@/lib/schemas';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 // Metadata for client components should be exported from a layout.tsx or a generateMetadata function in a server component
@@ -99,19 +100,19 @@ export default function AdminUsersPage() {
 
   // --- Mutations for User Actions ---
   const updateUserStatusMutation = useMutation({
-    mutationFn: ({ userId, isSuspended, role }: { userId: string; isSuspended: boolean; role?: UserRole }) =>
-      actions.adminUpdateUserStatusAction(userId, { isSuspended, role }),
-    onMutate: async ({ userId, isSuspended, role }) => {
+    mutationFn: ({ userId, isSuspended }: { userId: string; isSuspended: boolean }) =>
+      actions.adminUpdateUserStatusAction(userId, updateUserStatusSchema.parse({ isSuspended })),
+    onMutate: async ({ userId, isSuspended }) => {
       await queryClient.cancelQueries({ queryKey: ['adminUsers'] });
       const previousUsers = queryClient.getQueryData<UsersPaginatedResponse>(['adminUsers']);
       queryClient.setQueryData<UsersPaginatedResponse>(['adminUsers'], (old) => {
         if (!old) return old;
         return {
           ...old,
-          pages: old.pages.map((page) => ({
+          pages: (old as any).pages.map((page: any) => ({
             ...page,
-            users: page.users.map((user) =>
-              user.id === userId ? { ...user, isSuspended, role: role || user.role } : user,
+            users: page.users.map((user: any) =>
+              user.id === userId ? { ...user, isSuspended } : user,
             ),
           })),
         };
@@ -141,9 +142,9 @@ export default function AdminUsersPage() {
         if (!old) return old;
         return {
           ...old,
-          pages: old.pages.map((page) => ({
+          pages: (old as any).pages.map((page: any) => ({
             ...page,
-            users: page.users.filter((user) => user.id !== userId),
+            users: page.users.filter((user: any) => user.id !== userId),
           })),
         };
       });
@@ -208,7 +209,7 @@ export default function AdminUsersPage() {
         </Select>
 
         <Button variant="outline" onClick={handleClearFilters} className="shadow-soft text-neutral-600 hover:text-destructive-500">
-          <XCircleIcon className="h-4 w-4 mr-2" /> Clear Filters
+          <XIcon className="h-4 w-4 mr-2" /> Clear Filters
         </Button>
       </div>
 
@@ -242,7 +243,7 @@ export default function AdminUsersPage() {
                   </TableRow>
                 ))}
 
-                {allUsers.map((user) => (
+                {allUsers.map((user: any) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center space-x-3">

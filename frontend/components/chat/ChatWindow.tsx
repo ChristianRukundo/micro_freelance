@@ -1,3 +1,4 @@
+import { Message } from "@/lib/types";
 'use client';
 
 import React, { useRef, useEffect } from 'react';
@@ -46,7 +47,7 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
   // Scroll to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length, liveMessages.length]); // Scroll when historical or live messages change
+  }, [messages.length]); // Scroll when historical or live messages change
 
 
   // Load more messages when scroll area is near top AND loadMoreRef is in view
@@ -121,7 +122,7 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
 }
 
 interface ChatMessageProps {
-  message: ChatMessage;
+  message: Message;
   isCurrentUser: boolean;
 }
 

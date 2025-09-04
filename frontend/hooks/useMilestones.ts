@@ -3,7 +3,8 @@ import api from '@/lib/api';
 import { Milestone, PaginatedResponse, MilestoneStatus } from '@/lib/types';
 import { toast } from 'sonner';
 import * as actions from '@/lib/actions';
-import { createMultipleMilestonesSchema, requestRevisionSchema } from '@/lib/actions';
+import { createMultipleMilestonesSchema, requestRevisionSchema } from '@/lib/schemas';
+import { z } from "zod";
 
 interface MilestonesPaginatedResponse extends PaginatedResponse<Milestone> {
   milestones: Milestone[];
@@ -69,7 +70,7 @@ export function useMilestones(taskId?: string) {
 
   // Generic mutation for updating milestone status
   const updateMilestoneStatusMutation = (
-    action: (milestoneId: string, values?: any) => Promise<actions.ServerActionResponse<any>>,
+    action: (milestoneId: string, values?: any) => Promise<any>,
     status: MilestoneStatus,
     successMessage: string,
     errorMessage: string,
@@ -82,9 +83,9 @@ export function useMilestones(taskId?: string) {
 
         queryClient.setQueryData<MilestonesPaginatedResponse>(['milestones', taskId], (old) => {
           if (!old) return old;
-          const newPages = old.pages.map((page) => ({
+          const newPages = (old as any).pages.map((page: any) => ({
             ...page,
-            milestones: page.milestones.map((m) => (m.id === milestoneId ? { ...m, status: status } : m)),
+            milestones: page.milestones.map((m: any) => (m.id === milestoneId ? { ...m, status: status } : m)),
           }));
           return { ...old, pages: newPages };
         });

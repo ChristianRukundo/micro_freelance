@@ -1,12 +1,13 @@
 'use client';
 
 import { useAuthStore } from '@/lib/zustand';
+import { UserState } from '@/lib/zustand';
 import { useRouter, usePathname } from 'next/navigation';
 import { UserRole } from '@/lib/types';
 import { useEffect } from 'react'; // Import useEffect
 
 interface UseAuthReturn {
-  user: { id: string; email: string; role: UserRole; firstName?: string; avatarUrl?: string; profile?: any; stripeAccountId?: string | null; stripeAccountCompleted?: boolean } | null;
+  user: UserState | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (user: any) => void;

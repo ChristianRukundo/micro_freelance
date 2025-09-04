@@ -151,7 +151,7 @@ export default function TaskBrowsePage() {
               ) : isErrorCategories ? (
                 <div className="p-2 text-center text-destructive-500">Error loading categories</div>
               ) : (
-                categories?.map((category) => (
+                categories?.map((category: any) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
                   </SelectItem>

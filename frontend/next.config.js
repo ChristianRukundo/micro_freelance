@@ -19,8 +19,16 @@ const nextConfig = {
         ],
     },
     experimental: {
-        serverActions: true,
-        missingSuspenseWithCSRBailout: false,
+        serverActions: {},
+    },
+    transpilePackages: ['framer-motion'],
+    webpack: (config) => {
+        config.module.rules.push({
+            test: /\.mjs$/,
+            include: /node_modules/,
+            type: 'javascript/auto',
+        });
+        return config;
     },
 };
 

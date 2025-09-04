@@ -1,8 +1,11 @@
 'use client';
 
+import { motion } from "framer-motion";
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { createMultipleMilestonesSchema, createMilestoneSchema } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -19,9 +22,7 @@ import React from 'react';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import * as actions from '@/lib/actions';
 
-// Schema from lib/actions.ts for consistency
-const createMilestoneSchema = actions.createMilestoneSchema;
-const createMultipleMilestonesSchema = actions.createMultipleMilestonesSchema;
+// Schemas from lib/schemas
 
 type SingleMilestoneInput = z.infer<typeof createMilestoneSchema>;
 type MultipleMilestonesInput = z.infer<typeof createMultipleMilestonesSchema>;
@@ -37,7 +38,7 @@ interface MilestoneFormProps {
 export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
   const queryClient = useQueryClient();
   const [milestonesFields, setMilestonesFields] = React.useState<SingleMilestoneInput[]>([
-    { description: '', dueDate: new Date(), amount: 0 },
+    { description: '', dueDate: new Date().toISOString(), amount: 0 },
   ]);
 
   const form = useForm<MultipleMilestonesInput>({
@@ -47,7 +48,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
   });
 
   const addMilestoneField = () => {
-    setMilestonesFields((prev) => [...prev, { description: '', dueDate: new Date(), amount: 0 }]);
+    setMilestonesFields((prev) => [...prev, { description: '', dueDate: new Date().toISOString(), amount: 0 }]);
   };
 
   const removeMilestoneField = (index: number) => {
@@ -60,16 +61,16 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
     setMilestonesFields((prev) =>
       prev.map((m, i) => (i === index ? { ...m, [fieldName]: value } : m)),
     );
-    form.trigger(`root.${index}.${fieldName}` as keyof MultipleMilestonesInput); // Trigger validation for updated field
+    form.trigger(`${String(index)}.${String(fieldName)}` as any);
   };
 
 
   const { mutate: createMilestones, isPending: isCreatingMilestones } = useMutation({
     mutationFn: async (milestonesData: MultipleMilestonesInput) => {
       // Convert Date objects to ISO strings for the backend
-      const dataToSend = milestonesData.map(m => ({
+      const dataToSend = milestonesData.map((m: SingleMilestoneInput) => ({
         ...m,
-        dueDate: m.dueDate.toISOString(),
+        dueDate: m.dueDate,
       }));
       return actions.createMilestonesAction(taskId, dataToSend);
     },
@@ -79,7 +80,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
         queryClient.invalidateQueries({ queryKey: ['milestones', taskId] });
         queryClient.invalidateQueries({ queryKey: ['task', taskId] });
         form.reset(); // Reset form fields
-        setMilestonesFields([{ description: '', dueDate: new Date(), amount: 0 }]); // Reset state
+        setMilestonesFields([{ description: '', dueDate: new Date().toISOString(), amount: 0 }]); // Reset state
         onSuccess?.();
       } else {
         toast.error(response.message || 'Failed to create milestones.');
@@ -122,7 +123,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
             )}
             <FormField
               control={form.control}
-              name={`${index}.description` as `root.${number}.description`} // Type assertion for indexed field
+              name={`${index}.description` as any} // Type assertion for indexed field
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -143,7 +144,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name={`${index}.amount` as `root.${number}.amount`}
+                name={`${index}.amount` as any}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
@@ -165,7 +166,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
               />
               <FormField
                 control={form.control}
-                name={`${index}.dueDate` as `root.${number}.dueDate`}
+                name={`${index}.dueDate` as any}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Due Date</FormLabel>
@@ -188,7 +189,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={milestone.dueDate}
+                          selected={milestone.dueDate ? new Date(milestone.dueDate) : undefined}
                           onSelect={(date) => updateMilestoneField(index, 'dueDate', date)}
                           disabled={(date) => date < new Date() || date < new Date('1900-01-01')}
                           initialFocus

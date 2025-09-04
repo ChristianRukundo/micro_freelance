@@ -7,7 +7,8 @@ import api from "@/lib/api";
 import { Bid, PaginatedResponse } from "@/lib/types";
 import { toast } from "sonner";
 import * as actions from "@/lib/actions";
-import { submitBidSchema } from "@/lib/actions";
+import { z } from "zod";
+import { submitBidSchema } from "@/lib/schemas";
 
 interface BidsPaginatedResponse extends PaginatedResponse<Bid> {
   bids: Bid[];
@@ -60,9 +61,9 @@ export function useBids(taskId?: string) {
       ]);
 
       // Optimistic update for adding a new bid
-      queryClient.setQueryData<BidsPaginatedResponse>(
+      queryClient.setQueryData<any>(
         ["bids", taskId],
-        (old) => {
+        (old: any) => {
           if (!old) return previousBids; // Fallback if no old data
 
           const tempBid: Bid = {
@@ -75,7 +76,7 @@ export function useBids(taskId?: string) {
             createdAt: new Date(),
             status: "PENDING",
           };
-          const newPages = old.pages.map((page, index) => {
+          const newPages = (old as any).pages.map((page: any, index: number) => {
             if (index === 0) {
               return { ...page, bids: [tempBid, ...page.bids] }; // Add to first page
             }
@@ -115,13 +116,13 @@ export function useBids(taskId?: string) {
       const previousTask = queryClient.getQueryData<any>(["task", taskId]);
 
       // Optimistic update for bids: mark accepted, others rejected
-      queryClient.setQueryData<BidsPaginatedResponse>(
+      queryClient.setQueryData<any>(
         ["bids", taskId],
-        (old) => {
+        (old: any) => {
           if (!old) return old;
-          const newPages = old.pages.map((page) => ({
+          const newPages = (old as any).pages.map((page: any) => ({
             ...page,
-            bids: page.bids.map((bid) => {
+            bids: page.bids.map((bid: any) => {
               if (bid.id === bidId) return { ...bid, status: "ACCEPTED" };
               if (bid.status === "PENDING")
                 return { ...bid, status: "REJECTED" };
@@ -133,7 +134,7 @@ export function useBids(taskId?: string) {
       );
 
       // Optimistic update for task status
-      queryClient.setQueryData<any>(["task", taskId], (old) => {
+      queryClient.setQueryData<any>(["task", taskId], (old: any) => {
         if (!old) return old;
         return { ...old, status: "IN_PROGRESS" };
       });

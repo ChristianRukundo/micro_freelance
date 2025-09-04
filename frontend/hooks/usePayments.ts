@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import * as actions from '@/lib/actions';
-import { createStripeConnectAccountSchema, fundTaskBodySchema } from '@/lib/actions';
+import { createStripeConnectAccountSchema, fundTaskBodySchema } from '@/lib/schemas';
 import z from 'zod';
 
 interface StripeAccountStatus {
@@ -52,10 +52,10 @@ export function usePayments() {
   const createPaymentIntentMutation = useMutation({
     mutationFn: ({ taskId, amount }: { taskId: string; amount: number }) =>
       actions.createPaymentIntentAction(taskId, { amount }),
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       if (response.success) {
         toast.success(response.message);
-        queryClient.invalidateQueries({ queryKey: ['task', response.data?.taskId] }); // Invalidate task if funding status is shown
+        queryClient.invalidateQueries({ queryKey: ['task', variables.taskId] });
       } else {
         toast.error(response.message);
       }

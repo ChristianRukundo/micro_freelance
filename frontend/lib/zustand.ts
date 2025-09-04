@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, devtools } from 'zustand/middleware';
 import { UserRole, UserProfile } from './types'; // Assuming types.ts defines UserRole
 
-interface UserState {
+export interface UserState {
   id: string | null;
   email: string | null;
   role: UserRole | null;
@@ -18,6 +18,10 @@ interface AuthStore {
   user: UserState | null;
   isAuthenticated: boolean;
   isLoading: boolean; // For initial auth check
+  // Add role-based getters
+  isClient: boolean;
+  isFreelancer: boolean;
+  isAdmin: boolean;
   login: (user: UserState) => void;
   logout: () => void;
   setUser: (user: UserState) => void; // For updating profile
@@ -28,10 +32,20 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>()(
   devtools(
     persist(
-      (set) => ({
+      (set, get) => ({
         user: null,
         isAuthenticated: false,
         isLoading: true,
+        // Computed properties for role checks
+        get isClient() {
+          return get().user?.role === UserRole.CLIENT;
+        },
+        get isFreelancer() {
+          return get().user?.role === UserRole.FREELANCER;
+        },
+        get isAdmin() {
+          return get().user?.role === UserRole.ADMIN;
+        },
         login: (user) => set({ user, isAuthenticated: true, isLoading: false }),
         logout: () => set({ user: null, isAuthenticated: false, isLoading: false }),
         setUser: (user) => set((state) => ({ ...state, user: { ...state.user, ...user } })), // Merge updates
@@ -39,8 +53,8 @@ export const useAuthStore = create<AuthStore>()(
         stopLoading: () => set({ isLoading: false }),
       }),
       {
-        name: 'auth-storage', // unique name for local storage
-        getStorage: () => localStorage, // default is localStorage
+        name: 'auth-storage',
+        storage: typeof window !== 'undefined' ? localStorage : undefined as any,
       },
     ),
     { name: 'AuthStore' },

@@ -3,7 +3,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { submitBidSchema } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -16,11 +18,7 @@ import { useAuthStore } from '@/lib/zustand';
 import { UserRole } from '@/lib/types';
 import Link from 'next/link';
 
-// Schema from lib/actions.ts for consistency
-const submitBidSchema = z.object({
-  proposal: z.string().min(50, 'Proposal must be at least 50 characters long'),
-  amount: z.number().min(1, 'Bid amount must be at least 1'),
-});
+// use imported submitBidSchema
 
 type BidFormInput = z.infer<typeof submitBidSchema>;
 

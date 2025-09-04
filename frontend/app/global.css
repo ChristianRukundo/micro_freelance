@@ -1,8 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @layer base {
   :root {
@@ -49,7 +48,6 @@
     --blue-600: 200 100% 40%;
     --blue-200: 200 100% 80%;
 
-
     /* Shadcn/ui specific variables mapped to our palette */
     --background: var(--neutral-50);
     --foreground: var(--neutral-900);
@@ -92,7 +90,9 @@
     --popover: var(--neutral-800);
     --popover-foreground: var(--neutral-50);
 
-    --primary: var(--primary-400); /* Slightly lighter primary for dark mode contrast */
+    --primary: var(
+      --primary-400
+    ); /* Slightly lighter primary for dark mode contrast */
     --primary-foreground: 210 20% 98%;
 
     --secondary: var(--neutral-700);
@@ -130,17 +130,43 @@
 }
 
 @layer components {
-  .text-display-lg { @apply text-display-lg font-display; }
-  .text-display-md { @apply text-display-md font-display; }
-  .text-display-sm { @apply text-display-sm font-display; }
-  .text-h1 { @apply text-h1 font-sans; }
-  .text-h2 { @apply text-h2 font-sans; }
-  .text-h3 { @apply text-h3 font-sans; }
-  .text-h4 { @apply text-h4 font-sans; }
-  .text-h5 { @apply text-h5 font-sans; }
-  .text-h6 { @apply text-h6 font-sans; }
-  .text-body-lg { @apply text-body-lg font-sans; }
-  .text-body-md { @apply text-body-md font-sans; }
-  .text-body-sm { @apply text-body-sm font-sans; }
-  .text-caption { @apply text-caption font-sans; }
+  .text-display-lg {
+    @apply text-display-lg font-display;
+  }
+  .text-display-md {
+    @apply text-display-md font-display;
+  }
+  .text-display-sm {
+    @apply text-display-sm font-display;
+  }
+  .text-h1 {
+    @apply text-h1 font-sans;
+  }
+  .text-h2 {
+    @apply text-h2 font-sans;
+  }
+  .text-h3 {
+    @apply text-h3 font-sans;
+  }
+  .text-h4 {
+    @apply text-h4 font-sans;
+  }
+  .text-h5 {
+    @apply text-h5 font-sans;
+  }
+  .text-h6 {
+    @apply text-h6 font-sans;
+  }
+  .text-body-lg {
+    @apply text-body-lg font-sans;
+  }
+  .text-body-md {
+    @apply text-body-md font-sans;
+  }
+  .text-body-sm {
+    @apply text-body-sm font-sans;
+  }
+  .text-caption {
+    @apply text-caption font-sans;
+  }
 }
