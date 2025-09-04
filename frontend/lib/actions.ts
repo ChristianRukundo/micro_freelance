@@ -501,8 +501,8 @@ export async function fetchTopFreelancers(): Promise<
   ServerActionResponse<UserType[]>
 > {
   try {
-    // Fetch top 3-6 freelancers, e.g., highest rated (if backend supported) or most recent
-    const response = await api.get("/admin/users", {
+    // Fetch top 3-6 freelancers from the public users endpoint
+    const response = await api.get("/users", {
       params: {
         limit: 6,
         sortBy: "createdAt",

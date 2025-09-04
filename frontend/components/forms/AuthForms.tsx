@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -15,8 +15,9 @@ import { loginSchema, registerSchema, verifyEmailSchema, forgotPasswordSchema, r
 import { UserRole } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { RefreshCcwIcon } from 'lucide-react';
-import React from 'react';
+import { EyeIcon, EyeOffIcon, RefreshCcwIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Input } from '../ui/input';
 
 // Schemas imported from non-server module
 
@@ -32,6 +33,8 @@ interface AuthFormsProps {
 }
 
 export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const { login: authStoreLogin } = useAuthStore();
 
@@ -276,7 +279,29 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
               <FormItem>
                 <FormLabel>{formType === 'reset-password' ? 'New Password' : 'Password'}</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} disabled={isPending} />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      {...field}
+                      disabled={isPending}
+                      className="pr-10" // Add padding to make space for the icon
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -292,7 +317,16 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
               <FormItem>
                 <FormLabel>OTP (One-Time Password)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter 6-digit OTP" {...field} disabled={isPending} maxLength={6} />
+                  <InputOTP maxLength={6} {...field}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -308,7 +342,29 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
               <FormItem>
                 <FormLabel>Confirm New Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} disabled={isPending} />
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      {...field}
+                      disabled={isPending}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute inset-y-0 right-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
