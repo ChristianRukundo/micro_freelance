@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "npm install",
     "build": "rimraf dist && npx tsc",
-    "start": "node dist/server.js",
+    "start": "node -r tsconfig-paths/register dist/server.js",
     "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node -r tsconfig-paths/register src/server.ts\"",
     "seed": "ts-node prisma/seed.ts",
     "check-types": "tsc --noEmit"
