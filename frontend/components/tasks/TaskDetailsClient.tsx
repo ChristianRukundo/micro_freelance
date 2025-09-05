@@ -1,4 +1,3 @@
-// frontend/components/tasks/TaskDetailsClient.tsx
 "use client";
 
 import { Metadata } from "next";
@@ -23,6 +22,7 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/lib/date";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BidForm } from "@/components/forms/BidForm";
@@ -36,6 +36,8 @@ import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChatWindow } from "@/components/chat/ChatWindow";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
+import { Card, CardContent } from "../ui/card";
 
 interface TaskDetailsContentProps {
   taskId: string;
@@ -148,22 +150,31 @@ export function TaskDetailsClient({
           {task.attachments && task.attachments.length > 0 && (
             <div className="mt-8">
               <h3 className="text-h4 font-bold mb-3">Attachments</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {task.attachments.map((attachment) => (
-                  <a
-                    key={attachment.id}
-                    href={attachment.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center space-x-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 hover:bg-neutral-100 transition-colors"
-                  >
-                    <FileTextIcon className="h-5 w-5 text-primary-500" />
-                    <span className="text-body-sm font-medium">
-                      {attachment.fileName}
-                    </span>
-                  </a>
-                ))}
-              </div>
+              <Carousel className="w-full max-w-full">
+                <CarouselContent>
+                  {task.attachments
+                    .filter((a) => a.fileType.startsWith("image/"))
+                    .map((attachment) => (
+                      <CarouselItem key={attachment.id}>
+                        <div className="p-1">
+                          <Card>
+                            <CardContent className="flex aspect-video items-center justify-center p-6 relative">
+                              <Image
+                                src={attachment.url}
+                                alt={attachment.fileName}
+                                layout="fill"
+                                objectFit="contain"
+                                className="rounded-lg"
+                              />
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
             </div>
           )}
 

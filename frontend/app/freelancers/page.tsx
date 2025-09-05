@@ -69,7 +69,7 @@ export default function FreelancerDiscoveryPage() {
         page: pageParam,
         limit: 10,
       };
-      const response = await api.get("/admin/users", { params }); // Reusing admin/users endpoint with role filter
+      const response = await api.get("/users", { params }); // Reusing admin/users endpoint with role filter
       return response.data.data;
     },
     getNextPageParam: (lastPage) => {

@@ -73,7 +73,7 @@ const mainNavLinks: NavLinkItem[] = [
     badge: "New",
   },
   {
-    href: "/dashboard/spending",
+    href: "/dashboard/client/spending",
     icon: <DollarSignIcon className="h-5 w-5" />,
     label: "Spending History",
     roles: [UserRole.CLIENT],
@@ -87,7 +87,7 @@ const mainNavLinks: NavLinkItem[] = [
     roles: [UserRole.FREELANCER],
   },
   {
-    href: "/dashboard/earnings",
+    href: "/dashboard/freelancer/earnings",
     icon: <DollarSignIcon className="h-5 w-5" />,
     label: "My Earnings",
     roles: [UserRole.FREELANCER],

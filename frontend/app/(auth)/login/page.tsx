@@ -30,6 +30,20 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         <AuthForms formType="login" />
+        <div className="flex justify-between items-center mt-4">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-primary-600 hover:underline dark:text-primary-400"
+          >
+            Forgot Password?
+          </Link>
+          <Link
+            href="/reset-password"
+            className="text-sm text-primary-600 hover:underline dark:text-primary-400"
+          >
+            Reset Password?
+          </Link>
+        </div>
         <Separator className="my-6 bg-neutral-200 dark:bg-neutral-700" />
         <p className="text-center text-body-sm text-neutral-600 dark:text-neutral-400">
           Don't have an account?{" "}
