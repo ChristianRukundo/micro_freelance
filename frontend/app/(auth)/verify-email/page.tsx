@@ -59,11 +59,13 @@ function LoadingSkeleton() {
   );
 }
 
-export default function VerifyEmailPage({
+export default async function VerifyEmailPage({
   searchParams,
-}: any) {
-  const email =
-    typeof searchParams.email === "string" ? searchParams.email : undefined;
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { email: emailQuery } = await searchParams;
+  const email = typeof emailQuery === "string" ? emailQuery : undefined;
 
   return (
     <Suspense fallback={<LoadingSkeleton />}>

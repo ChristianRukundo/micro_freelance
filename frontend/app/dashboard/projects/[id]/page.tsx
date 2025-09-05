@@ -53,9 +53,10 @@ export async function generateMetadata({
 export default async function ProjectWorkspacePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const taskId = params.id;
+  const { id } = await params;
+  const taskId = id;
   const queryClient = new QueryClient();
 
   // Prefetch task details on the server
@@ -74,8 +75,8 @@ export default async function ProjectWorkspacePage({
     <div className="flex flex-col space-y-8 py-8">
       <h1 className="text-display-md font-extrabold">Project Workspace</h1>
       <p className="text-body-md">
-        Manage &quot;{initialTask.title}&quot; - track progress, communicate, and handle
-        payments.
+        Manage &quot;{initialTask.title}&quot; - track progress, communicate,
+        and handle payments.
       </p>
 
       <HydrationBoundary state={dehydrate(queryClient)}>

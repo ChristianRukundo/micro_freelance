@@ -28,7 +28,9 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
 
 export async function generateMetadata({
   params,
-}: any): Promise<Metadata> {
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
   const task = await getTaskDetails(params.id);
   if (!task) {
     return {
@@ -44,8 +46,11 @@ export async function generateMetadata({
 
 export default async function TaskDetailsPage({
   params,
-}: any) {
-  const taskId = params.id;
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const taskId = id;
   const queryClient = new QueryClient();
 
   // Prefetch task details on the server
