@@ -3,14 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prebuild": "npm install",
-    "build": "rimraf dist && npx tsc",
-    "start": "node -r tsconfig-paths/register dist/server.js",
-    "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node -r tsconfig-paths/register src/server.ts\"",
-    "seed": "ts-node prisma/seed.ts",
-    "check-types": "tsc --noEmit"
+ "scripts": {
+    "build": "tsc",  
+    "start": "node dist/server.js",
+    "migrate": "npx prisma migrate deploy",  
+    "generate": "npx prisma generate",
+    "seed": "ts-node prisma/seed.ts" 
   },
   "keywords": [],
   "author": "",
@@ -65,6 +63,7 @@
     "@types/uuid": "^10.0.0",
     "concurrently": "^8.2.2",
     "nodemon": "^3.1.4",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "tsc-alias": "^1.8.10"
   }
 }

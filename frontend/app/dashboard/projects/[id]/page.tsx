@@ -32,11 +32,7 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const task = await getTaskDetails(id);
 
@@ -53,12 +49,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProjectWorkspacePage({
-  params,
-}: {
+type Props = {
   params: Promise<{ id: string }>;
-}) {
+};
+
+export default async function ProjectWorkspacePage({ params }: Props) {
   const { id } = await params;
+
   const taskId = id;
   const queryClient = new QueryClient();
 

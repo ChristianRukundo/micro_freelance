@@ -15,6 +15,10 @@ import { TriangleAlertIcon } from "lucide-react";
 import { TaskDetailsSkeleton } from "@/components/common/SkeletonLoaders";
 import { TaskDetailsClient } from "@/components/tasks/TaskDetailsClient";
 
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
 // Server Component function to fetch initial task data
 async function getTaskDetails(taskId: string): Promise<Task | null> {
   try {
@@ -26,12 +30,9 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string };
-}): Promise<Metadata> {
-  const task = await getTaskDetails(params.id);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const task = await getTaskDetails(id);
   if (!task) {
     return {
       title: "Task Not Found - Micro Freelance Marketplace",
@@ -44,11 +45,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function TaskDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TaskDetailsPage({ params }: Props) {
   const { id } = await params;
   const taskId = id;
   const queryClient = new QueryClient();
