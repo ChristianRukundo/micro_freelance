@@ -1,7 +1,7 @@
-import { Message } from "@/lib/types";
-("use client");
+"use client";
 
 import React, { useRef, useEffect } from "react";
+import { Message } from "@/lib/types";
 import { useChat } from "@/hooks/useChat";
 import { useAuthStore } from "@/lib/zustand";
 import { MessageInput } from "./MessageInput";
