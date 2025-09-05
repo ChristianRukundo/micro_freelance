@@ -19,10 +19,10 @@ export default function NewTaskPage() {
     <div className="container py-8">
       <Card className="w-full shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-h2 font-bold text-neutral-800">
+          <CardTitle className="text-h2 font-bold">
             Post a New Project
           </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600">
+          <CardDescription className="text-body-md">
             Describe your project in detail, set your budget, and attach any
             relevant files.
           </CardDescription>

@@ -176,7 +176,7 @@ function CheckoutForm({
         />
 
         {isCreatingIntent ? (
-          <div className="flex items-center justify-center p-6 text-body-md text-neutral-600">
+          <div className="flex items-center justify-center p-6 text-body-md">
             <LoadingSpinner size="md" className="mr-3" /> Initializing
             payment...
           </div>
@@ -267,10 +267,8 @@ export function PaymentForm({
     >
       <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-h3 font-bold text-neutral-800">
-            Secure Payment
-          </CardTitle>
-          <LockIcon className="h-6 w-6 text-neutral-500" />
+          <CardTitle className="text-h3 font-bold">Secure Payment</CardTitle>
+          <LockIcon className="h-6 w-6" />
         </CardHeader>
         <CardContent>
           {!stripePromise && (

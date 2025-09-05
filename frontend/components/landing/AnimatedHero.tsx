@@ -70,11 +70,11 @@ export function AnimatedHero() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
           className="mt-12 w-full max-w-xl mx-auto relative group"
         >
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400 group-focus-within:text-primary-500 transition-colors" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 group-focus-within:text-primary-500 transition-colors" />
           <Input
             type="search"
             placeholder="What project are you looking for?"
-            className="w-full pl-12 pr-4 py-3 rounded-full text-neutral-800 bg-white/95 border-none shadow-medium dark:shadow-medium-dark focus:ring-primary-500 focus:ring-2"
+            className="w-full pl-12 pr-4 py-3 rounded-full bg-white/95 border-none shadow-medium dark:shadow-medium-dark focus:ring-primary-500 focus:ring-2"
             aria-label="Quick search projects"
           />
           <Button

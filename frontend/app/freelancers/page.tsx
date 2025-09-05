@@ -114,7 +114,7 @@ export default function FreelancerDiscoveryPage() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-display-md font-extrabold mb-8 text-neutral-800">
+      <h1 className="text-display-md font-extrabold mb-8">
         Discover Talented Freelancers
       </h1>
 
@@ -124,7 +124,7 @@ export default function FreelancerDiscoveryPage() {
           onSubmit={handleSearch}
           className="md:col-span-2 lg:col-span-2 relative"
         >
-          <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" />
           <Input
             placeholder="Search by name or email..."
             value={searchTerm}
@@ -135,7 +135,7 @@ export default function FreelancerDiscoveryPage() {
             type="submit"
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0 h-full w-10 text-neutral-500 hover:text-primary-500"
+            className="absolute right-0 top-0 h-full w-10 hover:text-primary-500"
             aria-label="Search"
           >
             <MoveRightIcon className="h-5 w-5" />
@@ -171,7 +171,7 @@ export default function FreelancerDiscoveryPage() {
         <Button
           variant="outline"
           onClick={handleClearFilters}
-          className="shadow-soft dark:shadow-soft-dark text-neutral-600 hover:text-destructive-500"
+          className="shadow-soft dark:shadow-soft-dark hover:text-destructive-500"
         >
           <XCircleIcon className="h-4 w-4 mr-2" /> Clear Filters
         </Button>
@@ -226,8 +226,8 @@ export default function FreelancerDiscoveryPage() {
       )}
 
       {isEmpty && (
-        <div className="flex flex-col items-center justify-center py-12 text-center text-neutral-500">
-          <FilterIcon className="h-16 w-16 mb-4 text-neutral-300" />
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <FilterIcon className="h-16 w-16 mb-4" />
           <h2 className="text-h3">
             No freelancers found matching your criteria.
           </h2>

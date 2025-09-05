@@ -133,26 +133,23 @@
     font-feature-settings: "liga" 0;
   }
 }
+
 @layer components {
-  /* --- TYPOGRAPHY HIERARCHY WITH AUTOMATIC DARK MODE COLORS --- */
+  /* --- REFINED TYPOGRAPHY HIERARCHY WITH AUTOMATIC DARK MODE COLORS --- */
 
-  /* Display Headings - Highest Contrast */
-  .text-display-lg {
-    @apply text-display-lg font-display text-neutral-800 dark:text-neutral-100;
-  }
-  .text-display-md {
-    @apply text-display-md font-display text-neutral-800 dark:text-neutral-100;
-  }
+  /* Display Headings - Brightest for Maximum Impact */
+  .text-display-lg,
+  .text-display-md,
   .text-display-sm {
-    @apply text-display-sm font-display text-neutral-800 dark:text-neutral-100;
+    @apply text-display-lg font-display text-neutral-800 dark:text-neutral-50;
   }
 
-  /* Standard Headings - High Contrast */
+  /* Standard Headings - High Contrast, Gently Stepped */
   .text-h1 {
     @apply text-h1 font-sans font-bold text-neutral-800 dark:text-neutral-100;
   }
   .text-h2 {
-    @apply text-h2 font-sans font-bold text-neutral-800 dark:text-neutral-200;
+    @apply text-h2 font-sans font-bold text-neutral-800 dark:text-neutral-100;
   }
   .text-h3 {
     @apply text-h3 font-sans font-semibold text-neutral-800 dark:text-neutral-200;
@@ -167,18 +164,14 @@
     @apply text-h6 font-sans font-semibold text-neutral-700 dark:text-neutral-300;
   }
 
-  /* Body Text - Standard Contrast for Readability */
-  .text-body-lg {
-    @apply text-body-lg font-sans text-neutral-700 dark:text-neutral-300;
-  }
-  .text-body-md {
+  /* Body Text - Optimized for Readability, Not Stark White */
+  .text-body-lg,
+  .text-body-md,
+  .text-body-sm {
     @apply text-body-md font-sans text-neutral-600 dark:text-neutral-400;
   }
-  .text-body-sm {
-    @apply text-body-sm font-sans text-neutral-600 dark:text-neutral-400;
-  }
 
-  /* Caption / Muted Text - Lower Contrast */
+  /* Caption / Muted Text - Lower Contrast for Tertiary Info */
   .text-caption {
     @apply text-caption font-sans text-neutral-500 dark:text-neutral-500;
   }

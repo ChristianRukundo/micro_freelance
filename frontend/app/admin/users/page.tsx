@@ -242,10 +242,8 @@ export default function AdminUsersPage() {
 
   return (
     <div className="flex flex-col space-y-8">
-      <h1 className="text-display-md font-extrabold text-neutral-800">
-        Admin User Management
-      </h1>
-      <p className="text-body-md text-neutral-600">
+      <h1 className="text-display-md font-extrabold">Admin User Management</h1>
+      <p className="text-body-md">
         Manage all users on the platform: view, suspend, and delete accounts.
       </p>
 
@@ -255,7 +253,7 @@ export default function AdminUsersPage() {
           onSubmit={handleSearch}
           className="md:col-span-2 lg:col-span-2 relative"
         >
-          <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+          <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" />
           <Input
             placeholder="Search by email or name..."
             value={searchTerm}
@@ -266,7 +264,7 @@ export default function AdminUsersPage() {
             type="submit"
             variant="ghost"
             size="icon"
-            className="absolute right-0 top-0 h-full w-10 text-neutral-500 hover:text-primary-500"
+            className="absolute right-0 top-0 h-full w-10 hover:text-primary-500"
             aria-label="Search"
           >
             <FilterIcon className="h-5 w-5" />
@@ -319,7 +317,7 @@ export default function AdminUsersPage() {
         <Button
           variant="outline"
           onClick={handleClearFilters}
-          className="shadow-soft dark:shadow-soft-dark text-neutral-600 hover:text-destructive-500"
+          className="shadow-soft dark:shadow-soft-dark hover:text-destructive-500"
         >
           <XIcon className="h-4 w-4 mr-2" /> Clear Filters
         </Button>
@@ -327,10 +325,8 @@ export default function AdminUsersPage() {
 
       <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader>
-          <CardTitle className="text-h3 text-neutral-800">
-            User Accounts
-          </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600">
+          <CardTitle className="text-h3">User Accounts</CardTitle>
+          <CardDescription className="text-body-md">
             Overview of all registered users on the platform.
           </CardDescription>
         </CardHeader>
@@ -387,10 +383,10 @@ export default function AdminUsersPage() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-body-md font-semibold text-neutral-800">
+                          <p className="text-body-md font-semibold">
                             {user.profile?.firstName} {user.profile?.lastName}
                           </p>
-                          <p className="text-caption text-neutral-500">
+                          <p className="text-caption">
                             {user.emailVerified ? "Verified" : "Unverified"}
                           </p>
                         </div>
@@ -470,10 +466,7 @@ export default function AdminUsersPage() {
                             </>
                           )}
                           {user.role === UserRole.ADMIN && (
-                            <DropdownMenuItem
-                              disabled
-                              className="text-neutral-500"
-                            >
+                            <DropdownMenuItem disabled className="">
                               <SlashIcon className="mr-2 h-4 w-4" /> Cannot
                               modify Admin
                             </DropdownMenuItem>
@@ -487,8 +480,8 @@ export default function AdminUsersPage() {
             </Table>
           </div>
           {isEmpty && (
-            <div className="py-6 text-center text-body-md text-neutral-500">
-              <FilterIcon className="h-16 w-16 mb-4 text-neutral-300 mx-auto" />
+            <div className="py-6 text-center text-body-md">
+              <FilterIcon className="h-16 w-16 mb-4 mx-auto" />
               <h2 className="text-h3">
                 No users found matching your criteria.
               </h2>

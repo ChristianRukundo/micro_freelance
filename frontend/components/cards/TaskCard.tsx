@@ -52,7 +52,7 @@ export function TaskCard({ task, showApplyButton = true }: TaskCardProps) {
         ></Link>
         <CardHeader className="flex flex-row items-start justify-between space-y-0 p-6">
           <div className="flex-1 space-y-2">
-            <h3 className="text-h5 font-semibold text-neutral-800 transition-colors group-hover:text-primary-600">
+            <h3 className="text-h5 font-semibold transition-colors group-hover:text-primary-600">
               {task.title}
             </h3>
             <Badge
@@ -71,8 +71,8 @@ export function TaskCard({ task, showApplyButton = true }: TaskCardProps) {
                   : task.status === "IN_PROGRESS"
                     ? "bg-warning-50 text-warning-600 border-warning-200"
                     : task.status === "COMPLETED"
-                      ? "bg-neutral-100 text-neutral-600 border-neutral-300"
-                      : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                      ? "bg-neutral-100 border-neutral-300"
+                      : "bg-neutral-100 border-neutral-300"
               }`}
             >
               {task.status.replace(/_/g, " ")}
@@ -80,9 +80,9 @@ export function TaskCard({ task, showApplyButton = true }: TaskCardProps) {
           </div>
         </CardHeader>
         <CardContent className="p-6 pt-0 space-y-4">
-          <div className="flex items-center text-body-sm text-neutral-500">
+          <div className="flex items-center text-body-sm">
             <DollarSignIcon className="mr-2 h-4 w-4 text-primary-500" />
-            <span className="font-semibold text-neutral-700">
+            <span className="font-semibold">
               ${task.budget.toLocaleString()}
             </span>
             <span className="ml-2">|</span>
@@ -90,11 +90,11 @@ export function TaskCard({ task, showApplyButton = true }: TaskCardProps) {
             <span>Due by {deadlineDate}</span>
           </div>
 
-          <CardDescription className="text-body-sm text-neutral-600 line-clamp-3">
+          <CardDescription className="text-body-sm line-clamp-3">
             {task.description}
           </CardDescription>
 
-          <div className="flex items-center justify-between text-caption text-neutral-500">
+          <div className="flex items-center justify-between text-caption">
             <div className="flex items-center space-x-2">
               {task.client?.profile?.avatarUrl ? (
                 <Avatar className="h-6 w-6">
@@ -125,7 +125,7 @@ export function TaskCard({ task, showApplyButton = true }: TaskCardProps) {
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between p-6 pt-0 relative z-20">
-          <div className="flex items-center text-body-sm text-neutral-600">
+          <div className="flex items-center text-body-sm">
             <UsersIcon className="mr-2 h-4 w-4 text-primary-500" />
             <span>{task._count?.bids || 0} Bids</span>
           </div>

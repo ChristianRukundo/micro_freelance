@@ -49,11 +49,11 @@ const NotificationIcon = ({ type }: { type: NotificationType }) => {
     case NotificationType.EMAIL_VERIFIED:
       return <MailIcon className="h-5 w-5 text-success-500" />;
     case NotificationType.PASSWORD_RESET:
-      return <ClockIcon className="h-5 w-5 text-neutral-500" />;
+      return <ClockIcon className="h-5 w-5" />;
     case NotificationType.STRIPE_ACCOUNT_UPDATED:
       return <DollarSignIcon className="h-5 w-5 text-primary-500" />;
     default:
-      return <BellIcon className="h-5 w-5 text-neutral-500" />;
+      return <BellIcon className="h-5 w-5" />;
   }
 };
 
@@ -100,13 +100,13 @@ export function NotificationCard({ notification }: NotificationCardProps) {
           <div className="ml-4 flex-1">
             <p
               className={cn(
-                "text-body-md text-neutral-800",
+                "text-body-md",
                 !notification.isRead && "font-semibold text-primary-800"
               )}
             >
               {notification.message}
             </p>
-            <p className="text-caption text-neutral-500 mt-1 flex items-center">
+            <p className="text-caption mt-1 flex items-center">
               <ClockIcon className="h-3 w-3 mr-1" />{" "}
               {formatRelativeTime(notification.createdAt)}
             </p>
@@ -118,7 +118,7 @@ export function NotificationCard({ notification }: NotificationCardProps) {
                 size="icon"
                 onClick={handleMarkAsRead}
                 disabled={isMarkingNotificationAsRead}
-                className="h-8 w-8 text-neutral-500 hover:text-primary-500"
+                className="h-8 w-8 hover:text-primary-500"
                 aria-label="Mark as read"
               >
                 {isMarkingNotificationAsRead ? (

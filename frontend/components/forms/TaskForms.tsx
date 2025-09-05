@@ -293,7 +293,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <h3 className="text-h4 font-bold text-neutral-800 flex items-center">
+            <h3 className="text-h4 font-bold flex items-center">
               <CheckCircle2Icon className="mr-2 h-5 w-5 text-primary-500" />{" "}
               Step 1: Basic Project Details
             </h3>
@@ -406,7 +406,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                     </FormControl>
                     <SelectContent>
                       {isLoadingCategories ? (
-                        <div className="p-4 text-center text-neutral-500">
+                        <div className="p-4 text-center">
                           Loading categories...
                         </div>
                       ) : (
@@ -445,7 +445,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <h3 className="text-h4 font-bold text-neutral-800 flex items-center">
+            <h3 className="text-h4 font-bold flex items-center">
               <CheckCircle2Icon className="mr-2 h-5 w-5 text-primary-500" />{" "}
               Step 2: Description & Attachments
             </h3>
@@ -466,10 +466,10 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                   <FormMessage />
                   {descriptionPreview && (
                     <div className="mt-4 p-4 border border-neutral-200 rounded-lg bg-neutral-50 dark:bg-neutral-800">
-                      <h4 className="text-h6 font-semibold mb-2 text-neutral-800 dark:text-neutral-100">
+                      <h4 className="text-h6 font-semibold mb-2">
                         Description Preview:
                       </h4>
-                      <article className="prose prose-sm dark:prose-invert max-w-none text-neutral-700 dark:text-neutral-300">
+                      <article className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown>{descriptionPreview}</ReactMarkdown>
                       </article>
                     </div>
@@ -500,8 +500,8 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                     Drop the files here ...
                   </p>
                 ) : (
-                  <p className="text-body-md text-neutral-600">
-                    <UploadCloudIcon className="mx-auto mb-2 h-8 w-8 text-neutral-400" />
+                  <p className="text-body-md">
+                    <UploadCloudIcon className="mx-auto mb-2 h-8 w-8" />
                     Drag 'n' drop some files here, or click to select files
                   </p>
                 )}
@@ -509,17 +509,15 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
               <FormMessage />
               {filesToProcess.length > 0 && (
                 <div className="mt-4 space-y-3">
-                  <p className="text-body-sm font-semibold text-neutral-700">
-                    Selected Files:
-                  </p>
+                  <p className="text-body-sm font-semibold">Selected Files:</p>
                   {filesToProcess.map((fileItem) => (
                     <div
                       key={fileItem.id}
                       className="flex items-center justify-between rounded-md border border-neutral-200 bg-neutral-50 p-3"
                     >
                       <div className="flex items-center space-x-3">
-                        <FileTextIcon className="h-5 w-5 text-neutral-500" />
-                        <span className="text-body-sm text-neutral-700">
+                        <FileTextIcon className="h-5 w-5" />
+                        <span className="text-body-sm">
                           {fileItem.file.name}
                         </span>
                         {fileItem.status === "uploading" && (
@@ -543,7 +541,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                             fileItem.url
                           )
                         }
-                        className="text-neutral-500 hover:text-destructive-500"
+                        className=" hover:text-destructive-500"
                         disabled={isFormPending}
                       >
                         <Trash2Icon className="h-4 w-4" />

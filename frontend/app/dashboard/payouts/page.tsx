@@ -68,25 +68,25 @@ export default function PayoutsPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-display-md font-extrabold text-neutral-800 dark:text-neutral-100"
+        className="text-display-md font-extrabold"
       >
         Payout Settings
       </motion.h1>
-      <p className="text-body-md text-neutral-600">
+      <p className="text-body-md">
         Connect your Stripe account to receive secure and timely payouts for
         your completed projects.
       </p>
 
       <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-h3 font-bold text-neutral-800">
+          <CardTitle className="text-h3 font-bold">
             Stripe Connect Status
           </CardTitle>
-          <LinkIcon className="h-6 w-6 text-neutral-500" />
+          <LinkIcon className="h-6 w-6" />
         </CardHeader>
         <CardContent>
           {isLoadingStripeAccountStatus ? (
-            <div className="flex items-center space-x-3 text-body-md text-neutral-600">
+            <div className="flex items-center space-x-3 text-body-md">
               <LoadingSpinner size="sm" />{" "}
               <span>Loading Stripe account status...</span>
             </div>
@@ -103,7 +103,7 @@ export default function PayoutsPage() {
                 <XCircleIcon className="h-6 w-6" />{" "}
                 <span>Stripe account not fully connected.</span>
               </div>
-              <CardDescription className="text-body-sm text-neutral-600">
+              <CardDescription className="text-body-sm">
                 Please connect or complete the onboarding process for your
                 Stripe account to receive payments.
               </CardDescription>
@@ -135,10 +135,10 @@ export default function PayoutsPage() {
 
       {/* Placeholder for Recent Payouts */}
       <section className="space-y-6">
-        <h2 className="text-h3 font-bold text-neutral-800">Recent Payouts</h2>
+        <h2 className="text-h3 font-bold">Recent Payouts</h2>
         <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
           <CardContent className="p-6">
-            <p className="text-body-md text-neutral-600">
+            <p className="text-body-md">
               Your recent payouts will be listed here. This is a placeholder.
             </p>
             <Button

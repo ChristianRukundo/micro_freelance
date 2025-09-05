@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import { FreelancerCard } from "@/components/cards/FreelancerCard";
@@ -10,7 +10,9 @@ interface AnimatedFreelancerSectionProps {
   topFreelancers?: UserType[];
 }
 
-export function AnimatedFreelancerSection({ topFreelancers }: AnimatedFreelancerSectionProps) {
+export function AnimatedFreelancerSection({
+  topFreelancers,
+}: AnimatedFreelancerSectionProps) {
   return (
     <section className="container my-24">
       <motion.div
@@ -20,10 +22,8 @@ export function AnimatedFreelancerSection({ topFreelancers }: AnimatedFreelancer
         transition={{ duration: 0.6, delay: 0.1 }}
         className="mb-12 text-center"
       >
-        <h2 className="text-display-md font-bold text-neutral-800">
-          Our Top Freelancers
-        </h2>
-        <p className="text-body-lg text-neutral-600 mt-4 max-w-2xl mx-auto">
+        <h2 className="text-display-md font-bold">Our Top Freelancers</h2>
+        <p className="text-body-lg mt-4 max-w-2xl mx-auto">
           Meet the highly-rated and skilled professionals ready to bring your
           ideas to life.
         </p>

@@ -20,10 +20,10 @@ export default function NotificationsPage() {
     <div className="container py-8">
       <Card className="w-full shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-h2 font-bold text-neutral-800 flex items-center">
+          <CardTitle className="text-h2 font-bold flex items-center">
             <BellIcon className="h-7 w-7 mr-3 text-primary-500" /> Notifications
           </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600">
+          <CardDescription className="text-body-md">
             Stay updated with your projects, bids, and platform activities.
           </CardDescription>
         </CardHeader>

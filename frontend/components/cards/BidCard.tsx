@@ -79,12 +79,12 @@ export function BidCard({ bid, isTaskOwner, taskId }: BidCardProps) {
             <div>
               <Link
                 href={`/freelancers/${bid.freelancerId}`}
-                className="text-h6 font-semibold text-neutral-800 hover:text-primary-600 transition-colors"
+                className="text-h6 font-semibold hover:text-primary-600 transition-colors"
               >
                 {bid.freelancer?.profile?.firstName}{" "}
                 {bid.freelancer?.profile?.lastName}
               </Link>
-              <p className="text-caption text-neutral-500">
+              <p className="text-caption">
                 {bid.freelancer?.profile?.skills &&
                 bid.freelancer.profile.skills.length > 0
                   ? bid.freelancer.profile.skills.slice(0, 2).join(", ")
@@ -99,22 +99,22 @@ export function BidCard({ bid, isTaskOwner, taskId }: BidCardProps) {
                 ? "bg-success-50 text-success-600 border-success-200"
                 : bid.status === "PENDING"
                   ? "bg-warning-50 text-warning-600 border-warning-200"
-                  : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                  : "bg-neutral-100 border-neutral-300"
             }`}
           >
             {bid.status}
           </Badge>
         </CardHeader>
         <CardContent className="p-6 pt-0 space-y-4">
-          <div className="flex items-center text-body-md text-neutral-600">
+          <div className="flex items-center text-body-md">
             <DollarSignIcon className="mr-2 h-5 w-5 text-primary-500" />
-            <span className="font-semibold text-neutral-800">
+            <span className="font-semibold">
               ${bid.amount.toLocaleString()}
             </span>
-            <ClockIcon className="ml-4 mr-2 h-5 w-5 text-neutral-500" />
+            <ClockIcon className="ml-4 mr-2 h-5 w-5" />
             <span>{formatRelativeTime(bid.createdAt)}</span>
           </div>
-          <CardDescription className="text-body-sm text-neutral-700">
+          <CardDescription className="text-body-sm">
             {bid.proposal.length > 200
               ? `${bid.proposal.substring(0, 200)}...`
               : bid.proposal}

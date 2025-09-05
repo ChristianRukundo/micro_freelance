@@ -44,10 +44,8 @@ export function EarningsChart({
     >
       <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader>
-          <CardTitle className="text-h3 font-bold text-neutral-800">
-            {title}
-          </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600">
+          <CardTitle className="text-h3 font-bold">{title}</CardTitle>
+          <CardDescription className="text-body-md">
             {description}
           </CardDescription>
         </CardHeader>
@@ -58,11 +56,8 @@ export function EarningsChart({
                 data={data}
                 margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
               >
-                <XAxis
-                  dataKey="month"
-                  className="text-body-sm text-neutral-600"
-                />
-                <YAxis className="text-body-sm text-neutral-600" />
+                <XAxis dataKey="month" className="text-body-sm" />
+                <YAxis className="text-body-sm" />
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="hsl(var(--neutral-200))"

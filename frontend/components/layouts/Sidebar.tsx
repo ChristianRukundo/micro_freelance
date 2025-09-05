@@ -20,7 +20,8 @@ import {
   LogOutIcon,
   SearchIcon,
   MenuIcon,
-} from "lucide-react"; // Added MenuIcon for toggle
+  SparklesIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UserRole } from "@/lib/types";
@@ -32,6 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
+import { Logo } from "../common/Logo";
 
 // --- Navigation Link Interface ---
 interface NavLinkItem {
@@ -39,6 +41,7 @@ interface NavLinkItem {
   icon: React.ReactNode;
   label: string;
   roles?: UserRole[];
+  badge?: string;
 }
 
 // --- Main Navigation Data (Centralized Configuration) ---
@@ -47,6 +50,7 @@ const mainNavLinks: NavLinkItem[] = [
     href: "/tasks",
     icon: <BriefcaseIcon className="h-5 w-5" />,
     label: "Browse Projects",
+    badge: "Hot",
   },
   {
     href: "/freelancers",
@@ -66,6 +70,7 @@ const mainNavLinks: NavLinkItem[] = [
     icon: <BriefcaseIcon className="h-5 w-5" />,
     label: "Post New Project",
     roles: [UserRole.CLIENT],
+    badge: "New",
   },
   {
     href: "/dashboard/spending",
@@ -112,14 +117,46 @@ const mainNavLinks: NavLinkItem[] = [
     href: "/dashboard/notifications",
     icon: <BellIcon className="h-5 w-5" />,
     label: "Notifications",
+    badge: "3",
   },
 ];
 
-// --- Sidebar Navigation Link Component ---
+// --- Enhanced Badge Component ---
+const Badge = ({
+  children,
+  variant = "primary",
+}: {
+  children: React.ReactNode;
+  variant?: "primary" | "secondary" | "success" | "warning";
+}) => {
+  const variants = {
+    primary: "bg-gradient-to-r from-blue-500 to-purple-600 text-white",
+    secondary: "bg-gradient-to-r from-gray-600 to-gray-700 text-white",
+    success: "bg-gradient-to-r from-emerald-500 to-teal-600 text-white",
+    warning: "bg-gradient-to-r from-amber-500 to-orange-600 text-white",
+  };
+
+  return (
+    <motion.span
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className={cn(
+        "inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium shadow-sm",
+        "backdrop-blur-sm border border-white/20",
+        variants[variant]
+      )}
+    >
+      {children}
+    </motion.span>
+  );
+};
+
+// --- Enhanced Sidebar Navigation Link Component ---
 interface SidebarNavLinkProps {
   href: string;
   icon: React.ReactNode;
   label: string;
+  badge?: string;
   onClick?: () => void;
   isCollapsed: boolean;
 }
@@ -128,6 +165,7 @@ function SidebarNavLink({
   href,
   icon,
   label,
+  badge,
   onClick,
   isCollapsed,
 }: SidebarNavLinkProps) {
@@ -151,58 +189,104 @@ function SidebarNavLink({
           <motion.div
             initial={false}
             animate={{
-              backgroundColor: isActive
-                ? "hsl(var(--primary-50))"
-                : "transparent",
-              color: isActive
-                ? "hsl(var(--primary-700))"
-                : "hsl(var(--neutral-600))",
+              scale: isActive ? 1.02 : 1,
             }}
             whileHover={{
-              backgroundColor: isActive
-                ? "hsl(var(--primary-100))"
-                : "hsl(var(--neutral-100))",
-              color: isActive
-                ? "hsl(var(--primary-800))"
-                : "hsl(var(--neutral-800))",
-              scale: 1.02,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+              scale: 1.03,
+              x: isCollapsed ? 0 : 4,
             }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+              duration: 0.2,
+            }}
             className={cn(
-              "flex items-center rounded-lg cursor-pointer h-10",
-              isCollapsed ? "justify-center w-10 p-0" : "px-4 py-2 w-full",
-              isActive ? "font-semibold" : "font-medium"
+              "relative group flex items-center w-full p-3 rounded-xl font-medium transition-all duration-300",
+              "hover:shadow-lg hover:shadow-primary/10",
+              isCollapsed ? "justify-center" : "justify-start",
+              isActive
+                ? cn(
+                    "bg-gradient-to-r from-primary/10 to-primary/5 text-primary",
+                    "border border-primary/20 shadow-md shadow-primary/10",
+                    "dark:from-primary/20 dark:to-primary/10 dark:text-primary-300",
+                    "before:absolute before:inset-0 before:rounded-xl",
+                    "before:bg-gradient-to-r before:from-primary/5 before:to-transparent",
+                    "before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                  )
+                : cn(
+                    "text-muted-foreground hover:text-foreground",
+                    "hover:bg-gradient-to-r hover:from-muted/50 hover:to-transparent",
+                    "dark:hover:from-muted/30"
+                  )
             )}
             onClick={handleClick}
             aria-current={isActive ? "page" : undefined}
           >
-            {cloneElement(icon as ReactElement<SVGProps<SVGSVGElement>>, {
-              className: cn(
-                "h-5 w-5 flex-shrink-0",
-                isActive ? "text-primary-700" : "text-neutral-500",
-                isCollapsed ? "" : "mr-3"
-              ),
-            })}
-            <AnimatePresence>
-              {!isCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="whitespace-nowrap overflow-hidden text-body-md"
-                >
-                  {label}
-                </motion.span>
-              )}
-            </AnimatePresence>
-            <span className="sr-only">{label}</span>
+            {/* Active indicator */}
+            {isActive && !isCollapsed && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-primary to-primary/60 rounded-r-full"
+                initial={false}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+
+            <div className="relative flex items-center">
+              {cloneElement(icon as ReactElement<SVGProps<SVGSVGElement>>, {
+                className: cn(
+                  "h-5 w-5 flex-shrink-0 transition-colors duration-200",
+                  isActive ? "text-primary drop-shadow-sm" : "",
+                  !isCollapsed && "mr-3"
+                ),
+              })}
+
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.div
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    className="flex items-center gap-2 whitespace-nowrap overflow-hidden"
+                  >
+                    <span className="text-sm font-medium">{label}</span>
+                    {badge && (
+                      <Badge
+                        variant={
+                          badge === "New"
+                            ? "success"
+                            : badge === "Hot"
+                              ? "warning"
+                              : "primary"
+                        }
+                      >
+                        {badge}
+                      </Badge>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Hover glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+              initial={false}
+            />
           </motion.div>
         </Link>
       </TooltipTrigger>
-      {isCollapsed && <TooltipContent side="right">{label}</TooltipContent>}
+      {isCollapsed && (
+        <TooltipContent side="right" className="font-medium">
+          <div className="flex items-center gap-2">
+            {label}
+            {badge && <Badge variant="primary">{badge}</Badge>}
+          </div>
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }
@@ -210,7 +294,7 @@ function SidebarNavLink({
 // --- Main Sidebar Component ---
 export function Sidebar() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore(); // toggleSidebar is used here
+  const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
@@ -236,8 +320,8 @@ export function Sidebar() {
     });
   }, [user, isAuthenticated]);
 
-  const desktopExpandedWidth = "16rem"; // Tailwind's w-64
-  const desktopCollapsedWidth = "4rem"; // Tailwind's w-16
+  const desktopExpandedWidth = "18rem"; // Increased from 16rem
+  const desktopCollapsedWidth = "4.5rem"; // Increased from 4rem
 
   const isDesktopCollapsed = !isSidebarOpen && !isMobile;
 
@@ -247,13 +331,14 @@ export function Sidebar() {
 
   return (
     <>
+      {/* Mobile overlay with enhanced blur */}
       {isSidebarOpen && isMobile && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-label="Close sidebar"
         />
@@ -264,51 +349,65 @@ export function Sidebar() {
         animate={sidebarAnimateProps}
         transition={{
           type: "spring",
-          stiffness: 150,
-          damping: 20,
+          stiffness: 200,
+          damping: 25,
           duration: 0.3,
         }}
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-full flex-col border-r border-neutral-200 bg-background shadow-lg",
-          !isMobile && "md:sticky md:z-auto md:w-64",
-          !isMobile && !isSidebarOpen && "md:w-16"
+          "fixed inset-y-0 left-0 z-50 flex h-full flex-col",
+          "bg-gradient-to-b from-background via-background to-background/95",
+          "border-r border-border/50 shadow-2xl shadow-black/10",
+          "backdrop-blur-xl",
+          "dark:bg-gradient-to-b dark:from-background dark:via-background/95 dark:to-background/90",
+          "dark:shadow-black/20",
+          !isMobile && "md:sticky md:z-auto",
+          !isMobile && isSidebarOpen && "md:w-72",
+          !isMobile && !isSidebarOpen && "md:w-18"
         )}
       >
+        {/* Enhanced gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
+
         {/* Sidebar Header */}
         <div
           className={cn(
-            "flex items-center px-4",
-            isSidebarOpen ? "justify-between h-16" : "justify-center h-16 w-16"
+            "relative flex items-center px-6 py-4 border-b border-border/30",
+            "bg-gradient-to-r from-background/80 to-background/60 backdrop-blur-sm",
+            isSidebarOpen ? "justify-between h-20" : "justify-center h-20"
           )}
         >
           <Link
             href="/"
             className={cn(
-              "flex items-center",
-              isSidebarOpen ? "space-x-2" : "justify-center"
+              "flex items-center group transition-all duration-300",
+              isSidebarOpen ? "space-x-3" : "justify-center"
             )}
             aria-label="Home"
           >
-            {isSidebarOpen && (
-              <BriefcaseBusinessIcon
-                className={cn("h-7 w-7 text-primary-500")}
+            <div className="relative">
+              <Logo showText={false} />
+              <motion.div
+                className="absolute inset-0 bg-primary/20 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                initial={false}
               />
-            )}
+            </div>
             <AnimatePresence>
               {isSidebarOpen && (
                 <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-h5 font-semibold text-neutral-800 whitespace-nowrap overflow-hidden"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent whitespace-nowrap"
                 >
-                  FreelanceHub
+                  MicroFreelance
                 </motion.span>
               )}
             </AnimatePresence>
           </Link>
-          {/* Toggle button for desktop sidebar (moved here) */}
+
+          {/* Enhanced toggle button */}
           {!isMobile && (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -316,87 +415,108 @@ export function Sidebar() {
                   variant="ghost"
                   size="icon"
                   onClick={toggleSidebar}
+                  className={cn(
+                    "relative p-2 h-10 w-10 rounded-lg transition-all duration-300",
+                    "hover:bg-primary/10 hover:text-primary",
+                    "before:absolute before:inset-0 before:rounded-lg",
+                    "before:bg-gradient-to-r before:from-primary/10 before:to-transparent",
+                    "before:opacity-0 hover:before:opacity-100 before:transition-opacity"
+                  )}
                   aria-label={
                     isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"
                   }
-                  className="p-0 h-8 w-8 text-neutral-600 hover:text-primary-500"
                 >
-                  {isSidebarOpen ? (
-                    <XIcon className="h-5 w-5" />
-                  ) : (
+                  <motion.div
+                    animate={{ rotate: isSidebarOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <MenuIcon className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">
-                    {isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-                  </span>
+                  </motion.div>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="right">
+              <TooltipContent side="right" className="font-medium">
                 {isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               </TooltipContent>
             </Tooltip>
           )}
 
+          {/* Mobile close button */}
           {isSidebarOpen && isMobile && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(false)}
+              className="p-2 h-10 w-10 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
               aria-label="Close mobile menu"
             >
-              <XIcon className="h-6 w-6 text-neutral-600" />
+              <XIcon className="h-5 w-5" />
             </Button>
           )}
         </div>
 
-        <Separator />
-
-        {/* User Profile Summary */}
+        {/* Enhanced User Profile Section */}
         {isAuthenticated && user && (
           <div
             className={cn(
-              "p-4 pb-2",
-              isDesktopCollapsed && "p-2 flex justify-center"
+              "relative p-6 border-b border-border/30",
+              "bg-gradient-to-r from-muted/30 to-transparent",
+              isDesktopCollapsed && "p-4 flex justify-center"
             )}
           >
             <div
               className={cn(
-                "flex items-center",
-                isSidebarOpen ? "space-x-3" : "flex-col space-y-1"
+                "flex items-center transition-all duration-300",
+                isSidebarOpen ? "space-x-4" : "flex-col space-y-2"
               )}
             >
-              <Avatar
-                className={cn(
-                  "border border-neutral-200 shadow-sm",
-                  isSidebarOpen ? "h-9 w-9" : "h-8 w-8"
-                )}
-              >
-                <AvatarImage
-                  src={
-                    user?.profile?.avatarUrl ||
-                    `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email || "User"}`
-                  }
-                  alt={user?.email || "User"}
+              <div className="relative">
+                <Avatar
+                  className={cn(
+                    "border-2 border-primary/20 shadow-lg transition-all duration-300",
+                    "ring-2 ring-primary/10",
+                    isSidebarOpen ? "h-12 w-12" : "h-10 w-10"
+                  )}
+                >
+                  <AvatarImage
+                    src={
+                      user?.profile?.avatarUrl ||
+                      `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email || "User"}`
+                    }
+                    alt={user?.email || "User"}
+                  />
+                  <AvatarFallback className="text-sm font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                    {(user?.email || "U").charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Online status indicator */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background shadow-sm"
                 />
-                <AvatarFallback className="text-body-md font-semibold bg-primary-100 text-primary-700">
-                  {(user?.email || "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              </div>
+
               <AnimatePresence>
                 {isSidebarOpen && (
                   <motion.div
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex flex-col flex-1 whitespace-nowrap overflow-hidden"
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="flex flex-col flex-1 min-w-0"
                   >
-                    <span className="text-body-md font-semibold text-neutral-800 truncate">
+                    <span className="text-base font-semibold truncate text-foreground">
                       {user.profile?.firstName || user.email}
                     </span>
-                    <span className="text-caption text-neutral-500 capitalize">
-                      {user.role?.toLowerCase() || "User"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground capitalize">
+                        {user.role?.toLowerCase() || "User"}
+                      </span>
+                      {user.role === UserRole.ADMIN && (
+                        <SparklesIcon className="h-3 w-3 text-amber-500" />
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -404,105 +524,98 @@ export function Sidebar() {
           </div>
         )}
 
-        <Separator />
-
         {/* Main Navigation Links */}
-        <nav className="flex-1 overflow-y-auto px-4 py-6">
-          <ul className={cn("space-y-2", isDesktopCollapsed && "space-y-1")}>
-            {filteredNavLinks.map((link) => (
-              <li key={link.href}>
+        <nav className="flex-1 overflow-y-auto py-6 px-4">
+          <div className={cn("space-y-2", isDesktopCollapsed && "space-y-3")}>
+            {filteredNavLinks.map((link, index) => (
+              <motion.div
+                key={link.href}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+              >
                 <SidebarNavLink
                   href={link.href}
                   icon={link.icon}
                   label={link.label}
+                  badge={link.badge}
                   isCollapsed={isDesktopCollapsed}
                 />
-              </li>
+              </motion.div>
             ))}
-          </ul>
+          </div>
         </nav>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-neutral-200">
-          <ul className="space-y-2">
-            <li>
-              <div
-                className={cn(
-                  "flex items-center justify-between",
-                  isDesktopCollapsed ? "flex-col space-y-2" : "space-x-2"
-                )}
-              >
-                <AnimatePresence>
-                  {isSidebarOpen ? (
-                    <motion.div
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: "auto" }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="whitespace-nowrap overflow-hidden flex-shrink-0"
-                    >
-                      <ShadcnThemeToggle />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <ShadcnThemeToggle />
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          Toggle Theme
-                        </TooltipContent>
-                      </Tooltip>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
+        {/* Enhanced Footer */}
+        <div className="p-4 border-t border-border/30 bg-gradient-to-r from-muted/20 to-transparent">
+          <div
+            className={cn(
+              "flex items-center gap-3",
+              isDesktopCollapsed && "flex-col space-y-3"
+            )}
+          >
+            {/* Theme toggle */}
+            <div
+              className={cn(
+                isDesktopCollapsed ? "w-full flex justify-center" : "flex-1"
+              )}
+            >
+              {isDesktopCollapsed ? (
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start text-destructive-500 hover:bg-destructive-50",
-                        isDesktopCollapsed
-                          ? "w-10 h-10 p-0 justify-center"
-                          : "w-full"
-                      )}
-                      onClick={() => logout()}
-                      aria-label="Log out"
-                    >
-                      <LogOutIcon
-                        className={cn(
-                          "h-5 w-5 flex-shrink-0",
-                          isSidebarOpen ? "mr-3" : ""
-                        )}
-                      />
-                      <AnimatePresence>
-                        {isSidebarOpen && (
-                          <motion.span
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: "auto" }}
-                            exit={{ opacity: 0, width: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="whitespace-nowrap overflow-hidden text-body-md"
-                          >
-                            Log out
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </Button>
+                    <div className="p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <ShadcnThemeToggle />
+                    </div>
                   </TooltipTrigger>
-                  {isDesktopCollapsed && (
-                    <TooltipContent side="right">Log out</TooltipContent>
-                  )}
+                  <TooltipContent side="right">Toggle Theme</TooltipContent>
                 </Tooltip>
-              </div>
-            </li>
-          </ul>
+              ) : (
+                <ShadcnThemeToggle />
+              )}
+            </div>
+
+            {/* Logout button */}
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => logout()}
+                  className={cn(
+                    "transition-all duration-300 group",
+                    "hover:bg-gradient-to-r hover:from-destructive/10 hover:to-transparent",
+                    "hover:text-destructive border border-transparent hover:border-destructive/20",
+                    isDesktopCollapsed
+                      ? "w-10 h-10 p-0 rounded-lg"
+                      : "w-full justify-start px-3 py-2 rounded-lg"
+                  )}
+                  aria-label="Log out"
+                >
+                  <LogOutIcon
+                    className={cn(
+                      "h-5 w-5 flex-shrink-0 transition-transform group-hover:scale-110",
+                      !isDesktopCollapsed && "mr-3"
+                    )}
+                  />
+                  <AnimatePresence>
+                    {!isDesktopCollapsed && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-sm font-medium whitespace-nowrap"
+                      >
+                        Log out
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </Button>
+              </TooltipTrigger>
+              {isDesktopCollapsed && (
+                <TooltipContent side="right">Log out</TooltipContent>
+              )}
+            </Tooltip>
+          </div>
         </div>
       </motion.aside>
     </>

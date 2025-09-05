@@ -132,10 +132,8 @@ export default async function MarketingPage() {
       {/* How It Works Section */}
       <section className="container my-24">
         <AnimatedSection className="mb-16 text-center">
-          <h2 className="text-display-md font-bold text-neutral-800">
-            How It Works
-          </h2>
-          <p className="text-body-lg text-neutral-600 mt-4 max-w-2xl mx-auto">
+          <h2 className="text-display-md font-bold">How It Works</h2>
+          <p className="text-body-lg mt-4 max-w-2xl mx-auto">
             Our platform simplifies the process of hiring and working. Follow
             these simple steps.
           </p>
@@ -234,10 +232,8 @@ export default async function MarketingPage() {
       {/* Newsletter Signup */}
       <section className="container my-24 text-center max-w-2xl">
         <AnimatedSection className="space-y-6">
-          <h2 className="text-display-md font-bold text-neutral-800">
-            Stay Updated
-          </h2>
-          <p className="text-body-lg text-neutral-600">
+          <h2 className="text-display-md font-bold">Stay Updated</h2>
+          <p className="text-body-lg">
             Subscribe to our newsletter for the latest projects, freelance tips,
             and platform updates.
           </p>

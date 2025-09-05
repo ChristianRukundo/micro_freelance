@@ -48,13 +48,11 @@ export default function ClientDashboardPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-display-md font-extrabold text-neutral-800 dark:text-neutral-100"
+        className="text-display-md font-extrabold"
       >
         Welcome, {user?.firstName || user?.email?.split("@")[0]}!
       </motion.h1>
-      <p className="text-body-md text-neutral-600">
-        Your client dashboard overview.
-      </p>
+      <p className="text-body-md">Your client dashboard overview.</p>
 
       {/* Stats Section */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -67,10 +65,10 @@ export default function ClientDashboardPage() {
           >
             <Card className="flex flex-col p-6 shadow-medium dark:shadow-medium-dark border-neutral-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 pb-3">
-                <CardTitle className="text-h6 font-semibold text-neutral-700 dark:text-neutral-300">
+                <CardTitle className="text-h6 font-semibold">
                   {stat.title}
                 </CardTitle>
-                <div className="text-neutral-500">{stat.icon}</div>
+                <div className="">{stat.icon}</div>
               </CardHeader>
               <CardContent className="flex-1 p-0">
                 <div className="text-h2 font-bold">{stat.value}</div>
@@ -86,7 +84,7 @@ export default function ClientDashboardPage() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-h3 font-bold text-neutral-800"
+          className="text-h3 font-bold"
         >
           Quick Actions
         </motion.h2>
@@ -95,32 +93,30 @@ export default function ClientDashboardPage() {
             <Button
               variant="gradient"
               size="lg"
-              className="h-auto py-5 shadow-primary dark:shadow-primary-dark group"
+              className="h-auto py-5 shadow-primary  cursor-pointer dark:shadow-primary-dark group"
             >
               <BriefcaseIcon className="mr-3 h-6 w-6" />
               <span className="text-h5">Post a New Project</span>
             </Button>
           </Link>
-          <Link href="/tasks" passHref>
+          <Link href="/freelancers" passHref>
             <Button
               variant="outline"
               size="lg"
-              className="h-auto py-5 border-neutral-300 shadow-soft dark:shadow-soft-dark group"
+              className="h-auto py-5 border-neutral-300 cursor-pointer  shadow-soft dark:shadow-soft-dark group"
             >
               <UsersIcon className="mr-3 h-6 w-6 text-primary-500" />
-              <span className="text-h5 text-neutral-700">Find Freelancers</span>
+              <span className="text-h5">Find Freelancers</span>
             </Button>
           </Link>
           <Link href="/dashboard/spending" passHref>
             <Button
               variant="outline"
               size="lg"
-              className="h-auto py-5 border-neutral-300 shadow-soft dark:shadow-soft-dark group"
+              className="h-auto py-5 border-neutral-300 cursor-pointer  shadow-soft dark:shadow-soft-dark group"
             >
               <DollarSignIcon className="mr-3 h-6 w-6 text-primary-500" />
-              <span className="text-h5 text-neutral-700">
-                View Spending History
-              </span>
+              <span className="text-h5">View Spending History</span>
             </Button>
           </Link>
         </div>
@@ -132,13 +128,13 @@ export default function ClientDashboardPage() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-h3 font-bold text-neutral-800"
+          className="text-h3 font-bold"
         >
           Your Recent Projects
         </motion.h2>
         <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
           <CardContent className="p-6">
-            <p className="text-body-md text-neutral-600">
+            <p className="text-body-md">
               Your recent projects will appear here. For now, this is a
               placeholder.
             </p>

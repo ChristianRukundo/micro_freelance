@@ -53,11 +53,11 @@ export default function FreelancerEarningsPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-display-md font-extrabold text-neutral-800 dark:text-neutral-100"
+        className="text-display-md font-extrabold"
       >
         My Earnings
       </motion.h1>
-      <p className="text-body-md text-neutral-600">
+      <p className="text-body-md">
         Track your income and financial growth over time.
       </p>
 
@@ -70,13 +70,13 @@ export default function FreelancerEarningsPage() {
         >
           <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 flex flex-col items-start">
             <CardHeader className="p-0 pb-3">
-              <CardTitle className="text-h4 font-bold text-neutral-800">
+              <CardTitle className="text-h4 font-bold">
                 Total Earnings
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex items-center">
               <DollarSignIcon className="h-8 w-8 text-primary-500 mr-2" />
-              <span className="text-display-sm font-bold text-neutral-900">
+              <span className="text-display-sm font-bold">
                 ${totalEarnings.toLocaleString()}
               </span>
             </CardContent>
@@ -89,13 +89,13 @@ export default function FreelancerEarningsPage() {
         >
           <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 flex flex-col items-start">
             <CardHeader className="p-0 pb-3">
-              <CardTitle className="text-h4 font-bold text-neutral-800">
+              <CardTitle className="text-h4 font-bold">
                 Avg. Monthly Earnings
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex items-center">
               <TrendingUpIcon className="h-8 w-8 text-primary-500 mr-2" />
-              <span className="text-display-sm font-bold text-neutral-900">
+              <span className="text-display-sm font-bold">
                 ${averageMonthly}
               </span>
             </CardContent>
@@ -112,10 +112,10 @@ export default function FreelancerEarningsPage() {
       >
         <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
           <CardHeader>
-            <CardTitle className="text-h3 font-bold text-neutral-800">
+            <CardTitle className="text-h3 font-bold">
               Monthly Earnings Overview
             </CardTitle>
-            <CardDescription className="text-body-md text-neutral-600">
+            <CardDescription className="text-body-md">
               Your earnings performance over the last few months.
             </CardDescription>
           </CardHeader>
@@ -126,11 +126,8 @@ export default function FreelancerEarningsPage() {
                   data={sampleEarnings}
                   margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
                 >
-                  <XAxis
-                    dataKey="month"
-                    className="text-body-sm text-neutral-600"
-                  />
-                  <YAxis className="text-body-sm text-neutral-600" />
+                  <XAxis dataKey="month" className="text-body-sm" />
+                  <YAxis className="text-body-sm" />
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="hsl(var(--neutral-200))"
@@ -169,15 +166,15 @@ export default function FreelancerEarningsPage() {
       >
         <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
           <CardHeader>
-            <CardTitle className="text-h3 font-bold text-neutral-800">
+            <CardTitle className="text-h3 font-bold">
               Detailed Payout History
             </CardTitle>
-            <CardDescription className="text-body-md text-neutral-600">
+            <CardDescription className="text-body-md">
               A full breakdown of all your payouts and fees.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-body-md text-neutral-600">
+            <p className="text-body-md">
               Detailed payout history will be displayed here, with filtering and
               search capabilities. This is a placeholder.
             </p>

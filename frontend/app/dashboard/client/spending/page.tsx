@@ -79,20 +79,20 @@ export default function ClientSpendingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-display-md font-extrabold text-neutral-800 dark:text-neutral-100"
+        className="text-display-md font-extrabold"
       >
         Spending History
       </motion.h1>
-      <p className="text-body-md text-neutral-600">
+      <p className="text-body-md">
         Track all your transactions and payments made on the platform.
       </p>
 
       <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-h3 font-bold text-neutral-800">
+          <CardTitle className="text-h3 font-bold">
             Transaction History
           </CardTitle>
-          <DollarSignIcon className="h-6 w-6 text-neutral-500" />
+          <DollarSignIcon className="h-6 w-6" />
         </CardHeader>
         <CardContent>
           <div className="max-h-[600px] overflow-y-auto">
@@ -138,7 +138,7 @@ export default function ClientSpendingPage() {
             </Table>
           </div>
           {sampleTransactions.length === 0 && (
-            <div className="py-6 text-center text-body-md text-neutral-500">
+            <div className="py-6 text-center text-body-md">
               No transactions recorded yet.
             </div>
           )}

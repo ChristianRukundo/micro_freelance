@@ -49,10 +49,10 @@ export function FreelancerCard({ freelancer }: FreelancerCardProps) {
               {avatarSeed.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <CardTitle className="mt-4 text-h4 font-bold text-neutral-800 transition-colors group-hover:text-primary-600">
+          <CardTitle className="mt-4 text-h4 font-bold transition-colors group-hover:text-primary-600">
             {freelancer.profile?.firstName} {freelancer.profile?.lastName}
           </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600 mt-1">
+          <CardDescription className="text-body-md mt-1">
             {freelancer.email}
           </CardDescription>
         </CardHeader>
@@ -60,9 +60,7 @@ export function FreelancerCard({ freelancer }: FreelancerCardProps) {
           {freelancer.profile?.skills &&
             freelancer.profile.skills.length > 0 && (
               <div>
-                <h4 className="text-h6 font-semibold text-neutral-700 mb-2">
-                  Skills:
-                </h4>
+                <h4 className="text-h6 font-semibold mb-2">Skills:</h4>
                 <div className="flex flex-wrap gap-2">
                   {freelancer.profile.skills.slice(0, 4).map((skill, index) => (
                     <Badge
@@ -74,10 +72,7 @@ export function FreelancerCard({ freelancer }: FreelancerCardProps) {
                     </Badge>
                   ))}
                   {freelancer.profile.skills.length > 4 && (
-                    <Badge
-                      variant="outline"
-                      className="text-body-sm text-neutral-500"
-                    >
+                    <Badge variant="outline" className="text-body-sm">
                       +{freelancer.profile.skills.length - 4} more
                     </Badge>
                   )}
@@ -86,12 +81,12 @@ export function FreelancerCard({ freelancer }: FreelancerCardProps) {
             )}
 
           {freelancer.profile?.bio && (
-            <CardDescription className="text-body-sm text-neutral-700 line-clamp-3">
+            <CardDescription className="text-body-sm line-clamp-3">
               {freelancer.profile.bio}
             </CardDescription>
           )}
 
-          <div className="flex items-center text-body-sm text-neutral-600">
+          <div className="flex items-center text-body-sm">
             <StarIcon className="mr-2 h-4 w-4 text-yellow-500" />
             <span>4.8 (12 Reviews)</span> {/* Placeholder for rating */}
             <BriefcaseIcon className="ml-4 mr-2 h-4 w-4 text-primary-500" />

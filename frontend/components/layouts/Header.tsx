@@ -133,8 +133,8 @@ export function Header() {
             aria-label="Home"
           >
             <Logo className="h-8 w-auto text-primary-500 transition-colors hover:text-primary-600" />
-            <span className="text-h5 font-semibold text-neutral-800 transition-colors hover:text-primary-700">
-              FreelanceHub
+            <span className="text-h5 font-semibold transition-colors hover:text-primary-700">
+              MicroFreelane
             </span>
           </Link>
         </div>
@@ -142,14 +142,14 @@ export function Header() {
         <nav className="flex-1 hidden items-center justify-center space-x-6 md:flex">
           <Link
             href="/tasks"
-            className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+            className="text-body-md font-medium hover:text-primary-500 transition-colors duration-200"
             prefetch={false}
           >
             Browse Tasks
           </Link>
           <Link
             href="/freelancers"
-            className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+            className="text-body-md font-medium hover:text-primary-500 transition-colors duration-200"
             prefetch={false}
           >
             Find Freelancers
@@ -157,7 +157,7 @@ export function Header() {
           {isAuthenticated && (
             <Link
               href={getDashboardLink()}
-              className="text-body-md font-medium text-neutral-600 hover:text-primary-500 transition-colors duration-200"
+              className="text-body-md font-medium hover:text-primary-500 transition-colors duration-200"
               prefetch={false}
             >
               Dashboard
@@ -199,18 +199,16 @@ export function Header() {
                   forceMount
                 >
                   <DropdownMenuLabel className="flex flex-col space-y-1 p-2">
-                    <p className="text-body-md font-semibold leading-none text-neutral-800">
+                    <p className="text-body-md font-semibold leading-none">
                       {user?.profile?.firstName || user?.email}
                     </p>
-                    <p className="text-caption text-neutral-500">
-                      {user?.email}
-                    </p>
+                    <p className="text-caption">{user?.email}</p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-neutral-200" />
                   <DropdownMenuItem asChild>
                     <Link
                       href={getDashboardLink()}
-                      className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                      className="flex cursor-pointer items-center p-2 text-body-sm transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
                     >
                       <LayoutDashboardIcon className="mr-2 h-4 w-4" />
                       Dashboard
@@ -219,7 +217,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link
                       href="/dashboard/profile"
-                      className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                      className="flex cursor-pointer items-center p-2 text-body-sm transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
                     >
                       <UserIcon className="mr-2 h-4 w-4" />
                       Profile Settings
@@ -229,7 +227,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link
                         href="/admin/users"
-                        className="flex cursor-pointer items-center p-2 text-body-sm text-neutral-700 transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
+                        className="flex cursor-pointer items-center p-2 text-body-sm transition-colors hover:text-primary-500 hover:bg-primary-50 rounded-md"
                       >
                         <UserCogIcon className="mr-2 h-4 w-4" />
                         Admin Panel
@@ -258,7 +256,7 @@ export function Header() {
               <Link href="/login" passHref>
                 <Button
                   variant="ghost"
-                  className="text-body-md font-medium text-neutral-700 hover:text-primary-500"
+                  className="text-body-md font-medium hover:text-primary-500"
                 >
                   Login
                 </Button>
@@ -285,10 +283,10 @@ export function Header() {
               className="w-[280px] sm:w-[320px] p-6 pt-12 flex flex-col"
             >
               <SheetHeader className="text-left mb-6">
-                <SheetTitle className="text-h3 font-bold text-neutral-800">
+                <SheetTitle className="text-h3 font-bold">
                   Navigation
                 </SheetTitle>
-                <SheetDescription className="text-body-md text-neutral-600">
+                <SheetDescription className="text-body-md">
                   Explore projects, find freelancers, or manage your account.
                 </SheetDescription>
               </SheetHeader>
@@ -302,7 +300,7 @@ export function Header() {
                   >
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-body-md font-medium text-neutral-700 hover:text-primary-500"
+                      className="w-full justify-start text-body-md font-medium hover:text-primary-500"
                     >
                       {item.icon} {item.label}
                     </Button>

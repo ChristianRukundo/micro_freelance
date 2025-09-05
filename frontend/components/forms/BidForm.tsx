@@ -57,8 +57,8 @@ export function BidForm({ taskId }: BidFormProps) {
   if (!isAuthenticated || user?.role !== UserRole.FREELANCER) {
     return (
       <Card className="shadow-soft dark:shadow-soft-dark border-neutral-200 bg-neutral-50 p-6 text-center">
-        <h4 className="text-h4 font-bold text-neutral-800">Ready to Bid?</h4>
-        <p className="text-body-md text-neutral-600 mt-2">
+        <h4 className="text-h4 font-bold">Ready to Bid?</h4>
+        <p className="text-body-md mt-2">
           Only registered freelancers can submit bids.
         </p>
         <Link

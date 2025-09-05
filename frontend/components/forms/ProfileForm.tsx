@@ -347,9 +347,7 @@ export function ProfileForm() {
     <div className="space-y-12">
       {/* Profile Information Form */}
       <section>
-        <h3 className="text-h3 font-bold text-neutral-800 mb-4">
-          Personal Information
-        </h3>
+        <h3 className="text-h3 font-bold mb-4">Personal Information</h3>
         <Form {...updateProfileForm}>
           <form
             onSubmit={updateProfileForm.handleSubmit(onProfileSubmit)}
@@ -408,7 +406,7 @@ export function ProfileForm() {
                   </Button>
                 )}
               </div>
-              <p className="text-body-sm text-neutral-500">
+              <p className="text-body-sm">
                 Click avatar or X icon to change/remove (Max 2MB)
               </p>
             </div>
@@ -471,9 +469,7 @@ export function ProfileForm() {
 
             {authUser.role === UserRole.FREELANCER && ( // Only show skills/portfolio for freelancers
               <>
-                <h4 className="text-h5 font-semibold text-neutral-800 mt-8">
-                  Skills
-                </h4>
+                <h4 className="text-h5 font-semibold mt-8">Skills</h4>
                 <FormField
                   control={updateProfileForm.control}
                   name="skills"
@@ -504,7 +500,7 @@ export function ProfileForm() {
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="ml-1 h-5 w-5 p-0 hover:bg-transparent text-neutral-500 hover:text-destructive-500"
+                                className="ml-1 h-5 w-5 p-0 hover:bg-transparent hover:text-destructive-500"
                                 onClick={() => handleRemoveSkill(skill)}
                                 disabled={isUpdatingProfile}
                               >
@@ -518,9 +514,7 @@ export function ProfileForm() {
                   )}
                 />
 
-                <h4 className="text-h5 font-semibold text-neutral-800 mt-8">
-                  Portfolio Links
-                </h4>
+                <h4 className="text-h5 font-semibold mt-8">Portfolio Links</h4>
                 <FormField
                   control={updateProfileForm.control}
                   name="portfolioLinks"
@@ -562,7 +556,7 @@ export function ProfileForm() {
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 p-0 hover:bg-transparent text-neutral-500 hover:text-destructive-500"
+                                className="h-6 w-6 p-0 hover:bg-transparent hover:text-destructive-500"
                                 onClick={() => handleRemovePortfolioLink(link)}
                                 disabled={isUpdatingProfile}
                               >
@@ -600,9 +594,7 @@ export function ProfileForm() {
 
       {/* Change Password Form */}
       <section>
-        <h3 className="text-h3 font-bold text-neutral-800 mb-4">
-          Change Password
-        </h3>
+        <h3 className="text-h3 font-bold mb-4">Change Password</h3>
         <Form {...changePasswordForm}>
           <form
             onSubmit={changePasswordForm.handleSubmit(onPasswordSubmit)}

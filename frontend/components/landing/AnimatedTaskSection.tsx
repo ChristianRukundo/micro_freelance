@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 import { TaskCard } from "@/components/cards/TaskCard";
@@ -10,7 +10,9 @@ interface AnimatedTaskSectionProps {
   popularTasks?: TaskType[];
 }
 
-export function AnimatedTaskSection({ popularTasks }: AnimatedTaskSectionProps) {
+export function AnimatedTaskSection({
+  popularTasks,
+}: AnimatedTaskSectionProps) {
   return (
     <section className="container my-24">
       <motion.div
@@ -20,10 +22,8 @@ export function AnimatedTaskSection({ popularTasks }: AnimatedTaskSectionProps) 
         transition={{ duration: 0.6, delay: 0.1 }}
         className="mb-12 text-center"
       >
-        <h2 className="text-display-md font-bold text-neutral-800">
-          Popular Projects
-        </h2>
-        <p className="text-body-lg text-neutral-600 mt-4 max-w-2xl mx-auto">
+        <h2 className="text-display-md font-bold">Popular Projects</h2>
+        <p className="text-body-lg mt-4 max-w-2xl mx-auto">
           Explore some of the most exciting and in-demand projects on our
           platform.
         </p>

@@ -138,7 +138,7 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
             transition={{ duration: 0.3 }}
             className="rounded-lg border border-neutral-200 p-4 shadow-soft dark:shadow-soft-dark space-y-4 relative"
           >
-            <h4 className="text-h6 font-semibold text-neutral-800 mb-4">
+            <h4 className="text-h6 font-semibold mb-4">
               Milestone {index + 1}
             </h4>
             {milestonesFields.length > 1 && (

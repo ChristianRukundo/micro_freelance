@@ -22,6 +22,7 @@ import adminRoutes from '@modules/admin/admin.route';
 import uploadRoutes from '@modules/uploads/upload.route';
 
 import swaggerDocument from '@docs/swagger.json';
+import path from 'path';
 
 const app = express();
 
@@ -46,6 +47,8 @@ app.use((req, res, next) => {
     express.json({ limit: '10kb' })(req, res, next);
   }
 });
+app.use(express.static(path.join(__dirname, '../public')));
+
 
 app.use(cookieParser());
 

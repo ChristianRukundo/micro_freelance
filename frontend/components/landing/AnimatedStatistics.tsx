@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion } from "framer-motion";
 
@@ -25,9 +25,7 @@ export function AnimatedStatistics() {
             <p className="text-display-lg font-extrabold text-primary-500">
               {stat.value}
             </p>
-            <h3 className="text-h4 font-bold text-neutral-800">
-              {stat.label}
-            </h3>
+            <h3 className="text-h4 font-bold">{stat.label}</h3>
           </motion.div>
         ))}
       </div>

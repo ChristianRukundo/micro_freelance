@@ -172,9 +172,7 @@ export function TaskDetailsOverview({
       className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6 space-y-6"
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-display-md font-bold text-neutral-800">
-          {task.title}
-        </h2>
+        <h2 className="text-display-md font-bold">{task.title}</h2>
         <Badge
           variant="outline"
           className={`text-body-md font-semibold px-4 py-2 ${
@@ -185,20 +183,18 @@ export function TaskDetailsOverview({
                 : task.status === TaskStatus.IN_REVIEW
                   ? "bg-blue-50 text-blue-600 border-blue-200" // Custom blue for in-review
                   : task.status === TaskStatus.COMPLETED
-                    ? "bg-neutral-100 text-neutral-600 border-neutral-300"
-                    : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                    ? "bg-neutral-100 border-neutral-300"
+                    : "bg-neutral-100 border-neutral-300"
           }`}
         >
           {task.status.replace(/_/g, " ")}
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-body-sm text-neutral-600">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-body-sm">
         <div className="flex items-center">
           <DollarSignIcon className="mr-2 h-4 w-4 text-primary-500" />
-          <span className="font-semibold text-neutral-700">
-            ${task.budget.toLocaleString()}
-          </span>
+          <span className="font-semibold">${task.budget.toLocaleString()}</span>
         </div>
         <div className="flex items-center">
           <ClockIcon className="mr-2 h-4 w-4 text-primary-500" />
@@ -214,16 +210,14 @@ export function TaskDetailsOverview({
         </div>
       </div>
 
-      <article className="prose prose-sm dark:prose-invert max-w-none text-neutral-700">
-        <h3 className="text-h4 font-bold text-neutral-800 mb-3">Description</h3>
+      <article className="prose prose-sm dark:prose-invert max-w-none">
+        <h3 className="text-h4 font-bold mb-3">Description</h3>
         <ReactMarkdown>{task.description}</ReactMarkdown>
       </article>
 
       {task.attachments && task.attachments.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-h4 font-bold text-neutral-800 mb-3">
-            Attachments
-          </h3>
+          <h3 className="text-h4 font-bold mb-3">Attachments</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {task.attachments.map((attachment) => (
               <a
@@ -234,7 +228,7 @@ export function TaskDetailsOverview({
                 className="flex items-center space-x-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 hover:bg-neutral-100 transition-colors"
               >
                 <FileTextIcon className="h-5 w-5 text-primary-500" />
-                <span className="text-body-sm font-medium text-neutral-700">
+                <span className="text-body-sm font-medium">
                   {attachment.fileName}
                 </span>
               </a>
@@ -243,7 +237,7 @@ export function TaskDetailsOverview({
         </div>
       )}
 
-      <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-body-sm text-neutral-600">
+      <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-body-sm">
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
             <AvatarImage
@@ -402,13 +396,11 @@ export function TaskBidsSection({ taskId, initialTask }: ProjectSectionProps) {
       transition={{ duration: 0.5, delay: 0.1 }}
       className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6"
     >
-      <h3 className="text-h4 font-bold text-neutral-800 mb-4">
-        Bids ({bids.length})
-      </h3>
+      <h3 className="text-h4 font-bold mb-4">Bids ({bids.length})</h3>
 
       {canBid && !hasBidded && (
         <>
-          <p className="text-body-sm text-neutral-600 mb-4">
+          <p className="text-body-sm mb-4">
             Submit your proposal for this project:
           </p>
           <BidForm taskId={taskId} />
@@ -433,9 +425,7 @@ export function TaskBidsSection({ taskId, initialTask }: ProjectSectionProps) {
           ))}
         </div>
       ) : bids.length === 0 ? (
-        <p className="text-body-md text-neutral-500 text-center py-4">
-          No bids submitted yet.
-        </p>
+        <p className="text-body-md text-center py-4">No bids submitted yet.</p>
       ) : (
         <div className="space-y-4">
           {bids.map((bid) => (
@@ -535,7 +525,7 @@ export function MilestoneManagement({
   if (isLoadingMilestones)
     return (
       <div className="space-y-4">
-        <h3 className="text-h4 font-bold text-neutral-800 mb-4">
+        <h3 className="text-h4 font-bold mb-4">
           <Skeleton className="h-6 w-1/3" />
         </h3>
         <Skeleton className="h-6 w-full" />
@@ -577,9 +567,7 @@ export function MilestoneManagement({
       className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6 space-y-6"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-h4 font-bold text-neutral-800">
-          Milestones ({totalMilestones})
-        </h3>
+        <h3 className="text-h4 font-bold">Milestones ({totalMilestones})</h3>
         {isTaskOwner && initialTask.status === TaskStatus.IN_PROGRESS && (
           <Dialog
             open={isMilestoneFormOpen}
@@ -611,7 +599,7 @@ export function MilestoneManagement({
       </div>
 
       {milestones.length === 0 ? (
-        <p className="text-body-md text-neutral-500 text-center py-4">
+        <p className="text-body-md text-center py-4">
           {isTaskOwner
             ? "No milestones defined yet. Click 'Create Milestones' to start."
             : "No milestones defined for this project."}
@@ -619,9 +607,9 @@ export function MilestoneManagement({
       ) : (
         <>
           <div className="space-y-2">
-            <div className="flex justify-between text-body-sm text-neutral-600">
+            <div className="flex justify-between text-body-sm">
               <span>Progress:</span>
-              <span className="font-medium text-neutral-800">
+              <span className="font-medium">
                 {progressPercentage}% Complete
               </span>
             </div>
@@ -695,7 +683,7 @@ function MilestoneCard({
   return (
     <Card className="rounded-xl border border-neutral-200 bg-card shadow-soft dark:shadow-soft-dark p-4 space-y-3">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-        <h4 className="text-h6 font-semibold text-neutral-800 flex items-center">
+        <h4 className="text-h6 font-semibold flex items-center">
           <ListChecksIcon className="h-5 w-5 mr-2 text-primary-500" />{" "}
           {milestone.description}
         </h4>
@@ -709,20 +697,20 @@ function MilestoneCard({
                   ? "bg-warning-50 text-warning-600 border-warning-200"
                   : milestone.status === MilestoneStatus.REVISION_REQUESTED
                     ? "bg-error-50 text-error-600 border-error-200"
-                    : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                    : "bg-neutral-100 border-neutral-300"
             }`}
           >
             {milestone.status.replace(/_/g, " ")}
           </Badge>
           <span
             className={cn(
-              "text-body-sm text-neutral-600",
+              "text-body-sm",
               isOverdue && "text-destructive-500 font-medium"
             )}
           >
             Due: {formatDate(milestone.dueDate)} {isOverdue && "(Overdue)"}
           </span>
-          <span className="text-body-sm font-semibold text-neutral-800">
+          <span className="text-body-sm font-semibold">
             ${milestone.amount.toLocaleString()}
           </span>
         </div>
@@ -880,7 +868,7 @@ export function ChatSection({ taskId, initialTask }: ProjectSectionProps) {
       transition={{ duration: 0.5, delay: 0.3 }}
       className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6"
     >
-      <h3 className="text-h4 font-bold text-neutral-800 mb-4 flex items-center">
+      <h3 className="text-h4 font-bold mb-4 flex items-center">
         <MessageSquareTextIcon className="mr-2 h-5 w-5 text-primary-500" />{" "}
         Project Chat
       </h3>

@@ -60,9 +60,7 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
     return (
       <div className="flex h-[400px] items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 shadow-soft dark:shadow-soft-dark">
         <LoadingSpinner size="lg" className="mr-3" />
-        <span className="text-body-md text-neutral-600">
-          Loading chat history...
-        </span>
+        <span className="text-body-md">Loading chat history...</span>
       </div>
     );
   }
@@ -129,7 +127,7 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="mt-2 text-caption text-neutral-500 flex items-center"
+            className="mt-2 text-caption flex items-center"
           >
             <CircleDotDashedIcon className="h-3 w-3 mr-1 animate-pulse" />
             {Array.from(typingUsers).join(", ")} is typing...
@@ -176,7 +174,7 @@ function ChatMessage({ message, isCurrentUser }: ChatMessageProps) {
           "relative max-w-[70%] rounded-xl px-4 py-2 text-body-md shadow-sm",
           isCurrentUser
             ? "rounded-br-none bg-primary-500 text-primary-foreground"
-            : "rounded-bl-none bg-neutral-100 text-neutral-900 border border-neutral-200"
+            : "rounded-bl-none bg-neutral-100 border border-neutral-200"
         )}
       >
         <p className="font-medium text-caption mb-1">
@@ -186,7 +184,7 @@ function ChatMessage({ message, isCurrentUser }: ChatMessageProps) {
         <span
           className={cn(
             "absolute bottom-1 right-2 text-caption opacity-80",
-            isCurrentUser ? "text-primary-50" : "text-neutral-500"
+            isCurrentUser ? "text-primary-50" : ""
           )}
         >
           {format(new Date(message.createdAt), "HH:mm")}

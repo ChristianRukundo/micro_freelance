@@ -137,9 +137,7 @@ export default function TaskBrowsePage() {
 
   return (
     <div className="container py-8">
-      <h1 className="text-display-md font-extrabold mb-8 text-neutral-800">
-        Browse Projects
-      </h1>
+      <h1 className="text-display-md font-extrabold mb-8">Browse Projects</h1>
 
       <ErrorBoundary
         fallback={
@@ -158,7 +156,7 @@ export default function TaskBrowsePage() {
             onSubmit={handleSearchSubmit}
             className="md:col-span-2 lg:col-span-2 relative"
           >
-            <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+            <SearchIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" />
             <Input
               placeholder="Search tasks by title or description..."
               value={searchTerm}
@@ -169,7 +167,7 @@ export default function TaskBrowsePage() {
               type="submit"
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-0 h-full w-10 text-neutral-500 hover:text-primary-500"
+              className="absolute right-0 top-0 h-full w-10 hover:text-primary-500"
               aria-label="Search"
             >
               <MoveRightIcon className="h-5 w-5" />
@@ -187,9 +185,7 @@ export default function TaskBrowsePage() {
             </SelectTrigger>
             <SelectContent>
               {isLoadingCategories ? (
-                <div className="p-2 text-center text-neutral-500">
-                  Loading...
-                </div>
+                <div className="p-2 text-center">Loading...</div>
               ) : isErrorCategories ? (
                 <div className="p-2 text-center text-destructive-500">
                   Error loading categories
@@ -232,7 +228,7 @@ export default function TaskBrowsePage() {
             type="button"
             variant="outline"
             onClick={handleClearFilters}
-            className="shadow-soft dark:shadow-soft-dark text-neutral-600 hover:text-destructive-500"
+            className="shadow-soft dark:shadow-soft-dark hover:text-destructive-500"
           >
             <XCircleIcon className="h-4 w-4 mr-2" /> Clear Filters
           </Button>
@@ -296,8 +292,8 @@ export default function TaskBrowsePage() {
         )}
 
         {isEmpty && (
-          <div className="flex flex-col items-center justify-center py-12 text-center text-neutral-500">
-            <FilterIcon className="h-16 w-16 mb-4 text-neutral-300" />
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <FilterIcon className="h-16 w-16 mb-4" />
             <h2 className="text-h3">No tasks found matching your criteria.</h2>
             <p className="text-body-md">
               Try adjusting your filters or search terms.

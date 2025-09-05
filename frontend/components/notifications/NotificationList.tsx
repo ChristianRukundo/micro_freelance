@@ -73,9 +73,7 @@ export function NotificationList() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-h4 font-bold text-neutral-800">
-          Your Notifications
-        </h3>
+        <h3 className="text-h4 font-bold">Your Notifications</h3>
         {!isEmpty && (
           <Button
             variant="outline"
@@ -101,8 +99,8 @@ export function NotificationList() {
           ))}
         </div>
       ) : isEmpty ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center text-neutral-500">
-          <BellOffIcon className="h-16 w-16 mb-4 text-neutral-300" />
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <BellOffIcon className="h-16 w-16 mb-4" />
           <h2 className="text-h3">No new notifications.</h2>
           <p className="text-body-md">You're all caught up!</p>
         </div>

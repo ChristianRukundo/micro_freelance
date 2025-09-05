@@ -13,7 +13,7 @@ export function AnimatedTestimonials() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
-          className="text-display-md font-bold text-neutral-800 mb-12"
+          className="text-display-md font-bold mb-12"
         >
           What Our Users Say
         </motion.h2>
@@ -31,7 +31,7 @@ export function AnimatedTestimonials() {
                   "
                 </span>
                 <CardContent className="p-0 space-y-4">
-                  <p className="text-body-lg italic text-neutral-700">
+                  <p className="text-body-lg italic">
                     &ldquo;This platform has revolutionized how I find and
                     manage my freelance projects. The escrow system gives me
                     peace of mind, and the talent pool is exceptional!&rdquo;
@@ -45,12 +45,8 @@ export function AnimatedTestimonials() {
                       <AvatarFallback>JD</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-h6 text-neutral-800">
-                        Jane Doe
-                      </p>
-                      <p className="text-body-sm text-neutral-600">
-                        CEO, Startup X
-                      </p>
+                      <p className="font-semibold text-h6">Jane Doe</p>
+                      <p className="text-body-sm">CEO, Startup X</p>
                     </div>
                   </div>
                 </CardContent>

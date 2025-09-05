@@ -91,9 +91,7 @@ export default async function TaskDetailsPage({
 
   return (
     <div className="container py-8">
-      <h1 className="text-display-md font-extrabold text-neutral-800 hidden">
-        Task Details
-      </h1>
+      <h1 className="text-display-md font-extrabold hidden">Task Details</h1>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <ErrorBoundary
           fallback={
@@ -175,9 +173,7 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
       <div className="flex-1 space-y-8">
         <div className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-display-md font-bold text-neutral-800">
-              {task.title}
-            </h2>
+            <h2 className="text-display-md font-bold">{task.title}</h2>
             <Badge
               variant="outline"
               className={`text-body-md font-semibold ${
@@ -186,18 +182,18 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
                   : task.status === TaskStatus.IN_PROGRESS
                     ? "bg-warning-50 text-warning-600 border-warning-200"
                     : task.status === TaskStatus.COMPLETED
-                      ? "bg-neutral-100 text-neutral-600 border-neutral-300"
-                      : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                      ? "bg-neutral-100 border-neutral-300"
+                      : "bg-neutral-100 border-neutral-300"
               }`}
             >
               {task.status.replace(/_/g, " ")}
             </Badge>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-body-sm text-neutral-600 mb-6">
+          <div className="flex flex-wrap items-center gap-4 text-body-sm mb-6">
             <div className="flex items-center">
               <DollarSignIcon className="mr-2 h-4 w-4 text-primary-500" />
-              <span className="font-semibold text-neutral-700">
+              <span className="font-semibold">
                 ${task.budget.toLocaleString()}
               </span>
             </div>
@@ -218,18 +214,14 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
             </div>
           </div>
 
-          <article className="prose prose-sm dark:prose-invert max-w-none text-neutral-700">
-            <h3 className="text-h4 font-bold text-neutral-800 mb-3">
-              Description
-            </h3>
+          <article className="prose prose-sm dark:prose-invert max-w-none">
+            <h3 className="text-h4 font-bold mb-3">Description</h3>
             <ReactMarkdown>{task.description}</ReactMarkdown>
           </article>
 
           {task.attachments && task.attachments.length > 0 && (
             <div className="mt-8">
-              <h3 className="text-h4 font-bold text-neutral-800 mb-3">
-                Attachments
-              </h3>
+              <h3 className="text-h4 font-bold mb-3">Attachments</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {task.attachments.map((attachment) => (
                   <a
@@ -240,7 +232,7 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
                     className="flex items-center space-x-3 rounded-md border border-neutral-200 bg-neutral-50 p-3 hover:bg-neutral-100 transition-colors"
                   >
                     <FileTextIcon className="h-5 w-5 text-primary-500" />
-                    <span className="text-body-sm font-medium text-neutral-700">
+                    <span className="text-body-sm font-medium">
                       {attachment.fileName}
                     </span>
                   </a>
@@ -249,7 +241,7 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-between text-body-sm text-neutral-600">
+          <div className="mt-8 flex items-center justify-between text-body-sm">
             <div className="flex items-center space-x-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage
@@ -343,12 +335,10 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
           id="bids"
           className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6"
         >
-          <h3 className="text-h4 font-bold text-neutral-800 mb-4">
-            Bids ({bids.length})
-          </h3>
+          <h3 className="text-h4 font-bold mb-4">Bids ({bids.length})</h3>
           {canBid && !hasBidded && (
             <>
-              <p className="text-body-sm text-neutral-600 mb-4">
+              <p className="text-body-sm mb-4">
                 Submit your proposal for this project:
               </p>
               <BidForm taskId={taskId} />
@@ -367,7 +357,7 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
           )}
 
           {bids.length === 0 ? (
-            <p className="text-body-md text-neutral-500 text-center py-4">
+            <p className="text-body-md text-center py-4">
               No bids submitted yet.
             </p>
           ) : (
@@ -410,7 +400,7 @@ function TaskDetailsContent({ taskId, initialTask }: TaskDetailsContentProps) {
         {/* Chat Section */}
         {(isTaskOwner || isAssignedFreelancer) && (
           <div className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6">
-            <h3 className="text-h4 font-bold text-neutral-800 mb-4 flex items-center">
+            <h3 className="text-h4 font-bold mb-4 flex items-center">
               <MessageSquareTextIcon className="mr-2 h-5 w-5 text-primary-500" />{" "}
               Project Chat
             </h3>

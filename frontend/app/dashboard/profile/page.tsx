@@ -46,10 +46,8 @@ export default async function ProfileSettingsPage() {
     <div className="container py-8">
       <Card className="w-full shadow-medium dark:shadow-medium-dark border-neutral-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-h2 font-bold text-neutral-800">
-            Profile Settings
-          </CardTitle>
-          <CardDescription className="text-body-md text-neutral-600">
+          <CardTitle className="text-h2 font-bold">Profile Settings</CardTitle>
+          <CardDescription className="text-body-md">
             Update your personal information, bio, skills, and portfolio links.
           </CardDescription>
         </CardHeader>
