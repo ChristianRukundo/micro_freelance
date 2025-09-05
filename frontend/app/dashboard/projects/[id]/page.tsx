@@ -22,11 +22,6 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
 
-interface ProjectWorkspacePageProps {
-  params: { id: string };
-}
-
-// Server Component to fetch initial task data
 async function getTaskDetails(taskId: string): Promise<Task | null> {
   try {
     const response = await api.get(`/tasks/${taskId}`);
@@ -39,7 +34,9 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
 
 export async function generateMetadata({
   params,
-}: ProjectWorkspacePageProps): Promise<Metadata> {
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
   const task = await getTaskDetails(params.id);
   if (!task) {
     return {
@@ -55,7 +52,9 @@ export async function generateMetadata({
 
 export default async function ProjectWorkspacePage({
   params,
-}: ProjectWorkspacePageProps) {
+}: {
+  params: { id: string };
+}) {
   const taskId = params.id;
   const queryClient = new QueryClient();
 
