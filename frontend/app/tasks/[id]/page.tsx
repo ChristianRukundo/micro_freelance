@@ -15,10 +15,6 @@ import { TriangleAlertIcon } from "lucide-react";
 import { TaskDetailsSkeleton } from "@/components/common/SkeletonLoaders";
 import { TaskDetailsClient } from "@/components/tasks/TaskDetailsClient";
 
-interface TaskDetailsPageProps {
-  params: { id: string };
-}
-
 // Server Component function to fetch initial task data
 async function getTaskDetails(taskId: string): Promise<Task | null> {
   try {
@@ -32,7 +28,7 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
 
 export async function generateMetadata({
   params,
-}: TaskDetailsPageProps): Promise<Metadata> {
+}: any): Promise<Metadata> {
   const task = await getTaskDetails(params.id);
   if (!task) {
     return {
@@ -48,7 +44,7 @@ export async function generateMetadata({
 
 export default async function TaskDetailsPage({
   params,
-}: TaskDetailsPageProps) {
+}: any) {
   const taskId = params.id;
   const queryClient = new QueryClient();
 

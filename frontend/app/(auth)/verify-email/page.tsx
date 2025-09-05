@@ -33,7 +33,7 @@ function VerifyEmailContent({ email }: { email?: string }) {
         <AuthForms formType="verify-email" initialEmail={email} />
         <Separator className="my-6 bg-neutral-200 dark:bg-neutral-700" />
         <p className="text-center text-body-sm text-neutral-600 dark:text-neutral-400">
-          Didn't receive the OTP?{" "}
+          Didn&apos;t receive the OTP?{" "}
           <button className="font-medium text-primary-600 hover:underline dark:text-primary-400">
             Resend OTP <MoveRightIcon className="inline-block ml-1 h-4 w-4" />
           </button>
@@ -61,9 +61,7 @@ function LoadingSkeleton() {
 
 export default function VerifyEmailPage({
   searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+}: any) {
   const email =
     typeof searchParams.email === "string" ? searchParams.email : undefined;
 

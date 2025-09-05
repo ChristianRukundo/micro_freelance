@@ -765,7 +765,7 @@ function MilestoneCard({
                 <DialogHeader>
                   <DialogTitle>Request Revision</DialogTitle>
                   <DialogDescription>
-                    Provide detailed feedback for why you're requesting a
+                    Provide detailed feedback for why you&apos;re requesting a
                     revision on this milestone.
                   </DialogDescription>
                 </DialogHeader>

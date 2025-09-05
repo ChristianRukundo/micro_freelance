@@ -46,7 +46,7 @@ export default function LoginPage() {
         </div>
         <Separator className="my-6 bg-neutral-200 dark:bg-neutral-700" />
         <p className="text-center text-body-sm text-neutral-600 dark:text-neutral-400">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/register"
             className="font-medium text-primary-600 hover:underline dark:text-primary-400"

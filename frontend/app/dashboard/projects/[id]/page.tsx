@@ -71,17 +71,11 @@ export default async function ProjectWorkspacePage({
     notFound(); // Next.js 404 page
   }
 
-  // Determine if the current user is authorized to view this workspace
-  // This check is duplicated in client-side hooks, but necessary for server-side rendering/metadata
-  // Real user check would involve decoding JWT from cookies on server
-  // For now, assume if the user has reached here, they might be involved or the page is public.
-  // The client-side components will enforce finer-grained authorization.
-
   return (
     <div className="flex flex-col space-y-8 py-8">
       <h1 className="text-display-md font-extrabold">Project Workspace</h1>
       <p className="text-body-md">
-        Manage "{initialTask.title}" - track progress, communicate, and handle
+        Manage &quot;{initialTask.title}&quot; - track progress, communicate, and handle
         payments.
       </p>
 

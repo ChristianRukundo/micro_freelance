@@ -44,7 +44,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <TriangleAlertIcon className="mx-auto h-6 w-6" />
             <AlertTitle className="text-h4 font-bold mt-2">Something went wrong!</AlertTitle>
             <AlertDescription className="mt-2 text-body-md">
-              We're sorry, an unexpected error occurred.
+              We&apos;re sorry, an unexpected error occurred.
               {this.state.error && (
                 <details className="mt-4 text-body-sm text-destructive-400">
                   <summary>Error Details</summary>

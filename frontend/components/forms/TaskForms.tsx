@@ -502,7 +502,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                 ) : (
                   <p className="text-body-md">
                     <UploadCloudIcon className="mx-auto mb-2 h-8 w-8" />
-                    Drag 'n' drop some files here, or click to select files
+                    Drag &apos;n&apos; drop some files here, or click to select files
                   </p>
                 )}
               </div>

@@ -28,7 +28,7 @@ export function AnimatedTestimonials() {
             >
               <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 text-left relative overflow-hidden group">
                 <span className="absolute top-0 right-0 h-24 w-24 translate-x-1/4 -translate-y-1/4 rotate-45 transform bg-primary-500/5 text-primary-500/10 text-display-lg font-extrabold -z-10 opacity-70">
-                  "
+                  &quot;
                 </span>
                 <CardContent className="p-0 space-y-4">
                   <p className="text-body-lg italic">

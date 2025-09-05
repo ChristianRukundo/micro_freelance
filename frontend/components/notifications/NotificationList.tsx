@@ -102,7 +102,7 @@ export function NotificationList() {
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <BellOffIcon className="h-16 w-16 mb-4" />
           <h2 className="text-h3">No new notifications.</h2>
-          <p className="text-body-md">You're all caught up!</p>
+          <p className="text-body-md">You&apos;re all caught up!</p>
         </div>
       ) : (
         <div className="space-y-4">
