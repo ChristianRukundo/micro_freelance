@@ -35,15 +35,18 @@ async function getTaskDetails(taskId: string): Promise<Task | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const task = await getTaskDetails(params.id);
+  const { id } = await params;
+  const task = await getTaskDetails(id);
+
   if (!task) {
     return {
       title: "Project Not Found - Micro Freelance Marketplace",
       description: "The requested project could not be found.",
     };
   }
+
   return {
     title: `${task.title} - Project Workspace`,
     description: `Manage project "${task.title}" with milestones, bids, and real-time chat.`,
