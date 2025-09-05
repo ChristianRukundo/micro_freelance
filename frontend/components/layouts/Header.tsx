@@ -134,7 +134,7 @@ export function Header() {
           >
             <Logo className="h-8 w-auto text-primary-500 transition-colors hover:text-primary-600" />
             <span className="text-h5 font-semibold transition-colors hover:text-primary-700">
-              MicroFreelane
+              MicroFreelance
             </span>
           </Link>
         </div>

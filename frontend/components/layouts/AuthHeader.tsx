@@ -15,7 +15,7 @@ export function AuthHeader() {
       >
         <Logo className="h-8 w-8 text-neutral-800 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors" />
         <span className="text-h5 font-semibold text-neutral-800 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
-          MicroFreelane
+          MicroFreelance
         </span>
       </Link>
       <ShadcnThemeToggle />

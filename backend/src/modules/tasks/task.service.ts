@@ -40,7 +40,7 @@ class TaskService {
     const skip = (page - 1) * limit;
 
     const where: any = {
-      status: status || TaskStatus.OPEN, // Default to open tasks
+      status: status || TaskStatus.OPEN, 
     };
 
     if (categoryId) {
@@ -77,6 +77,8 @@ class TaskService {
     });
 
     const totalTasks = await prisma.task.count({ where });
+
+    console.log(tasks);
 
     return {
       tasks,

@@ -12,7 +12,7 @@ import Link from "next/link";
 import { MoveLeftIcon } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Reset Password - MicroFreelane",
+  title: "Reset Password - MicroFreelance",
   description: "Reset your password using the OTP.",
 };
 

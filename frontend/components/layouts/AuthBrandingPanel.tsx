@@ -43,7 +43,7 @@ export function AuthBrandingPanel() {
       <div className="relative z-10 flex flex-col items-start w-full max-w-md">
         <div className="flex items-center space-x-3 mb-8">
           <Logo className="h-10 w-10 text-white" />
-          <span className="text-display-sm font-bold">MicroFreelane</span>
+          <span className="text-display-sm font-bold">MicroFreelance</span>
         </div>
 
         <h1 className="text-display-md font-extrabold tracking-tight drop-shadow-lg mb-4">

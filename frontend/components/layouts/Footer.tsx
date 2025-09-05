@@ -15,13 +15,13 @@ export function Footer() {
             aria-label="Home"
           >
             <Logo className="h-8 w-auto text-primary-500" />
-            <span className="text-h5 font-semibold">MicroFreelane</span>
+            <span className="text-h5 font-semibold">MicroFreelance</span>
           </Link>
           <p className="text-body-sm">
             Your trusted platform for connecting talent with opportunity.
           </p>
           <p className="text-caption">
-            &copy; {currentYear} MicroFreelane. All rights reserved.
+            &copy; {currentYear} MicroFreelance. All rights reserved.
           </p>
         </div>
 

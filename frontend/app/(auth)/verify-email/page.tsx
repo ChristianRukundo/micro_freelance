@@ -14,7 +14,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/common/SkeletonLoaders";
 
 export const metadata: Metadata = {
-  title: "Verify Email - MicroFreelane",
+  title: "Verify Email - MicroFreelance",
   description: "Verify your email to activate your account.",
 };
 

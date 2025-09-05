@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { MoveLeftIcon } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Register - MicroFreelane",
+  title: "Register - MicroFreelance",
   description: "Create a new account to start your journey.",
 };
 

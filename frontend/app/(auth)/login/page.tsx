@@ -13,8 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { MoveRightIcon } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Login - MicroFreelane",
-  description: "Log in to your MicroFreelane account.",
+  title: "Login - MicroFreelance",
+  description: "Log in to your MicroFreelance account.",
 };
 
 export default function LoginPage() {
