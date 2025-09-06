@@ -41,6 +41,7 @@ import {
 import Image from "next/image";
 import { LoadingSpinner } from "../common/LoadingSpinner";
 import { ChatWindow } from "../chat/ChatWindow";
+import { MilestoneManagement } from "./MilestoneManagement";
 
 interface TaskDetailsClientProps {
   taskId: string;
@@ -268,6 +269,13 @@ export function TaskDetailsClient({
             </div>
           </CardContent>
         </Card>
+        {(isTaskOwner || user?.id === task.freelancerId) && task.status === TaskStatus.IN_PROGRESS && (
+          <motion.div variants={itemVariants}>
+            <Card className="shadow-lg dark:shadow-black/20 p-6 md:p-8">
+              <MilestoneManagement taskId={taskId} initialTask={task} />
+            </Card>
+          </motion.div>
+        )}
         <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
           {(isTaskOwner || isAdmin) && (
             <>

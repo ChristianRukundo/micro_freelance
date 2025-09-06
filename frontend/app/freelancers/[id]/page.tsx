@@ -37,7 +37,8 @@ async function getFreelancerProfile(id: string): Promise<User | null> {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const freelancer = await getFreelancerProfile(params.id);
+  const { id } = await params;
+  const freelancer = await getFreelancerProfile(id);
   if (!freelancer || !freelancer.profile) {
     return { title: "Freelancer Not Found" };
   }
@@ -52,7 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function FreelancerProfilePage({ params }: Props) {
-  const freelancer = await getFreelancerProfile(params.id);
+  const id = await params.id;
+  const freelancer = await getFreelancerProfile(id);
 
   if (!freelancer || !freelancer.profile) {
     notFound();

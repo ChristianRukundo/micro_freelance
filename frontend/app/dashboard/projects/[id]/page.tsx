@@ -9,7 +9,7 @@ import api from "@/lib/api";
 import { Task, UserRole, Bid, Milestone } from "@/lib/types";
 import { TaskDetailsOverview } from "@/components/dashboard/ProjectWorkspace"; // Client Components
 import { TaskBidsSection } from "@/components/dashboard/ProjectWorkspace";
-import { MilestoneManagement } from "@/components/dashboard/ProjectWorkspace";
+import { MilestoneManagement } from "@/components/tasks/MilestoneManagement";
 import { ChatSection } from "@/components/dashboard/ProjectWorkspace";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/lib/zustand"; // Client component for user role checks
