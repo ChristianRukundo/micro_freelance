@@ -12,6 +12,7 @@ interface MessageInputProps {
   onSendMessage: (content: string) => void;
   onTypingStart: () => void;
   onTypingStop: () => void;
+  isInputDisabled?: boolean;
 }
 
 export function MessageInput({
@@ -19,6 +20,7 @@ export function MessageInput({
   onSendMessage,
   onTypingStart,
   onTypingStop,
+  isInputDisabled = false,
 }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const { isAuthenticated, user } = useAuthStore();
@@ -30,10 +32,15 @@ export function MessageInput({
       toast.error("You must be logged in to send messages.");
       return;
     }
+
+    if (isInputDisabled) {
+      toast.info("Chat is not connected. Please wait or refresh the page.");
+      return;
+    }
     if (message.trim()) {
       onSendMessage(message.trim());
       setMessage("");
-      onTypingStop(); // Ensure typing stops after sending
+      onTypingStop();
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = null;
@@ -43,7 +50,7 @@ export function MessageInput({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
-    if (!isAuthenticated || !user) return; // Only send typing if authenticated
+    if (!isAuthenticated || !user || isInputDisabled) return;
 
     if (!typingTimeoutRef.current) {
       onTypingStart();
@@ -56,22 +63,28 @@ export function MessageInput({
     typingTimeoutRef.current = setTimeout(() => {
       onTypingStop();
       typingTimeoutRef.current = null;
-    }, 3000); // Stop typing after 3 seconds of no input
+    }, 3000);
   };
 
   return (
     <form onSubmit={handleSendMessage} className="flex w-full space-x-3">
       <Input
         type="text"
-        placeholder="Type your message here..."
+        placeholder={
+          isInputDisabled
+            ? "Connecting to chat..."
+            : "Type your message here..."
+        }
         value={message}
         onChange={handleInputChange}
         className="flex-1 rounded-lg border border-neutral-300 bg-background shadow-soft dark:shadow-soft-dark"
-        disabled={!isAuthenticated || !user}
+        disabled={isInputDisabled || !isAuthenticated || !user}
       />
       <Button
         type="submit"
-        disabled={!message.trim() || !isAuthenticated || !user}
+        disabled={
+          !message.trim() || isInputDisabled || !isAuthenticated || !user
+        }
         className="shadow-primary dark:shadow-primary-dark group"
       >
         <SendIcon className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />

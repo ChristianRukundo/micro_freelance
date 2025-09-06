@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import React, { useEffect, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuthStore } from '@/lib/zustand'; // To get current user for socket connection
+import { logger } from '@/lib/utils';
 
 interface NotificationsPaginatedResponse extends PaginatedResponse<Notification> {
   notifications: Notification[];
@@ -12,65 +13,59 @@ interface NotificationsPaginatedResponse extends PaginatedResponse<Notification>
 
 export function useNotifications() {
   const queryClient = useQueryClient();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuthStore();
   const socketRef = useRef<Socket | null>(null);
 
   // --- Socket.IO for Real-time Notifications ---
   useEffect(() => {
-    if (!isAuthenticated || !user?.id || !process.env.NEXT_PUBLIC_WS_BASE_URL) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+    if (isAuthLoading || !isAuthenticated || !user?.id) {
       return;
     }
 
-    // Connect to WebSocket server
-    const socket = io(process.env.NEXT_PUBLIC_WS_BASE_URL, {
-      withCredentials: true,
-      extraHeaders: {
-        Authorization: `Bearer ${document.cookie.split('; ').find(row => row.startsWith('accessToken='))?.split('=')[1] || ''}`,
-      },
-    });
+    // FIX: Robust pattern for Strict Mode
+    if (!socketRef.current) {
+        logger.info("useNotifications: Initializing Socket.IO connection.");
+        
+        socketRef.current = io(process.env.NEXT_PUBLIC_WS_BASE_URL!, {
+            withCredentials: true,
+            transports: ['websocket'],
+        });
 
-    socket.on('connect', () => {
-      console.log('Socket.IO connected for notifications:', socket.id);
-      // Join a personal room based on user ID
-      socket.emit('join_room', user.id);
-    });
+        socketRef.current.on('connect', () => {
+            logger.info('Socket.IO connected for notifications:', { socketId: socketRef.current?.id });
+            // The backend automatically joins the personal room based on authenticated user ID
+        });
 
-    socket.on('new_notification', (notification: Notification) => {
-      console.log('Received new notification via socket:', notification);
-      toast.info(notification.message, {
-        action: {
-          label: 'View',
-          onClick: () => window.location.href = notification.url,
-        },
-      });
-      // Invalidate the notifications query to refetch fresh data
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      // Update unread count immediately
-      queryClient.setQueryData(['notificationsCount'], (old: any) => (old !== undefined ? old + 1 : 1));
-    });
+        socketRef.current.on('new_notification', (notification: Notification) => {
+            logger.info('Received new notification via socket:', { notification });
+            toast.info(notification.message, {
+                action: {
+                label: 'View',
+                onClick: () => window.location.href = notification.url,
+                },
+            });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            queryClient.invalidateQueries({ queryKey: ['notificationsCount'] });
+        });
 
-    socket.on('disconnect', () => {
-      console.log('Socket.IO disconnected for notifications');
-    });
+        socketRef.current.on('disconnect', (reason) => {
+            logger.info('Socket.IO disconnected for notifications', { reason });
+            socketRef.current = null;
+        });
 
-    socket.on('error', (error: string) => {
-      console.error('Socket.IO error:', error);
-      toast.error(`Real-time notification error: ${error}`);
-    });
-
-    socketRef.current = socket;
+        socketRef.current.on('connect_error', (error) => {
+            logger.error('Socket.IO notification error:', { error: error.message });
+        });
+    }
 
     return () => {
       if (socketRef.current) {
+        logger.info("useNotifications: Disconnecting socket on cleanup.");
         socketRef.current.disconnect();
         socketRef.current = null;
       }
     };
-  }, [isAuthenticated, user?.id, queryClient]);
+  }, [isAuthenticated, isAuthLoading, user?.id, queryClient]);
 
 
   // --- TanStack Query for Historical Notifications ---

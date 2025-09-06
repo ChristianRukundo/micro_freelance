@@ -1,54 +1,71 @@
+// frontend/components/tasks/TaskDetailsClient.tsx
+
 "use client";
 
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import api from "@/lib/api";
-import { Task, UserRole, Bid, Milestone, TaskStatus } from "@/lib/types";
-import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/useAuth";
-import { TaskDetailsSkeleton } from "@/components/common/SkeletonLoaders";
-import { Suspense } from "react";
-import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import React from "react";
+import { motion, Variants } from "framer-motion";
+import { Task, UserRole, Bid, TaskStatus } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  TriangleAlertIcon,
   DollarSignIcon,
   ClockIcon,
-  UsersIcon,
-  FileTextIcon,
-  MessageSquareTextIcon,
   HammerIcon,
   CheckCircle2Icon,
   XCircleIcon,
+  FileTextIcon,
+  MessageSquareTextIcon,
+  TriangleAlertIcon,
+  PencilIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/lib/date";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { BidForm } from "@/components/forms/BidForm";
-import { useBids } from "@/hooks/useBids";
-import { useTasks } from "@/hooks/useTasks";
-import { BidCard } from "@/components/cards/BidCard";
-import { useInView } from "react-intersection-observer";
-import React from "react";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChatWindow } from "@/components/chat/ChatWindow";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import { TaskDetailsSkeleton } from "@/components/common/SkeletonLoaders";
+import { useAuth } from "@/hooks/useAuth";
+import { useTasks } from "@/hooks/useTasks";
+import { BidCard } from "@/components/cards/BidCard"; // FIX: Corrected import
+import { BidForm } from "@/components/forms/BidForm";
+import { MyBidCard } from "@/components/cards/MyBidCard";
 import { Card, CardContent } from "../ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../ui/carousel";
+import Image from "next/image";
+import { LoadingSpinner } from "../common/LoadingSpinner";
+import { ChatWindow } from "../chat/ChatWindow";
 
-interface TaskDetailsContentProps {
+interface TaskDetailsClientProps {
   taskId: string;
   initialTask: Task;
 }
 
+// FIX: Correctly typed Framer Motion variants
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
 export function TaskDetailsClient({
   taskId,
   initialTask,
-}: TaskDetailsContentProps) {
-  const { user, isFreelancer } = useAuth();
+}: TaskDetailsClientProps) {
+  const { user, isFreelancer, isAdmin } = useAuth();
   const {
     taskDetails,
     isLoadingTaskDetails,
@@ -58,288 +75,307 @@ export function TaskDetailsClient({
     isCancelingTask,
     completeTask,
     isCompletingTask,
+    deleteTask,
+    isDeletingTask,
   } = useTasks({ q: taskId });
-  const {
-    bids,
-    isLoading,
-    isError,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useBids(taskId);
-  const { ref, inView } = useInView();
 
-  const task = taskDetails || initialTask; // Use real-time data if available, fallback to initial
+  const task = taskDetails || initialTask;
 
-  React.useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  if (isLoadingTaskDetails && !initialTask) return <TaskDetailsSkeleton />;
+  if (isLoadingTaskDetails && !task) return <TaskDetailsSkeleton />;
   if (isErrorTaskDetails)
     return (
       <Alert variant="destructive">
         <TriangleAlertIcon className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load task details: {errorTaskDetails?.message}
-        </AlertDescription>
+        <AlertTitle>Error Loading Task</AlertTitle>
+        <AlertDescription>{errorTaskDetails?.message}</AlertDescription>
       </Alert>
     );
+  if (!task) return null; // Should be caught by notFound in page.tsx, but as a safeguard.
 
+  const bids: Bid[] = (task as any)?.bids || [];
+  const myBid = user
+    ? bids.find((bid) => bid.freelancerId === user.id)
+    : undefined;
   const isTaskOwner = user?.id === task.clientId;
-  const isAssignedFreelancer = user?.id === task.freelancerId;
   const canBid = isFreelancer && task.status === TaskStatus.OPEN;
-  const hasBidded = bids.some((bid) => bid.freelancerId === user?.id);
+  const imageAttachments =
+    task.attachments?.filter((a) => a.fileType.startsWith("image/")) || [];
+  const otherAttachments =
+    task.attachments?.filter((a) => !a.fileType.startsWith("image/")) || [];
+
+  // FIX: Added correct handler functions
+  const handleCancelTask = async () => {
+    if (
+      window.confirm(
+        "Are you sure you want to cancel this task? This action cannot be undone."
+      )
+    ) {
+      await cancelTask(taskId).catch(() => {});
+    }
+  };
+  const handleDeleteTask = async () => {
+    if (
+      window.confirm(
+        "Are you sure you want to permanently delete this task? This will remove all associated data."
+      )
+    ) {
+      await deleteTask(taskId).catch(() => {});
+    }
+  };
+  const handleCompleteTask = async () => {
+    if (
+      window.confirm(
+        "Marking this task as completed will finalize the project. Are you sure?"
+      )
+    ) {
+      await completeTask(taskId).catch(() => {});
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-8 lg:flex-row">
-      {/* Left Column: Task Details */}
-      <div className="flex-1 space-y-8">
-        <div className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-display-md font-bold">{task.title}</h2>
-            <Badge
-              variant="outline"
-              className={`text-body-md font-semibold ${
-                task.status === TaskStatus.OPEN
-                  ? "bg-success-50 text-success-600 border-success-200"
-                  : task.status === TaskStatus.IN_PROGRESS
-                    ? "bg-warning-50 text-warning-600 border-warning-200"
-                    : task.status === TaskStatus.COMPLETED
-                      ? "bg-neutral-100 border-neutral-300"
-                      : "bg-neutral-100 border-neutral-300"
-              }`}
-            >
-              {task.status.replace(/_/g, " ")}
-            </Badge>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 text-body-sm mb-6">
-            <div className="flex items-center">
-              <DollarSignIcon className="mr-2 h-4 w-4 text-primary-500" />
-              <span className="font-semibold">
-                ${task.budget.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <ClockIcon className="mr-2 h-4 w-4 text-primary-500" />
-              <span>
-                Due by {formatDate(task.deadline)} (
-                {formatRelativeTime(task.deadline)})
-              </span>
-            </div>
-            <div className="flex items-center">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-8 lg:flex-row lg:items-start"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex-1 space-y-6 lg:max-w-4xl"
+      >
+        <Card className="overflow-hidden shadow-lg dark:shadow-black/20">
+          <CardContent className="p-6 md:p-8 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <h1 className="text-display-sm font-extrabold">{task.title}</h1>
               <Badge
-                variant="secondary"
-                className="bg-primary-50 text-primary-600"
+                variant="outline"
+                className="text-body-md font-semibold px-4 py-2 flex-shrink-0"
               >
-                {task.category?.name || "Uncategorized"}
+                {task.status.replace(/_/g, " ")}
               </Badge>
             </div>
-          </div>
-
-          <article className="prose prose-sm dark:prose-invert max-w-none">
-            <h3 className="text-h4 font-bold mb-3">Description</h3>
-            <ReactMarkdown>{task.description}</ReactMarkdown>
-          </article>
-
-          {task.attachments && task.attachments.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-h4 font-bold mb-3">Attachments</h3>
-              <Carousel className="w-full max-w-full">
-                <CarouselContent>
-                  {task.attachments
-                    .filter((a) => a.fileType.startsWith("image/"))
-                    .map((attachment) => (
-                      <CarouselItem key={attachment.id}>
-                        <div className="p-1">
-                          <Card>
-                            <CardContent className="flex aspect-video items-center justify-center p-6 relative">
-                              <Image
-                                src={attachment.url}
-                                alt={attachment.fileName}
-                                layout="fill"
-                                objectFit="contain"
-                                className="rounded-lg"
-                              />
-                            </CardContent>
-                          </Card>
-                        </div>
+            <Card className="bg-muted/50 dark:bg-muted/20 p-4 rounded-lg">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-body-sm">
+                <div className="flex items-center" title="Budget">
+                  <DollarSignIcon className="mr-2 h-4 w-4 text-primary" />
+                  <span className="font-semibold">
+                    ${task.budget.toLocaleString()}
+                  </span>
+                </div>
+                {task.deadline && (
+                  <div className="flex items-center" title="Deadline">
+                    <ClockIcon className="mr-2 h-4 w-4 text-primary" />
+                    <span>Due by {formatDate(task.deadline)}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Badge variant="secondary">
+                    {task.category?.name || "Uncategorized"}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+            <article className="prose prose-sm dark:prose-invert max-w-none">
+              <h3 className="text-h4 font-bold mb-3">Project Details</h3>
+              <ReactMarkdown>{task.description}</ReactMarkdown>
+            </article>
+            {imageAttachments.length > 0 && (
+              <motion.div variants={itemVariants}>
+                <h3 className="text-h4 font-bold mb-4">Visuals</h3>
+                <Carousel className="w-full rounded-lg overflow-hidden border shadow-soft dark:shadow-soft-dark">
+                  <CarouselContent>
+                    {imageAttachments.map((att) => (
+                      <CarouselItem key={att.id}>
+                        <Card className="border-0 shadow-none">
+                          <CardContent className="flex aspect-video items-center justify-center p-0 relative">
+                            <Image
+                              src={att.url}
+                              alt={att.fileName}
+                              layout="fill"
+                              objectFit="contain"
+                              className="rounded-lg"
+                            />
+                          </CardContent>
+                        </Card>
                       </CarouselItem>
                     ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            </div>
-          )}
-
-          <div className="mt-8 flex items-center justify-between text-body-sm">
-            <div className="flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={
-                    task.client?.profile?.avatarUrl ||
-                    `https://api.dicebear.com/7.x/initials/svg?seed=${task.client?.email || "Client"}`
-                  }
-                  alt={
-                    task.client?.profile?.firstName ||
-                    task.client?.email ||
-                    "Client"
-                  }
-                />
-                <AvatarFallback>
-                  {(task.client?.profile?.firstName || "C")
-                    .charAt(0)
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span>
-                Posted by{" "}
-                <Link
-                  href={`/freelancers/${task.clientId}`}
-                  className="font-semibold text-primary-500 hover:underline"
-                >
-                  {task.client?.profile?.firstName || "Client"}
-                </Link>{" "}
-                {formatRelativeTime(task.createdAt)}
-              </span>
-            </div>
-            {task.freelancer && (
+                  </CarouselContent>
+                  <CarouselPrevious className="left-4" />
+                  <CarouselNext className="right-4" />
+                </Carousel>
+              </motion.div>
+            )}
+            {otherAttachments.length > 0 && (
+              <motion.div variants={itemVariants}>
+                <h3 className="text-h4 font-bold mb-4">Documents</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {otherAttachments.map((att) => (
+                    <a
+                      key={att.id}
+                      href={att.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-3 rounded-md border p-3 hover:bg-muted transition-colors"
+                    >
+                      <FileTextIcon className="h-5 w-5 text-primary" />
+                      <span className="text-body-sm font-medium truncate">
+                        {att.fileName}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+            <div className="!mt-8 pt-6 border-t flex flex-col md:flex-row items-center justify-between gap-4 text-body-sm">
               <div className="flex items-center space-x-2">
-                <HammerIcon className="h-4 w-4 text-primary-500" />
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={
+                      task.client?.profile?.avatarUrl ||
+                      `https://api.dicebear.com/7.x/initials/svg?seed=${task.client?.email || "C"}`
+                    }
+                  />
+                  <AvatarFallback>
+                    {(task.client?.profile?.firstName || "C").charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <span>
-                  Assigned to{" "}
+                  Posted by{" "}
                   <Link
-                    href={`/freelancers/${task.freelancerId}`}
-                    className="font-semibold text-primary-500 hover:underline"
+                    href={`/users/${task.clientId}`}
+                    className="font-semibold text-primary hover:underline"
                   >
-                    {task.freelancer.profile?.firstName || "Freelancer"}
-                  </Link>
+                    {task.client?.profile?.firstName || "Client"}
+                  </Link>{" "}
+                  {formatRelativeTime(task.createdAt)}
                 </span>
               </div>
-            )}
-          </div>
-        </div>
-
-        {isTaskOwner && task.status === TaskStatus.OPEN && (
-          <div className="flex space-x-4">
-            <Link href={`/tasks/edit/${taskId}`} passHref>
-              <Button variant="outline">Edit Task</Button>
-            </Link>
-            <Button
-              variant="destructive"
-              onClick={() => cancelTask(taskId)}
-              disabled={isCancelingTask}
-            >
-              {isCancelingTask ? (
-                <LoadingSpinner size="sm" className="mr-2" />
-              ) : (
-                <XCircleIcon className="mr-2 h-4 w-4" />
-              )}
-              Cancel Task
-            </Button>
-          </div>
-        )}
-        {isTaskOwner && task.status === TaskStatus.IN_REVIEW && (
-          <div className="flex space-x-4">
-            <Button
-              variant="default"
-              onClick={() => completeTask(taskId)}
-              disabled={isCompletingTask}
-              className="bg-success-500 hover:bg-success-600"
-            >
-              {isCompletingTask ? (
-                <LoadingSpinner size="sm" className="mr-2" />
-              ) : (
-                <CheckCircle2Icon className="mr-2 h-4 w-4" />
-              )}
-              Mark as Completed
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <div className="w-full lg:w-[400px] space-y-8">
-        <div
-          id="bids"
-          className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6"
-        >
-          <h3 className="text-h4 font-bold mb-4">Bids ({bids.length})</h3>
-          {canBid && !hasBidded && (
-            <>
-              <p className="text-body-sm mb-4">
-                Submit your proposal for this project:
-              </p>
-              <BidForm taskId={taskId} />
-              <Separator className="my-6 bg-neutral-200" />
-            </>
-          )}
-
-          {isFreelancer && hasBidded && (
-            <Alert className="mb-6 bg-primary-50 text-primary-700 border-primary-200">
-              <MessageSquareTextIcon className="h-4 w-4" />
-              <AlertTitle>Bid Submitted</AlertTitle>
-              <AlertDescription>
-                You have already submitted a bid for this task.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {bids.length === 0 ? (
-            <p className="text-body-md text-center py-4">
-              No bids submitted yet.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {bids.map((bid) => (
-                <BidCard
-                  key={bid.id}
-                  bid={bid}
-                  isTaskOwner={isTaskOwner}
-                  taskId={taskId}
-                />
-              ))}
-              {hasNextPage && (
-                <div ref={ref} className="mt-4 flex justify-center">
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    variant="outline"
-                    className="shadow-soft dark:shadow-soft-dark"
-                  >
-                    {isFetchingNextPage ? (
-                      <>
-                        <LoadingSpinner
-                          size="sm"
-                          color="text-primary-500"
-                          className="mr-2"
-                        />{" "}
-                        Loading more...
-                      </>
-                    ) : (
-                      "Load More Bids"
-                    )}
-                  </Button>
+              {task.freelancer && (
+                <div className="flex items-center space-x-2">
+                  <HammerIcon className="h-4 w-4 text-primary" />
+                  <span>
+                    Assigned to{" "}
+                    <Link
+                      href={`/freelancers/${task.freelancerId}`}
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      {task.freelancer.profile?.firstName || "Freelancer"}
+                    </Link>
+                  </span>
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+        <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
+          {(isTaskOwner || isAdmin) && (
+            <>
+              {isTaskOwner && task.status === TaskStatus.OPEN && (
+                <Link href={`/tasks/${taskId}/edit`} passHref>
+                  <Button variant="outline">
+                    <PencilIcon className="mr-2 h-4 w-4" />
+                    Edit Task
+                  </Button>
+                </Link>
+              )}
+              {(task.status === TaskStatus.OPEN ||
+                task.status === TaskStatus.IN_PROGRESS) && (
+                <Button
+                  variant="destructive"
+                  onClick={handleCancelTask}
+                  disabled={isCancelingTask}
+                >
+                  {isCancelingTask ? (
+                    <LoadingSpinner size="sm" className="mr-2" />
+                  ) : (
+                    <XCircleIcon className="mr-2 h-4 w-4" />
+                  )}
+                  Cancel Task
+                </Button>
+              )}
+              {task.status === TaskStatus.OPEN && (
+                <Button
+                  variant="destructive-outline"
+                  onClick={handleDeleteTask}
+                  disabled={isDeletingTask}
+                >
+                  {isDeletingTask ? (
+                    <LoadingSpinner size="sm" className="mr-2" />
+                  ) : (
+                    <Trash2Icon className="mr-2 h-4 w-4" />
+                  )}
+                  Delete Task
+                </Button>
+              )}
+              {isTaskOwner && task.status === TaskStatus.IN_REVIEW && (
+                <Button
+                  onClick={handleCompleteTask}
+                  disabled={isCompletingTask}
+                  className="bg-success-500 hover:bg-success-600"
+                >
+                  {isCompletingTask ? (
+                    <LoadingSpinner size="sm" className="mr-2" />
+                  ) : (
+                    <CheckCircle2Icon className="mr-2 h-4 w-4" />
+                  )}
+                  Mark as Completed
+                </Button>
+              )}
+            </>
           )}
-        </div>
-        {(isTaskOwner || isAssignedFreelancer) && (
-          <div className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6">
-            <h3 className="text-h4 font-bold mb-4 flex items-center">
-              <MessageSquareTextIcon className="mr-2 h-5 w-5 text-primary-500" />{" "}
-              Project Chat
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants}
+        className="w-full lg:w-[400px] xl:w-[450px] flex-shrink-0 space-y-8"
+      >
+        <Card id="bid" className="shadow-lg dark:shadow-black/20">
+          <CardContent className="p-6">
+            <h3 className="text-h4 font-bold mb-4">
+              Bids ({task._count?.bids || 0})
             </h3>
-            <ChatWindow taskId={taskId} />
-          </div>
+            {canBid && !myBid && <BidForm taskId={taskId} />}
+            {myBid && <MyBidCard bid={myBid} />}
+            {isTaskOwner && bids.length > 0 && (
+              <div className="space-y-4 pt-4 border-t mt-4">
+                {bids.map((bid) => (
+                  <BidCard
+                    key={bid.id}
+                    bid={bid}
+                    isTaskOwner={isTaskOwner}
+                    taskId={taskId}
+                  />
+                ))}
+              </div>
+            )}
+            {isTaskOwner && bids.length === 0 && (
+              <p className="text-body-md text-center py-4 text-muted-foreground">
+                No bids submitted yet.
+              </p>
+            )}
+            {!isTaskOwner && !myBid && task.status !== TaskStatus.OPEN && (
+              <Alert>
+                <AlertTitle>Bidding Closed</AlertTitle>
+                <AlertDescription>
+                  This project is no longer accepting new bids.
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+        {(isTaskOwner || user?.id === task.freelancerId) && (
+          <Card className="shadow-lg dark:shadow-black/20">
+            <CardContent className="p-6">
+              <h3 className="text-h4 font-bold mb-4 flex items-center">
+                <MessageSquareTextIcon className="mr-2 h-5 w-5 text-primary" />{" "}
+                Project Chat
+              </h3>
+              <ChatWindow taskId={taskId} />
+            </CardContent>
+          </Card>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

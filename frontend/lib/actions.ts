@@ -31,6 +31,7 @@ import {
   fundTaskBodySchema,
   updateUserStatusSchema,
   newsletterSchema,
+  updateBidSchema,
 } from "./schemas";
 
 // --- Server Actions Implementations ---
@@ -473,6 +474,39 @@ export async function adminDeleteUserAction(
     await api.delete(`/admin/users/${userId}`);
     revalidatePath("/admin/users");
     return { success: true, message: "User deleted successfully!" };
+  } catch (error: any) {
+    return handleServerActionError(error);
+  }
+}
+
+export async function updateBidAction(
+  bidId: string,
+  values: z.infer<typeof updateBidSchema>
+): Promise<ServerActionResponse<any>> {
+  try {
+    const validatedData = updateBidSchema.parse(values);
+    const response = await api.put(`/bids/${bidId}`, validatedData);
+    revalidatePath(`/tasks/${response.data.data.taskId}`);
+    return {
+      success: true,
+      message: "Bid updated successfully!",
+      data: response.data.data,
+    };
+  } catch (error: any) {
+    return handleServerActionError(error);
+  }
+}
+
+// NEW: Server Action to withdraw a bid
+export async function withdrawBidAction(
+  bidId: string
+): Promise<ServerActionResponse<void>> {
+  try {
+    const bidResponse = await api.get(`/bids/${bidId}`); // Need to get taskId before deleting
+    const taskId = bidResponse.data.data.taskId;
+    await api.delete(`/bids/${bidId}`);
+    revalidatePath(`/tasks/${taskId}`);
+    return { success: true, message: "Bid withdrawn successfully!" };
   } catch (error: any) {
     return handleServerActionError(error);
   }

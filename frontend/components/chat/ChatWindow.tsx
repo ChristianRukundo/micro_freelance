@@ -1,3 +1,4 @@
+// File: frontend/components/chat/ChatWindow.tsx
 "use client";
 
 import React, { useRef, useEffect } from "react";
@@ -7,7 +8,6 @@ import { useAuthStore } from "@/lib/zustand";
 import { MessageInput } from "./MessageInput";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { MessageSquareDashedIcon, CircleDotDashedIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { TriangleAlertIcon } from "lucide-react";
+import { TriangleAlertIcon, WifiOffIcon } from "lucide-react"; // Import WifiOffIcon
 import { motion } from "framer-motion";
 import { Card, CardContent, CardFooter } from "../ui/card";
 
@@ -37,6 +37,9 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
     sendMessage,
     sendTypingStart,
     sendTypingStop,
+    isSocketConnecting,
+    isSocketConnected,
+    refetchHistory,
   } = useChat(taskId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,10 +47,11 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
     threshold: 0.5,
   });
 
-  // Scroll to bottom on new message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]); // Scroll when historical or live messages change
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length]);
 
   // Load more messages when scroll area is near top AND loadMoreRef is in view
   useEffect(() => {
@@ -56,23 +60,50 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
     }
   }, [loadMoreInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (isLoadingHistory) {
+  // <--- CRITICAL: Unified loading UI for initial socket connection and history
+  if (isLoadingHistory && isSocketConnecting) {
     return (
       <div className="flex h-[400px] items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 shadow-soft dark:shadow-soft-dark">
         <LoadingSpinner size="lg" className="mr-3" />
-        <span className="text-body-md">Loading chat history...</span>
+        <span className="text-body-md">
+          Connecting to chat and loading history...
+        </span>
       </div>
     );
   }
 
+  // <--- CRITICAL: Display specific error if socket is not connected AND not currently connecting
+  if (!isSocketConnected && !isSocketConnecting) {
+    return (
+      <Alert
+        variant="destructive"
+        className="h-[400px] flex flex-col items-center justify-center text-center"
+      >
+        <WifiOffIcon className="h-10 w-10 mb-4" />
+        <AlertTitle className="text-h4">Chat Not Connected</AlertTitle>
+        <AlertDescription className="text-body-md mt-2">
+          Real-time chat is currently unavailable. Please refresh the page,
+          check your internet connection, or ensure you are logged in correctly.
+        </AlertDescription>
+        <Button onClick={() => window.location.reload()} className="mt-6">
+          <TriangleAlertIcon className="mr-2 h-4 w-4" /> Refresh Chat
+        </Button>
+      </Alert>
+    );
+  }
+
+  // Handle errors specifically for historical messages after socket has attempted connection
   if (isErrorHistory) {
     return (
       <Alert variant="destructive">
         <TriangleAlertIcon className="h-4 w-4" />
-        <AlertTitle>Error loading chat</AlertTitle>
+        <AlertTitle>Error loading chat history</AlertTitle>
         <AlertDescription>
           Failed to load chat history: {errorHistory?.message}
         </AlertDescription>
+        <Button onClick={() => refetchHistory()} className="mt-4">
+          <TriangleAlertIcon className="mr-2 h-4 w-4" /> Retry Loading History
+        </Button>
       </Alert>
     );
   }
@@ -111,7 +142,7 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
                 isCurrentUser={message.senderId === user?.id}
               />
             ))}
-            <div ref={messagesEndRef} /> {/* For auto-scrolling to bottom */}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </CardContent>
@@ -121,6 +152,8 @@ export function ChatWindow({ taskId }: ChatWindowProps) {
           onSendMessage={sendMessage}
           onTypingStart={sendTypingStart}
           onTypingStop={sendTypingStop}
+          // <--- CRITICAL: Pass socket connected status to disable input if not connected
+          isInputDisabled={!isSocketConnected}
         />
         {typingUsers.size > 0 && (
           <motion.div

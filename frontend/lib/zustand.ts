@@ -76,7 +76,6 @@ export const useAuthStore = create<AuthStore>()(
     { name: "AuthStore" }
   )
 );
-
 interface UIStore {
   isSidebarOpen: boolean;
   toggleSidebar: () => void;

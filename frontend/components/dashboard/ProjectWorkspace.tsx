@@ -57,9 +57,10 @@ import { BidForm } from "@/components/forms/BidForm";
 import { useMilestones } from "@/hooks/useMilestones";
 import { MilestoneForm } from "@/components/forms/MilestoneForm";
 import { ChatWindow } from "@/components/chat/ChatWindow";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { Progress } from "@/components/ui/progress";
+
 import {
   Dialog,
   DialogContent,
@@ -77,6 +78,7 @@ import { z } from "zod";
 import * as actions from "@/lib/actions";
 import { requestRevisionSchema } from "@/lib/schemas";
 import { toast } from "sonner";
+
 import {
   FormControl,
   FormField,
@@ -86,11 +88,22 @@ import {
   Form,
 } from "../ui/form";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+import { useChat } from "@/hooks/useChat";
+import { MyBidCard } from "../cards/MyBidCard";
 
 interface ProjectSectionProps {
   taskId: string;
   initialTask: Task;
 }
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5, ease: "easeOut" as const },
+  },
+};
 
 // --- Task Details Overview Section ---
 export function TaskDetailsOverview({
@@ -166,10 +179,8 @@ export function TaskDetailsOverview({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6 space-y-6"
+      variants={itemVariants}
+      className="rounded-xl border bg-card shadow-medium p-6 space-y-6"
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-display-md font-bold">{task.title}</h2>
@@ -351,110 +362,38 @@ export function TaskDetailsOverview({
     </motion.div>
   );
 }
-
-// --- Bids Section ---
 export function TaskBidsSection({ taskId, initialTask }: ProjectSectionProps) {
-  // CORRECTED: Using useAuth() hook
   const { user, isFreelancer } = useAuth();
-  const {
-    bids,
-    isLoading,
-    isError,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useBids(taskId);
-  const { ref, inView } = useInView();
-
-  const isTaskOwner = user?.id === initialTask.clientId;
-  const isAssignedFreelancer = user?.id === initialTask.freelancerId;
-  const canBid = isFreelancer && initialTask.status === TaskStatus.OPEN;
-  const hasBidded = bids.some((bid) => bid.freelancerId === user?.id);
-
-  React.useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  if (isError)
-    return (
-      <Alert variant="destructive">
-        <TriangleAlertIcon className="h-4 w-4" />
-        <AlertTitle>Error loading bids</AlertTitle>
-        <AlertDescription>
-          Failed to load bids: {error?.message}
-        </AlertDescription>
-      </Alert>
-    );
+  const { taskDetails } = useTasks({ q: taskId });
+  const task = taskDetails || initialTask;
+  const bids: Bid[] = (task as any)?.bids || [];
+  const myBid = user
+    ? bids.find((bid) => bid.freelancerId === user.id)
+    : undefined;
+  const isTaskOwner = user?.id === task.clientId;
+  const canBid = isFreelancer && task.status === TaskStatus.OPEN;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6"
+      variants={itemVariants}
+      className="rounded-xl border bg-card shadow-medium p-6"
     >
-      <h3 className="text-h4 font-bold mb-4">Bids ({bids.length})</h3>
-
-      {canBid && !hasBidded && (
-        <>
-          <p className="text-body-sm mb-4">
-            Submit your proposal for this project:
-          </p>
-          <BidForm taskId={taskId} />
-          <Separator className="my-6 bg-neutral-200" />
-        </>
-      )}
-
-      {isFreelancer && hasBidded && (
-        <Alert className="mb-6 bg-primary-50 text-primary-700 border-primary-200">
-          <MessageSquareTextIcon className="h-4 w-4" />
-          <AlertTitle>Bid Submitted</AlertTitle>
-          <AlertDescription>
-            You have already submitted a bid for this task.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {isLoading && bids.length === 0 ? (
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <BidCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : bids.length === 0 ? (
+      <h3 className="text-h4 font-bold mb-4">
+        Bids ({task._count?.bids || 0})
+      </h3>
+      {canBid && !myBid && <BidForm taskId={taskId} />}
+      {myBid && <MyBidCard bid={myBid} />}
+      {isTaskOwner &&
+        bids.map((bid: Bid) => (
+          <BidCard
+            key={bid.id}
+            bid={bid}
+            isTaskOwner={isTaskOwner}
+            taskId={taskId}
+          />
+        ))}
+      {isTaskOwner && bids.length === 0 && (
         <p className="text-body-md text-center py-4">No bids submitted yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {bids.map((bid) => (
-            <BidCard
-              key={bid.id}
-              bid={bid}
-              isTaskOwner={isTaskOwner}
-              taskId={taskId}
-            />
-          ))}
-          {isFetchingNextPage && (
-            <div className="flex justify-center p-4">
-              <LoadingSpinner size="md" className="mr-2" /> Loading more bids...
-            </div>
-          )}
-          {hasNextPage && !isFetchingNextPage && (
-            <div ref={ref} className="mt-4 flex justify-center">
-              <Button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                variant="outline"
-                className="shadow-soft dark:shadow-soft-dark group"
-              >
-                Load More{" "}
-                <MoveRightIcon className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </div>
-          )}
-        </div>
       )}
     </motion.div>
   );
@@ -834,13 +773,30 @@ function MilestoneCard({
     </Card>
   );
 }
-
-// --- Chat Section ---
 export function ChatSection({ taskId, initialTask }: ProjectSectionProps) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth(); // <--- isLoading is crucial
+  // <--- CRITICAL: Get isSocketConnecting and isSocketConnected from useChat hook
+  const { isSocketConnecting, isSocketConnected } = useChat(taskId);
+
   const isTaskOwner = user?.id === initialTask.clientId;
   const isAssignedFreelancer = user?.id === initialTask.freelancerId;
 
+  // 1. Show loading for AuthProvider's initial check
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="rounded-xl border border-neutral-200 bg-card shadow-medium dark:shadow-medium-dark p-6 flex justify-center items-center h-[300px]"
+      >
+        <LoadingSpinner size="md" className="mr-2" /> Loading chat
+        authorization...
+      </motion.div>
+    );
+  }
+
+  // 2. Show Unauthorized if user is not client/freelancer for this task AFTER auth loads
   if (!isTaskOwner && !isAssignedFreelancer) {
     return (
       <motion.div
@@ -860,7 +816,6 @@ export function ChatSection({ taskId, initialTask }: ProjectSectionProps) {
       </motion.div>
     );
   }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
