@@ -1,48 +1,53 @@
-import { z } from 'zod';
-import { UserRole } from './types';
+import { z } from "zod";
+import { UserRole } from "./types";
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const registerSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
-  role: z.nativeEnum(UserRole, { message: 'Please select a role' }),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  role: z.nativeEnum(UserRole, { message: "Please select a role" }),
 });
 
 export const verifyEmailSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  otp: z.string().length(6, 'OTP must be 6 digits'),
+  email: z.string().email("Invalid email address"),
+  otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email("Invalid email address"),
 });
 
-export const updateBidSchema = z.object({
-  proposal: z.string().min(50, 'Proposal must be at least 50 characters.').optional(),
-  amount: z.number().min(1, 'Amount must be at least $1.').optional(),
-}).refine(data => data.proposal || data.amount, {
-  message: 'Either a new proposal or a new amount must be provided to update.',
-});
-
+export const updateBidSchema = z
+  .object({
+    proposal: z
+      .string()
+      .min(50, "Proposal must be at least 50 characters.")
+      .optional(),
+    amount: z.number().min(1, "Amount must be at least $1.").optional(),
+  })
+  .refine((data) => data.proposal || data.amount, {
+    message:
+      "Either a new proposal or a new amount must be provided to update.",
+  });
 
 export const resetPasswordSchema = z
   .object({
-    email: z.string().email('Invalid email address'),
-    otp: z.string().length(6, 'OTP must be 6 digits'),
+    email: z.string().email("Invalid email address"),
+    otp: z.string().length(6, "OTP must be 6 digits"),
     newPassword: z
       .string()
-      .min(8, 'New password must be at least 8 characters long'),
+      .min(8, "New password must be at least 8 characters long"),
     confirmNewPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "New passwords don't match",
-    path: ['confirmNewPassword'],
+    path: ["confirmNewPassword"],
   });
 
 export const updateProfileSchema = z.object({
@@ -62,7 +67,7 @@ export const changePasswordSchema = z
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "New passwords don't match",
-    path: ['confirmNewPassword'],
+    path: ["confirmNewPassword"],
   });
 
 export const attachmentSchema = z.object({
@@ -90,7 +95,10 @@ export const createMilestoneSchema = z.object({
   dueDate: z.string().datetime(),
   amount: z.number().min(0.01),
 });
-export const createMultipleMilestonesSchema = z.array(createMilestoneSchema);
+
+export const createMultipleMilestonesSchema = z.object({
+  milestones: z.array(createMilestoneSchema),
+});
 
 export const requestRevisionSchema = z.object({
   comments: z.string().min(10).max(500),
@@ -110,7 +118,5 @@ export const updateUserStatusSchema = z.object({
 });
 
 export const newsletterSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().email("Please enter a valid email address"),
 });
-
-

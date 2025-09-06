@@ -6,11 +6,15 @@ import { createTaskSchema, getTasksQuerySchema, updateTaskSchema, taskIdSchema }
 import { UserRole } from '@prisma/client';
 import bidsController from '@modules/bids/bids.controller';
 import { submitBidSchema, taskIdParamSchema as bidTaskIdParamSchema } from '@modules/bids/bid.validation';
-
+import milestoneController from '@modules/milestones/milestone.controller';
+import {
+  createMultipleMilestonesSchema,
+  taskIdParamSchema as milestoneTaskIdParamSchema,
+} from '@modules/milestones/milestone.validation';
 const router = Router();
 
 router.get('/', validateRequest({ query: getTasksQuerySchema }), taskController.getTasks);
-router.get('/:id', protect ,validateRequest({ params: taskIdSchema }), taskController.getTaskById);
+router.get('/:id', protect, validateRequest({ params: taskIdSchema }), taskController.getTaskById);
 
 router.use(protect); // All routes below this use authentication
 
@@ -48,6 +52,21 @@ router.get(
   authorize(UserRole.CLIENT, UserRole.FREELANCER),
   validateRequest({ params: bidTaskIdParamSchema }),
   bidsController.getBidsForTask,
+);
+
+router.post(
+  '/:taskId/milestones',
+  authorize(UserRole.CLIENT),
+  validateRequest({ params: milestoneTaskIdParamSchema, body: createMultipleMilestonesSchema }),
+  milestoneController.createMilestones,
+);
+
+// This route will now correctly resolve to GET /api/tasks/:taskId/milestones
+router.get(
+  '/:taskId/milestones',
+  // Accessible by both Client and the assigned Freelancer
+  validateRequest({ params: milestoneTaskIdParamSchema }),
+  milestoneController.getMilestonesForTask,
 );
 
 export default router;

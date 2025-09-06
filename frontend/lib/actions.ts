@@ -335,7 +335,6 @@ export async function createMilestonesAction(
       validatedData
     );
     revalidatePath(`/dashboard/projects/${taskId}`);
-    revalidatePath(`/tasks/${taskId}`);
     return {
       success: true,
       message: "Milestones created successfully!",
@@ -347,13 +346,11 @@ export async function createMilestonesAction(
 }
 
 export async function submitMilestoneAction(
-  milestoneId: string,
-  values?: any
+  milestoneId: string
 ): Promise<ServerActionResponse<any>> {
   try {
     const response = await api.patch(`/milestones/${milestoneId}/submit`);
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
-    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Milestone submitted for review!",
@@ -375,7 +372,6 @@ export async function requestMilestoneRevisionAction(
       validatedData
     );
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
-    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Revision requested for milestone!",
@@ -392,7 +388,6 @@ export async function approveMilestoneAction(
   try {
     const response = await api.patch(`/milestones/${milestoneId}/approve`);
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
-    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Milestone approved and payment released!",
@@ -402,7 +397,6 @@ export async function approveMilestoneAction(
     return handleServerActionError(error);
   }
 }
-
 // --- PAYMENT ACTIONS ---
 export async function createStripeConnectAccountAction(
   values: z.infer<typeof createStripeConnectAccountSchema>

@@ -269,13 +269,14 @@ export function TaskDetailsClient({
             </div>
           </CardContent>
         </Card>
-        {(isTaskOwner || user?.id === task.freelancerId) && task.status === TaskStatus.IN_PROGRESS && (
-          <motion.div variants={itemVariants}>
-            <Card className="shadow-lg dark:shadow-black/20 p-6 md:p-8">
-              <MilestoneManagement taskId={taskId} initialTask={task} />
-            </Card>
-          </motion.div>
-        )}
+        {(isTaskOwner || user?.id === task.freelancerId) &&
+          task.status === TaskStatus.IN_PROGRESS && (
+            <motion.div variants={itemVariants}>
+              <Card className="shadow-lg dark:shadow-black/20 p-6 md:p-8">
+                <MilestoneManagement taskId={taskId} initialTask={task} />
+              </Card>
+            </motion.div>
+          )}
         <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
           {(isTaskOwner || isAdmin) && (
             <>
@@ -290,7 +291,7 @@ export function TaskDetailsClient({
               {(task.status === TaskStatus.OPEN ||
                 task.status === TaskStatus.IN_PROGRESS) && (
                 <Button
-                  variant="destructive"
+                  variant="destructive-outline"
                   onClick={handleCancelTask}
                   disabled={isCancelingTask}
                 >

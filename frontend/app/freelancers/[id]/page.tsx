@@ -18,7 +18,7 @@ import {
 import ReactMarkdown from "react-markdown";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 // Server Component function to fetch the freelancer's public profile
@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function FreelancerProfilePage({ params }: Props) {
-  const id = await params.id;
+  const { id } = await params;
   const freelancer = await getFreelancerProfile(id);
 
   if (!freelancer || !freelancer.profile) {

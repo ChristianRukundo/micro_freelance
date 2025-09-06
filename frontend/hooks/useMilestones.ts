@@ -1,108 +1,129 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { Milestone, PaginatedResponse, MilestoneStatus } from '@/lib/types';
-import { toast } from 'sonner';
-import * as actions from '@/lib/actions';
-import { createMultipleMilestonesSchema, requestRevisionSchema } from '@/lib/schemas';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { Milestone, MilestoneStatus } from "@/lib/types";
+import { toast } from "sonner";
+import * as actions from "@/lib/actions";
+import {
+  createMultipleMilestonesSchema,
+  requestRevisionSchema,
+} from "@/lib/schemas";
 import { z } from "zod";
 
-interface MilestonesPaginatedResponse extends PaginatedResponse<Milestone> {
-  milestones: Milestone[];
-}
-
+/**
+ * Custom hook to manage milestones for a specific task.
+ * It handles fetching, creating, and updating the status of milestones.
+ *
+ * @param taskId The ID of the task whose milestones are being managed.
+ */
 export function useMilestones(taskId?: string) {
   const queryClient = useQueryClient();
 
-  // Query for all milestones of a task (no infinite scroll usually, as all shown)
+  // --- DATA FETCHING ---
   const {
     data: milestones,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useInfiniteQuery<MilestonesPaginatedResponse, Error>({
-    queryKey: ['milestones', taskId],
-    queryFn: async ({ pageParam = 1 }) => {
-      if (!taskId) throw new Error('Task ID is required for fetching milestones.');
-      const response = await api.get(`/tasks/${taskId}/milestones`, { params: { page: pageParam, limit: 50 } }); // Fetch all or a reasonable amount
+    isLoading: isLoadingMilestones,
+    isError: isErrorMilestones,
+    error: errorMilestones,
+    refetch: refetchMilestones,
+  } = useQuery<Milestone[], Error>({
+    queryKey: ["milestones", taskId],
+    queryFn: async () => {
+      if (!taskId)
+        throw new Error("Task ID is required for fetching milestones.");
+      // The backend should return all milestones for a task in a single array.
+      const response = await api.get(`/tasks/${taskId}/milestones`);
       return response.data.data;
     },
-    getNextPageParam: (lastPage) => {
-        // Milestones might not always be paginated if they're few per task
-        if (lastPage.currentPage < lastPage.totalPages) {
-            return lastPage.currentPage + 1;
-        }
-        return undefined;
-    },
-    initialPageParam: 1,
-    enabled: !!taskId,
-    select: (data) => ({
-        ...data,
-        pages: data.pages.map(page => ({
-            ...page,
-            milestones: page.milestones.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-        }))
-    })
+    // Sort the milestones by due date once fetched.
+    select: (data) =>
+      data.sort(
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      ),
+    enabled: !!taskId, // Only run the query if taskId is provided.
   });
 
-  const allMilestones = milestones?.pages.flatMap((page) => page.milestones) || [];
-
+  // --- MUTATIONS ---
 
   // Mutation for creating new milestones
   const createMilestonesMutation = useMutation({
     mutationFn: (values: z.infer<typeof createMultipleMilestonesSchema>) => {
-      if (!taskId) throw new Error('Task ID is required to create milestones.');
+      if (!taskId) throw new Error("Task ID is required to create milestones.");
       return actions.createMilestonesAction(taskId, values);
     },
     onSuccess: (response) => {
       if (response.success) {
-        queryClient.invalidateQueries({ queryKey: ['milestones', taskId] });
-        queryClient.invalidateQueries({ queryKey: ['task', taskId] }); // Task might update progress/status
         toast.success(response.message);
+        // Invalidate both milestones and the parent task queries to refetch fresh data.
+        queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
+        queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       } else {
-        toast.error(response.message);
+        toast.error(response.message || "Failed to create milestones.");
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast.error(error.message);
     },
   });
 
-  // Generic mutation for updating milestone status
+  // Generic factory for updating a milestone's status with optimistic updates.
   const updateMilestoneStatusMutation = (
     action: (milestoneId: string, values?: any) => Promise<any>,
-    status: MilestoneStatus,
-    successMessage: string,
-    errorMessage: string,
+    optimisticStatus: MilestoneStatus,
+    successMessage: string
   ) => {
     return useMutation({
-      mutationFn: ({ milestoneId, values }: { milestoneId: string; values?: any }) => action(milestoneId, values),
-      onMutate: async ({ milestoneId }) => {
-        await queryClient.cancelQueries({ queryKey: ['milestones', taskId] });
-        const previousMilestones = queryClient.getQueryData<MilestonesPaginatedResponse>(['milestones', taskId]);
+      mutationFn: ({
+        milestoneId,
+        values,
+      }: {
+        milestoneId: string;
+        values?: any;
+      }) => action(milestoneId, values),
+      onMutate: async ({ milestoneId, values }) => {
+        await queryClient.cancelQueries({ queryKey: ["milestones", taskId] });
+        const previousMilestones = queryClient.getQueryData<Milestone[]>([
+          "milestones",
+          taskId,
+        ]);
 
-        queryClient.setQueryData<MilestonesPaginatedResponse>(['milestones', taskId], (old) => {
-          if (!old) return old;
-          const newPages = (old as any).pages.map((page: any) => ({
-            ...page,
-            milestones: page.milestones.map((m: any) => (m.id === milestoneId ? { ...m, status: status } : m)),
-          }));
-          return { ...old, pages: newPages };
-        });
+        // Optimistically update the milestone in the cache.
+        queryClient.setQueryData<Milestone[]>(
+          ["milestones", taskId],
+          (oldData) => {
+            if (!oldData) return [];
+            return oldData.map((m) =>
+              m.id === milestoneId
+                ? {
+                    ...m,
+                    status: optimisticStatus,
+                    // If revision comments are provided, add them optimistically.
+                    ...(values?.comments && { comments: values.comments }),
+                  }
+                : m
+            );
+          }
+        );
         return { previousMilestones };
       },
       onSuccess: (response) => {
         if (response.success) {
-          queryClient.invalidateQueries({ queryKey: ['milestones', taskId] });
-          queryClient.invalidateQueries({ queryKey: ['task', taskId] });
           toast.success(successMessage);
         } else {
-          toast.error(response.message);
+          toast.error(response.message || "Milestone update failed.");
         }
       },
-      onError: (error, _variables, context) => {
-        toast.error(errorMessage);
-        queryClient.setQueryData(['milestones', taskId], context?.previousMilestones);
+      onError: (error: Error, _variables, context) => {
+        toast.error(error.message || "An error occurred.");
+        // Roll back to the previous state on error.
+        queryClient.setQueryData(
+          ["milestones", taskId],
+          context?.previousMilestones
+        );
+      },
+      onSettled: () => {
+        // Always refetch after mutation is settled to ensure data consistency.
+        queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
+        queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       },
     });
   };
@@ -110,30 +131,27 @@ export function useMilestones(taskId?: string) {
   const submitMilestoneMutation = updateMilestoneStatusMutation(
     actions.submitMilestoneAction,
     MilestoneStatus.SUBMITTED,
-    'Milestone submitted for review!',
-    'Failed to submit milestone.',
+    "Milestone submitted for review!"
   );
 
   const requestMilestoneRevisionMutation = updateMilestoneStatusMutation(
     actions.requestMilestoneRevisionAction,
     MilestoneStatus.REVISION_REQUESTED,
-    'Revision requested for milestone!',
-    'Failed to request revision.',
+    "Revision requested for milestone!"
   );
 
   const approveMilestoneMutation = updateMilestoneStatusMutation(
     actions.approveMilestoneAction,
     MilestoneStatus.APPROVED,
-    'Milestone approved and payment released!',
-    'Failed to approve milestone.',
+    "Milestone approved and payment released!"
   );
 
   return {
-    milestones: allMilestones,
-    isLoadingMilestones: isLoading,
-    isErrorMilestones: isError,
-    errorMilestones: error,
-    refetchMilestones: refetch,
+    milestones: milestones || [],
+    isLoadingMilestones,
+    isErrorMilestones,
+    errorMilestones,
+    refetchMilestones,
     createMilestones: createMilestonesMutation.mutateAsync,
     isCreatingMilestones: createMilestonesMutation.isPending,
     submitMilestone: submitMilestoneMutation.mutateAsync,
