@@ -33,6 +33,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
+import { useNotifications } from "@/hooks/useNotifications";
 import { Logo } from "../common/Logo";
 
 // --- Navigation Link Interface ---
@@ -43,83 +44,6 @@ interface NavLinkItem {
   roles?: UserRole[];
   badge?: string;
 }
-
-// --- Main Navigation Data (Centralized Configuration) ---
-const mainNavLinks: NavLinkItem[] = [
-  {
-    href: "/tasks",
-    icon: <BriefcaseIcon className="h-5 w-5" />,
-    label: "Browse Projects",
-    badge: "Hot",
-  },
-  {
-    href: "/freelancers",
-    icon: <UsersIcon className="h-5 w-5" />,
-    label: "Find Freelancers",
-  },
-
-  // Client Dashboard Links
-  {
-    href: "/dashboard/client",
-    icon: <LayoutDashboardIcon className="h-5 w-5" />,
-    label: "Client Dashboard",
-    roles: [UserRole.CLIENT],
-  },
-  {
-    href: "/tasks/new",
-    icon: <BriefcaseIcon className="h-5 w-5" />,
-    label: "Post New Project",
-    roles: [UserRole.CLIENT],
-    badge: "New",
-  },
-  {
-    href: "/dashboard/client/spending",
-    icon: <DollarSignIcon className="h-5 w-5" />,
-    label: "Spending History",
-    roles: [UserRole.CLIENT],
-  },
-
-  // Freelancer Dashboard Links
-  {
-    href: "/dashboard/freelancer",
-    icon: <LayoutDashboardIcon className="h-5 w-5" />,
-    label: "Freelancer Dashboard",
-    roles: [UserRole.FREELANCER],
-  },
-  {
-    href: "/dashboard/freelancer/earnings",
-    icon: <DollarSignIcon className="h-5 w-5" />,
-    label: "My Earnings",
-    roles: [UserRole.FREELANCER],
-  },
-  {
-    href: "/dashboard/payouts",
-    icon: <DollarSignIcon className="h-5 w-5" />,
-    label: "Payout Settings",
-    roles: [UserRole.FREELANCER],
-  },
-
-  // Admin Links
-  {
-    href: "/admin/users",
-    icon: <UserCogIcon className="h-5 w-5" />,
-    label: "Manage Users",
-    roles: [UserRole.ADMIN],
-  },
-
-  // Common Links for all Authenticated Users
-  {
-    href: "/dashboard/profile",
-    icon: <UserIcon className="h-5 w-5" />,
-    label: "Profile Settings",
-  },
-  {
-    href: "/dashboard/notifications",
-    icon: <BellIcon className="h-5 w-5" />,
-    label: "Notifications",
-    badge: "3",
-  },
-];
 
 // --- Enhanced Badge Component ---
 const Badge = ({
@@ -295,8 +219,81 @@ function SidebarNavLink({
 export function Sidebar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
+  const { unreadCount } = useNotifications();
   const pathname = usePathname();
   const isMobile = useIsMobile();
+
+  const mainNavLinks: NavLinkItem[] = React.useMemo(() => [
+    {
+      href: "/tasks",
+      icon: <BriefcaseIcon className="h-5 w-5" />,
+      label: "Browse Projects",
+      badge: "Hot",
+    },
+    {
+      href: "/freelancers",
+      icon: <UsersIcon className="h-5 w-5" />,
+      label: "Find Freelancers",
+    },
+    // Client Dashboard Links
+    {
+      href: "/dashboard/client",
+      icon: <LayoutDashboardIcon className="h-5 w-5" />,
+      label: "Client Dashboard",
+      roles: [UserRole.CLIENT],
+    },
+    {
+      href: "/tasks/new",
+      icon: <BriefcaseIcon className="h-5 w-5" />,
+      label: "Post New Project",
+      roles: [UserRole.CLIENT],
+      badge: "New",
+    },
+    {
+      href: "/dashboard/client/spending",
+      icon: <DollarSignIcon className="h-5 w-5" />,
+      label: "Spending History",
+      roles: [UserRole.CLIENT],
+    },
+    // Freelancer Dashboard Links
+    {
+      href: "/dashboard/freelancer",
+      icon: <LayoutDashboardIcon className="h-5 w-5" />,
+      label: "Freelancer Dashboard",
+      roles: [UserRole.FREELANCER],
+    },
+    {
+      href: "/dashboard/freelancer/earnings",
+      icon: <DollarSignIcon className="h-5 w-5" />,
+      label: "My Earnings",
+      roles: [UserRole.FREELANCER],
+    },
+    {
+      href: "/dashboard/payouts",
+      icon: <DollarSignIcon className="h-5 w-5" />,
+      label: "Payout Settings",
+      roles: [UserRole.FREELANCER],
+    },
+    // Admin Links
+    {
+      href: "/admin/users",
+      icon: <UserCogIcon className="h-5 w-5" />,
+      label: "Manage Users",
+      roles: [UserRole.ADMIN],
+    },
+    // Common Links for all Authenticated Users
+    {
+      href: "/dashboard/profile",
+      icon: <UserIcon className="h-5 w-5" />,
+      label: "Profile Settings",
+    },
+    {
+      href: "/dashboard/notifications",
+      icon: <BellIcon className="h-5 w-5" />,
+      label: "Notifications",
+      badge: unreadCount > 0 ? unreadCount.toString() : undefined,
+    },
+  ], [unreadCount]);
 
   useEffect(() => {
     if (isMobile) {
@@ -318,7 +315,7 @@ export function Sidebar() {
       if (!link.roles) return true;
       return link.roles.includes(user.role!);
     });
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, mainNavLinks]);
 
   const desktopExpandedWidth = "18rem"; // Increased from 16rem
   const desktopCollapsedWidth = "4.5rem"; // Increased from 4rem

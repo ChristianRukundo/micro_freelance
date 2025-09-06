@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import config from '@config/index';
 import AppError from '@shared/utils/appError';
 import { verifyToken } from '@shared/utils/jwt';
@@ -43,22 +42,11 @@ export const protect = async (req: Request, _res: Response, next: NextFunction) 
     if (currentUser.isSuspended) {
       return next(new AppError('Your account has been suspended. Please contact support.', 403));
     }
-    req.user = {
-      id: currentUser.id,
-      email: currentUser.email,
-      role: currentUser.role,
-      stripeAccountId: currentUser.stripeAccountId,
-      stripeAccountCompleted: currentUser.stripeAccountCompleted,
-    };
+
+    req.user = currentUser;
     next();
   } catch (error: any) {
-    if (error instanceof jwt.TokenExpiredError) {
-      return next(new AppError('Your token has expired! Please log in again.', 401));
-    }
-    if (error instanceof jwt.JsonWebTokenError) {
-      return next(new AppError('Invalid token. Please log in again.', 401));
-    }
-    next(error);
+    return next(new AppError('Invalid token or session expired. Please log in again.', 401));
   }
 };
 

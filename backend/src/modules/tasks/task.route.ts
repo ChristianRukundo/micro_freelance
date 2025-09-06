@@ -10,7 +10,7 @@ import { submitBidSchema, taskIdParamSchema as bidTaskIdParamSchema } from '@mod
 const router = Router();
 
 router.get('/', validateRequest({ query: getTasksQuerySchema }), taskController.getTasks);
-router.get('/:id', validateRequest({ params: taskIdSchema }), taskController.getTaskById);
+router.get('/:id', protect ,validateRequest({ params: taskIdSchema }), taskController.getTaskById);
 
 router.use(protect); // All routes below this use authentication
 

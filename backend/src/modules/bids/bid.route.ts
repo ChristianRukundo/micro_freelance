@@ -11,7 +11,7 @@ const router = Router();
 
 // Client accepts a bid
 router.post(
-  '/bids/:bidId/accept',
+  '/:bidId/accept',
   protect,
   authorize(UserRole.CLIENT),
   validateRequest({ params: bidIdSchema }),

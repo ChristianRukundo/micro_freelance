@@ -4,11 +4,11 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import { verifyToken } from '@shared/utils/jwt';
 import config from '@config/index';
 import prisma from '@shared/database/prisma';
-import { NotificationType,  UserRole, Profile } from '@prisma/client';
+import { NotificationType, UserRole, Profile } from '@prisma/client';
 import { createNotification } from '@modules/notifications/notification.service';
 import { logger } from '@shared/utils/logger';
 import * as cookie from 'cookie';
-
+import AppError from '@shared/utils/appError';
 
 interface AuthenticatedSocketData {
   user: {
@@ -23,33 +23,32 @@ interface AuthenticatedSocketData {
 let io: SocketIOServer;
 
 const getAccessTokenFromSocket = (socket: Socket): string | undefined => {
-    // 1. Prioritize auth header (for non-browser clients or specific setups)
-    const authHeader = socket.handshake.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        if (token && token !== 'undefined') {
-            return token;
-        }
+  // 1. Prioritize auth header (for non-browser clients or specific setups)
+  const authHeader = socket.handshake.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    if (token && token !== 'undefined') {
+      return token;
     }
+  }
 
-    // 2. Fallback to parsing cookies (primary method for browsers)
-    const cookies = socket.handshake.headers.cookie;
-    
-    // This check is still valid and important
-    if (typeof cookies === 'string' && cookies.length > 0) {
-        try {
-            // The `cookie.parse` call will now work correctly
-            const parsedCookies = cookie.parse(cookies);
-            return parsedCookies.accessToken;
-        } catch (error) {
-            logger.error('Socket.IO: Failed to parse cookies.', { cookieHeader: cookies, error });
-            return undefined;
-        }
+  // 2. Fallback to parsing cookies (primary method for browsers)
+  const cookies = socket.handshake.headers.cookie;
+
+  // This check is still valid and important
+  if (typeof cookies === 'string' && cookies.length > 0) {
+    try {
+      // The `cookie.parse` call will now work correctly
+      const parsedCookies = cookie.parse(cookies);
+      return parsedCookies.accessToken;
+    } catch (error) {
+      logger.error('Socket.IO: Failed to parse cookies.', { cookieHeader: cookies, error });
+      return undefined;
     }
+  }
 
-    return undefined;
+  return undefined;
 };
-
 
 export const initSocket = (httpServer: HttpServer): SocketIOServer => {
   io = new SocketIOServer(httpServer, {
@@ -63,8 +62,8 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
     const token = getAccessTokenFromSocket(socket);
 
     if (!token) {
-        logger.warn('Socket.IO Auth: No access token found in handshake.', { socketId: socket.id });
-        return next(new Error('Authentication error: No token provided.'));
+      logger.warn('Socket.IO Auth: No access token found in handshake.', { socketId: socket.id });
+      return next(new Error('Authentication error: No token provided.'));
     }
 
     try {
@@ -91,7 +90,6 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
       next(new Error('Authentication error: Token verification failed.'));
     }
   });
-
 
   io.on('connection', (socket: Socket & { data: AuthenticatedSocketData }) => {
     const user = socket.data.user;
@@ -148,39 +146,16 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
     });
 
     socket.on('send_message', async ({ taskId, content }: { taskId: string; content: string }) => {
-      logger.debug(`Socket.IO: Received message from ${user.id} in task ${taskId}.`, {
-        socketId: socket.id,
-        requestedTaskId: taskId,
-        contentPreview: content.substring(0, 50),
-      });
       try {
+        if (!user) throw new AppError('User not authenticated for socket operations.', 401);
+
         const task = await prisma.task.findUnique({
           where: { id: taskId },
-          include: {
-            client: { select: { id: true, email: true, profile: true } },
-            freelancer: { select: { id: true, email: true, profile: true } },
-          },
+          select: { id: true, title: true, clientId: true, freelancerId: true },
         });
 
-        if (!task) {
-          logger.warn(`Socket.IO: Task not found for ID: ${taskId} when user ${user.id} tried to send message.`, {
-            socketId: socket.id,
-            taskId,
-            userId: user.id,
-          });
-          socket.emit('chat_error', 'Task not found for this chat.');
-          return;
-        }
-        if (task.clientId !== user.id && task.freelancerId !== user.id) {
-          logger.warn(`Socket.IO: User ${user.id} attempted to send message in unauthorized task ${taskId}.`, {
-            socketId: socket.id,
-            taskId,
-            userId: user.id,
-            clientId: task.clientId,
-            freelancerId: task.freelancerId,
-          });
-          socket.emit('chat_error', 'Unauthorized to send message in this task chat.');
-          return;
+        if (!task || (task.clientId !== user.id && task.freelancerId !== user.id)) {
+          throw new AppError('Unauthorized to send message in this task chat.', 403);
         }
 
         const newMessage = await prisma.message.create({
@@ -201,45 +176,24 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
           },
         });
 
+        // Broadcast the new message to EVERYONE in the room. This is the simplest and most reliable way.
         io.to(taskId).emit('receive_message', newMessage);
-        logger.info(`Socket.IO: Message emitted in room ${taskId} by ${user.email}.`, {
-          messageId: newMessage.id,
-          taskId,
-        });
+        logger.info(`Message sent and broadcasted in room ${taskId} by ${user.email}`);
 
+        // Notify the OTHER party
         const recipientId = user.id === task.clientId ? task.freelancerId : task.clientId;
         if (recipientId) {
-          const senderName = user.profile?.firstName || user.email;
-          const notificationMessage = `${senderName} sent a new message in task "${task.title}".`;
-          const notificationUrl = `/dashboard/projects/${taskId}`;
+          const senderName = user.profile?.firstName || user.email.split('@')[0];
           await createNotification(
             recipientId,
             NotificationType.NEW_MESSAGE,
-            notificationMessage,
-            notificationUrl,
-            taskId,
+            `${senderName} sent a new message in task "${task.title}".`,
+            `/dashboard/projects/${taskId}`,
           );
-          io.to(recipientId).emit('new_notification', {
-            message: notificationMessage,
-            type: NotificationType.NEW_MESSAGE,
-            url: notificationUrl,
-            taskId,
-          });
-          logger.debug(`Socket.IO: Notification sent to ${recipientId} for new message in task ${taskId}.`, {
-            taskId,
-            senderId: user.id,
-            recipientId,
-          });
         }
       } catch (error: any) {
-        logger.error(`Socket.IO: Error sending message for task ${taskId} by user ${user.id}.`, {
-          socketId: socket.id,
-          taskId,
-          userId: user.id,
-          error: error.message,
-          stack: error.stack,
-        });
-        socket.emit('chat_error', `Failed to send message: ${error.message}`);
+        logger.error('Error in send_message socket handler', { error: error.message, stack: error.stack });
+        socket.emit('error', `Failed to send message: ${error.message}`);
       }
     });
 

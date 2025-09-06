@@ -1,6 +1,6 @@
 import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
-import { Attachment, Bid, Prisma, TaskStatus, UserRole } from '@prisma/client';
+import { Attachment, Prisma, TaskStatus, UserRole } from '@prisma/client';
 import { CreateTaskInput, GetTasksQueryInput, UpdateTaskInput } from './task.validation';
 import { createNotification } from '@modules/notifications/notification.service';
 import { NotificationType } from '@prisma/client';
@@ -88,8 +88,8 @@ class TaskService {
       totalPages: Math.ceil(totalTasks / limit),
     };
   }
-
-  public async getTaskById(taskId: string, requesterId?: string) {
+  public async getTaskById(taskId: string, requesterId: string, _requesterRole: string) {
+    // FIX: A single, powerful Prisma query that handles all logic.
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: {
@@ -101,25 +101,28 @@ class TaskService {
         },
         category: { select: { id: true, name: true } },
         attachments: true,
-        milestones: {
-          orderBy: { dueDate: 'asc' },
+        _count: {
+          select: { bids: true },
         },
-        messages: {
-          orderBy: { createdAt: 'asc' },
+        // This is the core of the fix: A conditional include for bids.
+        bids: {
+          // The 'where' clause filters which bids are returned based on the user's role.
+          where: {
+            // Logic:
+            // OR:
+            // 1. The requester is the client of the task (show all bids).
+            // 2. The requester is the freelancer who made the bid (show only their bid).
+            OR: [{ task: { clientId: requesterId } }, { freelancerId: requesterId }],
+          },
           include: {
-            sender: {
+            freelancer: {
               select: {
                 id: true,
                 email: true,
-                profile: { select: { firstName: true, lastName: true, avatarUrl: true } },
+                profile: { select: { firstName: true, lastName: true, avatarUrl: true, skills: true } },
               },
             },
           },
-        },
-        // FIX: Conditionally include bids
-        bids: false, // Initially set to false
-        _count: {
-          select: { bids: true },
         },
       },
     });
@@ -128,45 +131,7 @@ class TaskService {
       throw new AppError('Task not found.', 404);
     }
 
-    // Dynamically fetch bids based on requester's role
-    let bidsToShow: Bid[] = [];
-    if (requesterId) {
-      if (requesterId === task.clientId) {
-        // If requester is the client, show all bids
-        bidsToShow = await prisma.bid.findMany({
-          where: { taskId },
-          include: {
-            freelancer: {
-              select: {
-                id: true,
-                email: true,
-                profile: { select: { firstName: true, lastName: true, avatarUrl: true, skills: true } },
-              },
-            },
-          },
-        });
-      } else {
-        // If requester is a freelancer, show ONLY their own bid
-        const freelancerBid = await prisma.bid.findFirst({
-          where: { taskId, freelancerId: requesterId },
-          include: {
-            freelancer: {
-              select: {
-                id: true,
-                email: true,
-                profile: { select: { firstName: true, lastName: true, avatarUrl: true, skills: true } },
-              },
-            },
-          },
-        });
-        if (freelancerBid) {
-          bidsToShow = [freelancerBid];
-        }
-      }
-    }
-
-    // Attach the conditionally fetched bids to the task object
-    return { ...task, bids: bidsToShow };
+    return task;
   }
 
   public async updateTask(userId: string, taskId: string, data: UpdateTaskInput) {

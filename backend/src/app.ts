@@ -20,6 +20,7 @@ import messageRoutes from '@modules/messaging/message.route';
 import notificationRoutes from '@modules/notifications/notification.route';
 import adminRoutes from '@modules/admin/admin.route';
 import uploadRoutes from '@modules/uploads/upload.route';
+import freelancerRoutes from '@modules/freelancers/freelancer.route'; 
 
 import swaggerDocument from '@docs/swagger.json';
 import path from 'path';
@@ -64,6 +65,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/freelancers', freelancerRoutes); 
 app.use('/api/uploads', uploadRoutes);
 
 app.all('*', (req, _res, next) => {

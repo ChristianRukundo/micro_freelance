@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface NotificationBellProps {
   className?: string;
@@ -77,11 +78,19 @@ export function NotificationBell({ className }: NotificationBellProps) {
           className={cn("relative", className)}
         >
           <BellIcon className="h-6 w-6 hover:text-primary-500 transition-colors" />
-          {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive-500 text-caption font-bold text-white">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-white"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
           <span className="sr-only">Notifications</span>
         </Button>
       </DropdownMenuTrigger>
