@@ -164,6 +164,52 @@ class BidService {
 
     return acceptedBid;
   }
+
+  public async updateBid(
+    bidId: string,
+    freelancerId: string,
+    data: { proposal?: string; amount?: number },
+  ): Promise<Bid> {
+    const bid = await prisma.bid.findUnique({
+      where: { id: bidId },
+      include: { task: { select: { status: true } } },
+    });
+
+    if (!bid) {
+      throw new AppError('Bid not found.', 404);
+    }
+    if (bid.freelancerId !== freelancerId) {
+      throw new AppError('You are not authorized to update this bid.', 403);
+    }
+    if (bid.task.status !== TaskStatus.OPEN) {
+      throw new AppError('Bids can only be updated while the task is open.', 400);
+    }
+
+    return prisma.bid.update({
+      where: { id: bidId },
+      data,
+    });
+  }
+
+  // --- NEW: Withdraw Bid Method ---
+  public async withdrawBid(bidId: string, freelancerId: string): Promise<void> {
+    const bid = await prisma.bid.findUnique({
+      where: { id: bidId },
+      include: { task: { select: { status: true } } },
+    });
+
+    if (!bid) {
+      throw new AppError('Bid not found.', 404);
+    }
+    if (bid.freelancerId !== freelancerId) {
+      throw new AppError('You are not authorized to withdraw this bid.', 403);
+    }
+    if (bid.task.status !== TaskStatus.OPEN) {
+      throw new AppError('Bids can only be withdrawn while the task is open.', 400);
+    }
+
+    await prisma.bid.delete({ where: { id: bidId } });
+  }
 }
 
 export default new BidService();

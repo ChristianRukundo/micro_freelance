@@ -2,28 +2,12 @@ import { Router } from 'express';
 import bidController from './bids.controller';
 import { protect, authorize } from '@shared/middleware/auth.middleware';
 import { validateRequest } from '@shared/middleware/validateRequest';
-import { submitBidSchema, taskIdParamSchema, bidIdSchema } from './bid.validation';
+import {  bidIdSchema, updateBidSchema } from './bid.validation';
 import { UserRole } from '@prisma/client';
 
 const router = Router();
 
-// Freelancer submits a bid for a task
-router.post(
-  '/tasks/:taskId/bids',
-  protect,
-  authorize(UserRole.FREELANCER),
-  validateRequest({ params: taskIdParamSchema, body: submitBidSchema }),
-  bidController.submitBid,
-);
 
-// Client views all bids for their task
-router.get(
-  '/tasks/:taskId/bids',
-  protect,
-  authorize(UserRole.CLIENT),
-  validateRequest({ params: taskIdParamSchema }),
-  bidController.getBidsForTask,
-);
 
 // Client accepts a bid
 router.post(
@@ -33,5 +17,22 @@ router.post(
   validateRequest({ params: bidIdSchema }),
   bidController.acceptBid,
 );
+
+router.put(
+  '/:bidId',
+  authorize(UserRole.FREELANCER),
+  validateRequest({ params: bidIdSchema, body: updateBidSchema }),
+  bidController.updateBid
+);
+
+// --- NEW: Withdraw a Bid (Freelancer only) ---
+router.delete(
+  '/:bidId',
+  authorize(UserRole.FREELANCER),
+  validateRequest({ params: bidIdSchema }),
+  bidController.withdrawBid
+);
+
+
 
 export default router;

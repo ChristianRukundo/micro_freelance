@@ -4,6 +4,8 @@ import { protect, authorize } from '@shared/middleware/auth.middleware';
 import { validateRequest } from '@shared/middleware/validateRequest';
 import { createTaskSchema, getTasksQuerySchema, updateTaskSchema, taskIdSchema } from './task.validation';
 import { UserRole } from '@prisma/client';
+import bidsController from '@modules/bids/bids.controller';
+import { submitBidSchema, taskIdParamSchema as bidTaskIdParamSchema } from '@modules/bids/bid.validation';
 
 const router = Router();
 
@@ -32,6 +34,20 @@ router.patch(
   authorize(UserRole.CLIENT),
   validateRequest({ params: taskIdSchema }),
   taskController.completeTask,
+);
+
+router.post(
+  '/:taskId/bids',
+  authorize(UserRole.FREELANCER),
+  validateRequest({ params: bidTaskIdParamSchema, body: submitBidSchema }),
+  bidsController.submitBid,
+);
+
+router.get(
+  '/:taskId/bids',
+  authorize(UserRole.CLIENT, UserRole.FREELANCER),
+  validateRequest({ params: bidTaskIdParamSchema }),
+  bidsController.getBidsForTask,
 );
 
 export default router;

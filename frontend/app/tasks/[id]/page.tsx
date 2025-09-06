@@ -1,6 +1,6 @@
 // frontend/app/tasks/[id]/page.tsx
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   HydrationBoundary,
   QueryClient,
@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TriangleAlertIcon } from "lucide-react";
 import { TaskDetailsSkeleton } from "@/components/common/SkeletonLoaders";
 import { TaskDetailsClient } from "@/components/tasks/TaskDetailsClient";
+import { getApiWithAuth } from "@/lib/api-server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -22,9 +23,13 @@ type Props = {
 // Server Component function to fetch initial task data
 async function getTaskDetails(taskId: string): Promise<Task | null> {
   try {
+    const api = await getApiWithAuth(); // Gets API instance with server-side cookies
     const response = await api.get(`/tasks/${taskId}`);
     return response.data.data;
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      redirect(`/login?callbackUrl=/tasks/${taskId}`);
+    }
     console.error(`Failed to fetch task ${taskId} details:`, error);
     return null;
   }

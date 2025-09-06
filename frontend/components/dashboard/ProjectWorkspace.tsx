@@ -306,7 +306,7 @@ export function TaskDetailsOverview({
             )}
             {(isTaskOwner || isAdmin) && task.status === TaskStatus.OPEN && (
               <Button
-                variant="destructive"
+                variant="gradient"
                 onClick={handleCancelTask}
                 disabled={isCancelingTask}
                 className="shadow-medium dark:shadow-medium-dark group"

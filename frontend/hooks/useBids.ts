@@ -6,12 +6,9 @@ import * as actions from "@/lib/actions";
 import { z } from "zod";
 import { submitBidSchema, updateBidSchema } from "@/lib/schemas";
 
-// This hook is now focused only on actions (mutations) related to bids.
-// The data is fetched and managed by the useTasks hook.
+
 export function useBids(taskId?: string) {
   const queryClient = useQueryClient();
-
-  // --- MUTATIONS ---
 
   const submitBidMutation = useMutation({
     mutationFn: (values: z.infer<typeof submitBidSchema>) => {
@@ -31,8 +28,13 @@ export function useBids(taskId?: string) {
   });
 
   const updateBidMutation = useMutation({
-    mutationFn: ({ bidId, values }: { bidId: string; values: z.infer<typeof updateBidSchema> }) =>
-      actions.updateBidAction(bidId, values),
+    mutationFn: ({
+      bidId,
+      values,
+    }: {
+      bidId: string;
+      values: z.infer<typeof updateBidSchema>;
+    }) => actions.updateBidAction(bidId, values),
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
@@ -71,7 +73,6 @@ export function useBids(taskId?: string) {
   });
 
   return {
-    // Note: The 'bids' array and its loading states are no longer here.
     submitBid: submitBidMutation.mutateAsync,
     isSubmittingBid: submitBidMutation.isPending,
     updateBid: updateBidMutation.mutateAsync,

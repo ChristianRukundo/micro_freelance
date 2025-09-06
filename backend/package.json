@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-    "build": "tsc && tsc-alias",  
+  "scripts": {
+    "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "migrate": "npx prisma migrate deploy",  
+    "migrate": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
-    "seed": "ts-node prisma/seed.ts" 
+    "seed": "ts-node prisma/seed.ts",
+    "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node -r tsconfig-paths/register src/server.ts\""
   },
   "keywords": [],
   "author": "",
@@ -18,11 +19,13 @@
     "@aws-sdk/s3-request-presigner": "^3.879.0",
     "@faker-js/faker": "^9.7.0",
     "@prisma/client": "^5.18.0",
+    "@types/cookie": "^0.6.0",
     "@types/socket.io": "^3.0.1",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.2",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.0",
+    "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -63,7 +66,7 @@
     "@types/uuid": "^10.0.0",
     "concurrently": "^8.2.2",
     "nodemon": "^3.1.4",
-    "tsconfig-paths": "^4.2.0",
-    "tsc-alias": "^1.8.10"
+    "tsc-alias": "^1.8.10",
+    "tsconfig-paths": "^4.2.0"
   }
 }

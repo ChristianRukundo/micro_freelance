@@ -80,6 +80,7 @@ export function TaskDetailsClient({
   } = useTasks({ q: taskId });
 
   const task = taskDetails || initialTask;
+  console.log(task);
 
   if (isLoadingTaskDetails && !task) return <TaskDetailsSkeleton />;
   if (isErrorTaskDetails)

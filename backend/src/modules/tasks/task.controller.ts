@@ -31,10 +31,11 @@ class TaskController {
     }
   }
 
-  public async getTaskById(req: Request<z.infer<typeof taskIdSchema>>, res: Response, next: NextFunction) {
+public async getTaskById(req: Request<z.infer<typeof taskIdSchema>>, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const task = await taskService.getTaskById(id);
+      const requesterId = req.user?.id;
+      const task = await taskService.getTaskById(id, requesterId);
       res.status(200).json({ success: true, data: task });
     } catch (error) {
       next(error);
