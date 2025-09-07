@@ -24,28 +24,27 @@ class TaskController {
   ) {
     try {
       const queryParams = req.query;
-      const tasksData = await taskService.getTasks(queryParams);
+      const tasksData = await taskService.getTasks(queryParams, req.user);
       res.status(200).json({ success: true, data: tasksData });
     } catch (error) {
       next(error);
     }
   }
 
- public async getTaskById(req: Request<z.infer<typeof taskIdSchema>>, res: Response, next: NextFunction) {
+  public async getTaskById(req: Request<z.infer<typeof taskIdSchema>>, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-    
+
       const requesterId = req.user!.id;
       const requesterRole = req.user!.role;
 
       const task = await taskService.getTaskById(id, requesterId, requesterRole);
-      
+
       res.status(200).json({ success: true, data: task });
     } catch (error) {
       next(error);
     }
   }
-
 
   public async updateTask(
     req: Request<z.infer<typeof taskIdSchema>, unknown, UpdateTaskInput>,

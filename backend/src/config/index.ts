@@ -1,4 +1,4 @@
- import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import { z } from 'zod';
 
 dotenv.config();
@@ -28,6 +28,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1, 'STRIPE_SECRET_KEY is required'),
   STRIPE_WEBHOOK_SECRET: z.string().min(1, 'STRIPE_WEBHOOK_SECRET is required'),
   STRIPE_CONNECT_RETURN_URL: z.string().url('STRIPE_CONNECT_RETURN_URL must be a valid URL'),
+  COOKIE_DOMAIN: z.string().optional(),
 
   AWS_REGION: z.string().min(1, 'AWS_REGION is required'),
   AWS_ACCESS_KEY_ID: z.string().min(1, 'AWS_ACCESS_KEY_ID is required'),

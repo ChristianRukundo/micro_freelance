@@ -28,7 +28,9 @@ import path from 'path';
 const app = express();
 
 app.use(helmet());
-
+if (config.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 app.use(apiRateLimiter);
 
 app.use(

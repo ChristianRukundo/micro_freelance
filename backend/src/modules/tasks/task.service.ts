@@ -35,13 +35,27 @@ class TaskService {
     return { task, attachments: createdAttachments };
   }
 
-  public async getTasks(query: GetTasksQueryInput) {
+  public async getTasks(query: GetTasksQueryInput, user?: { id: string; role: UserRole }) {
     const { page = 1, limit = 10, categoryId, minBudget, maxBudget, status, q, sortBy, sortOrder } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = {
-      status: status || TaskStatus.OPEN,
-    };
+    const where: Prisma.TaskWhereInput = {};
+
+    // --- SECURE USER-SPECIFIC FILTERING ---
+    // If a user object is passed, filter tasks specifically for them.
+    if (user) {
+      if (user.role === UserRole.CLIENT) {
+        where.clientId = user.id;
+      } else if (user.role === UserRole.FREELANCER) {
+        where.freelancerId = user.id;
+      }
+    } else {
+      where.status = status ? (status as TaskStatus) : TaskStatus.OPEN;
+    }
+
+    if (status) {
+      where.status = status as TaskStatus;
+    }
 
     if (categoryId) {
       where.categoryId = categoryId;
@@ -69,6 +83,9 @@ class TaskService {
         client: {
           select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } },
         },
+        freelancer: {
+          select: { id: true, email: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } },
+        },
         category: { select: { id: true, name: true } },
         _count: {
           select: { bids: true },
@@ -78,8 +95,6 @@ class TaskService {
 
     const totalTasks = await prisma.task.count({ where });
 
-    console.log(tasks);
-
     return {
       tasks,
       totalTasks,
@@ -88,6 +103,7 @@ class TaskService {
       totalPages: Math.ceil(totalTasks / limit),
     };
   }
+
   public async getTaskById(taskId: string, requesterId: string, _requesterRole: string) {
     // FIX: A single, powerful Prisma query that handles all logic.
     const task = await prisma.task.findUnique({

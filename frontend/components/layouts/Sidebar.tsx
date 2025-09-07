@@ -21,6 +21,7 @@ import {
   SearchIcon,
   MenuIcon,
   SparklesIcon,
+  ListChecksIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -223,77 +224,81 @@ export function Sidebar() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
-  const mainNavLinks: NavLinkItem[] = React.useMemo(() => [
-    {
-      href: "/tasks",
-      icon: <BriefcaseIcon className="h-5 w-5" />,
-      label: "Browse Projects",
-      badge: "Hot",
-    },
-    {
-      href: "/freelancers",
-      icon: <UsersIcon className="h-5 w-5" />,
-      label: "Find Freelancers",
-    },
-    // Client Dashboard Links
-    {
-      href: "/dashboard/client",
-      icon: <LayoutDashboardIcon className="h-5 w-5" />,
-      label: "Client Dashboard",
-      roles: [UserRole.CLIENT],
-    },
-    {
-      href: "/tasks/new",
-      icon: <BriefcaseIcon className="h-5 w-5" />,
-      label: "Post New Project",
-      roles: [UserRole.CLIENT],
-      badge: "New",
-    },
-    {
-      href: "/dashboard/client/spending",
-      icon: <DollarSignIcon className="h-5 w-5" />,
-      label: "Spending History",
-      roles: [UserRole.CLIENT],
-    },
-    // Freelancer Dashboard Links
-    {
-      href: "/dashboard/freelancer",
-      icon: <LayoutDashboardIcon className="h-5 w-5" />,
-      label: "Freelancer Dashboard",
-      roles: [UserRole.FREELANCER],
-    },
-    {
-      href: "/dashboard/freelancer/earnings",
-      icon: <DollarSignIcon className="h-5 w-5" />,
-      label: "My Earnings",
-      roles: [UserRole.FREELANCER],
-    },
-    {
-      href: "/dashboard/payouts",
-      icon: <DollarSignIcon className="h-5 w-5" />,
-      label: "Payout Settings",
-      roles: [UserRole.FREELANCER],
-    },
-    // Admin Links
-    {
-      href: "/admin/users",
-      icon: <UserCogIcon className="h-5 w-5" />,
-      label: "Manage Users",
-      roles: [UserRole.ADMIN],
-    },
-    // Common Links for all Authenticated Users
-    {
-      href: "/dashboard/profile",
-      icon: <UserIcon className="h-5 w-5" />,
-      label: "Profile Settings",
-    },
-    {
-      href: "/dashboard/notifications",
-      icon: <BellIcon className="h-5 w-5" />,
-      label: "Notifications",
-      badge: unreadCount > 0 ? unreadCount.toString() : undefined,
-    },
-  ], [unreadCount]);
+  const mainNavLinks: NavLinkItem[] = React.useMemo(
+    () => [
+      // --- Client Dashboard Links ---
+      {
+        href: "/dashboard/client",
+        icon: <LayoutDashboardIcon className="h-5 w-5" />,
+        label: "Client Dashboard",
+        roles: [UserRole.CLIENT],
+      },
+      {
+        href: "/dashboard/client/projects", // NEW LINK FOR CLIENTS
+        icon: <ListChecksIcon className="h-5 w-5" />,
+        label: "My Projects",
+        roles: [UserRole.CLIENT],
+      },
+      {
+        href: "/tasks/new",
+        icon: <BriefcaseIcon className="h-5 w-5" />,
+        label: "Post New Project",
+        roles: [UserRole.CLIENT],
+        badge: "New",
+      },
+      {
+        href: "/dashboard/client/spending",
+        icon: <DollarSignIcon className="h-5 w-5" />,
+        label: "Spending History",
+        roles: [UserRole.CLIENT],
+      },
+      // --- Freelancer Dashboard Links ---
+      {
+        href: "/dashboard/freelancer",
+        icon: <LayoutDashboardIcon className="h-5 w-5" />,
+        label: "Freelancer Dashboard",
+        roles: [UserRole.FREELANCER],
+      },
+      {
+        href: "/dashboard/freelancer/projects", // NEW LINK FOR FREELANCERS
+        icon: <ListChecksIcon className="h-5 w-5" />,
+        label: "My Projects",
+        roles: [UserRole.FREELANCER],
+      },
+      {
+        href: "/dashboard/freelancer/earnings",
+        icon: <DollarSignIcon className="h-5 w-5" />,
+        label: "My Earnings",
+        roles: [UserRole.FREELANCER],
+      },
+      {
+        href: "/dashboard/payouts",
+        icon: <DollarSignIcon className="h-5 w-5" />,
+        label: "Payout Settings",
+        roles: [UserRole.FREELANCER],
+      },
+      // --- Admin Links ---
+      {
+        href: "/admin/users",
+        icon: <UserCogIcon className="h-5 w-5" />,
+        label: "Manage Users",
+        roles: [UserRole.ADMIN],
+      },
+      // --- Common Links for all Authenticated Users ---
+      {
+        href: "/dashboard/profile",
+        icon: <UserIcon className="h-5 w-5" />,
+        label: "Profile Settings",
+      },
+      {
+        href: "/dashboard/notifications",
+        icon: <BellIcon className="h-5 w-5" />,
+        label: "Notifications",
+        badge: unreadCount > 0 ? unreadCount.toString() : undefined,
+      },
+    ],
+    [unreadCount]
+  );
 
   useEffect(() => {
     if (isMobile) {
