@@ -316,7 +316,6 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
               )}
             />
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              acka
               <FormField
                 control={form.control}
                 name="budget"
