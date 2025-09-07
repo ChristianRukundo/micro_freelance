@@ -49,6 +49,7 @@ export const createSendToken = (user: UserWithProfileData, statusCode: number, r
     httpOnly: true,
     secure: config.NODE_ENV === 'production',
     sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: config.COOKIE_DOMAIN,
   };
 
   res.cookie('refreshToken', refreshToken, {
@@ -99,6 +100,7 @@ export const clearAuthCookies = (res: Response) => {
     httpOnly: true,
     secure: config.NODE_ENV === 'production',
     sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
+    domain: config.COOKIE_DOMAIN,
   };
 
   res.cookie('accessToken', 'loggedout', {
