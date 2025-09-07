@@ -89,7 +89,7 @@ export default function ClientDashboardPage() {
           Quick Actions
         </motion.h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Link href="/tasks/new" passHref>
+          <Link href="/dashboard/tasks/new" passHref>
             <Button
               variant="gradient"
               size="lg"

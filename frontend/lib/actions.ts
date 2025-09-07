@@ -1,6 +1,6 @@
 "use server";
 
-import api from "./api";
+import { getApiWithAuth } from "./api-server";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -83,6 +83,7 @@ export async function loginAction(
   formData: FormData
 ): Promise<ServerActionResponse<{ user: any }>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = loginSchema.parse(data);
     const response = await api.post("/auth/login", validatedData);
@@ -101,6 +102,7 @@ export async function registerAction(
   formData: FormData
 ): Promise<ServerActionResponse<{ userId: string; email: string }>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = registerSchema.parse(data);
     const response = await api.post("/auth/register", validatedData);
@@ -119,6 +121,7 @@ export async function verifyEmailAction(
   formData: FormData
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = verifyEmailSchema.parse(data);
     await api.post("/auth/verify-email", validatedData);
@@ -132,6 +135,7 @@ export async function resendVerificationEmailAction(
   formData: FormData
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const email = z.object({ email: z.string().email() }).parse(data).email;
     await api.post("/auth/resend-verification-email", { email });
@@ -148,6 +152,7 @@ export async function forgotPasswordAction(
   formData: FormData
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = forgotPasswordSchema.parse(data);
     await api.post("/auth/forgot-password", validatedData);
@@ -165,6 +170,7 @@ export async function resetPasswordAction(
   formData: FormData
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = resetPasswordSchema.parse(data);
     await api.post("/auth/reset-password", validatedData);
@@ -180,6 +186,7 @@ export async function updateProfileInfoAction(
   values: z.infer<typeof updateProfileSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = updateProfileSchema.parse(values);
     const response = await api.put("/users/me", validatedData);
     revalidatePath("/dashboard/profile");
@@ -198,6 +205,7 @@ export async function changePasswordAction(
   values: z.infer<typeof changePasswordSchema>
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = changePasswordSchema.parse(values);
     await api.patch("/users/me/change-password", validatedData);
     return { success: true, message: "Password changed successfully!" };
@@ -211,6 +219,7 @@ export async function createTaskAction(
   values: z.infer<typeof createTaskSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = createTaskSchema.parse(values);
     const response = await api.post("/tasks", validatedData);
     revalidatePath("/tasks");
@@ -230,6 +239,7 @@ export async function updateTaskAction(
   values: Partial<z.infer<typeof createTaskSchema>>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = createTaskSchema.partial().parse(values);
     const response = await api.put(`/tasks/${taskId}`, validatedData);
     revalidatePath(`/tasks/${taskId}`);
@@ -248,6 +258,7 @@ export async function deleteTaskAction(
   taskId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     await api.delete(`/tasks/${taskId}`);
     revalidatePath("/tasks");
     revalidatePath("/dashboard/client");
@@ -261,6 +272,7 @@ export async function cancelTaskAction(
   taskId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     await api.patch(`/tasks/${taskId}/cancel`);
     revalidatePath(`/tasks/${taskId}`);
     revalidatePath("/dashboard/client");
@@ -275,6 +287,7 @@ export async function completeTaskAction(
   taskId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     await api.patch(`/tasks/${taskId}/complete`);
     revalidatePath(`/tasks/${taskId}`);
     revalidatePath("/dashboard/client");
@@ -291,6 +304,7 @@ export async function submitBidAction(
   values: z.infer<typeof submitBidSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = submitBidSchema.parse(values);
     const response = await api.post(`/tasks/${taskId}/bids`, validatedData);
     revalidatePath(`/tasks/${taskId}`);
@@ -308,6 +322,7 @@ export async function acceptBidAction(
   bidId: string
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const response = await api.post(`/bids/${bidId}/accept`);
     revalidatePath("/tasks");
     revalidatePath("/dashboard/client");
@@ -329,6 +344,7 @@ export async function createMilestonesAction(
   values: z.infer<typeof createMultipleMilestonesSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = createMultipleMilestonesSchema.parse(values);
     const response = await api.post(
       `/tasks/${taskId}/milestones`,
@@ -349,6 +365,7 @@ export async function submitMilestoneAction(
   milestoneId: string
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const response = await api.patch(`/milestones/${milestoneId}/submit`);
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
     return {
@@ -366,6 +383,7 @@ export async function requestMilestoneRevisionAction(
   values: z.infer<typeof requestRevisionSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = requestRevisionSchema.parse(values);
     const response = await api.patch(
       `/milestones/${milestoneId}/request-revision`,
@@ -386,6 +404,7 @@ export async function approveMilestoneAction(
   milestoneId: string
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const response = await api.patch(`/milestones/${milestoneId}/approve`);
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
     return {
@@ -402,6 +421,7 @@ export async function createStripeConnectAccountAction(
   values: z.infer<typeof createStripeConnectAccountSchema>
 ): Promise<ServerActionResponse<StripeCustomerData>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = createStripeConnectAccountSchema.parse(values);
     const response = await api.post(
       "/payments/stripe/connect-account",
@@ -423,6 +443,7 @@ export async function createPaymentIntentAction(
   values: z.infer<typeof fundTaskBodySchema>
 ): Promise<ServerActionResponse<StripeCustomerData>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = fundTaskBodySchema.parse(values);
     const response = await api.post(
       `/payments/tasks/${taskId}/create-payment-intent`,
@@ -445,6 +466,7 @@ export async function adminUpdateUserStatusAction(
   values: z.infer<typeof updateUserStatusSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = updateUserStatusSchema.parse(values);
     const response = await api.patch(
       `/admin/users/${userId}/status`,
@@ -465,6 +487,7 @@ export async function adminDeleteUserAction(
   userId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     await api.delete(`/admin/users/${userId}`);
     revalidatePath("/admin/users");
     return { success: true, message: "User deleted successfully!" };
@@ -478,6 +501,7 @@ export async function updateBidAction(
   values: z.infer<typeof updateBidSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
+    const api = await getApiWithAuth();
     const validatedData = updateBidSchema.parse(values);
     const response = await api.put(`/bids/${bidId}`, validatedData);
     revalidatePath(`/tasks/${response.data.data.taskId}`);
@@ -496,6 +520,7 @@ export async function withdrawBidAction(
   bidId: string
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const bidResponse = await api.get(`/bids/${bidId}`); // Need to get taskId before deleting
     const taskId = bidResponse.data.data.taskId;
     await api.delete(`/bids/${bidId}`);
@@ -513,6 +538,7 @@ export async function fetchPopularTasks(): Promise<
   ServerActionResponse<TaskType[]>
 > {
   try {
+    const api = await getApiWithAuth();
     // Fetch top 3-6 tasks, e.g., with most bids or recent activity
     const response = await api.get("/tasks", {
       params: {
@@ -534,6 +560,7 @@ export async function fetchTopFreelancers(): Promise<
   ServerActionResponse<UserType[]>
 > {
   try {
+    const api = await getApiWithAuth();
     // Fetch top 3-6 freelancers from the public users endpoint
     const response = await api.get("/users", {
       params: {
@@ -554,6 +581,7 @@ export async function newsletterSubscribeAction(
   formData: FormData
 ): Promise<ServerActionResponse<void>> {
   try {
+    const api = await getApiWithAuth();
     const data = Object.fromEntries(formData.entries());
     const validatedData = newsletterSchema.parse(data);
 
@@ -576,6 +604,7 @@ export async function getCategoriesAction(): Promise<
   ServerActionResponse<any[]>
 > {
   try {
+    const api = await getApiWithAuth();
     const response = await api.get("/categories");
     return { success: true, data: response.data.data };
   } catch (error: any) {

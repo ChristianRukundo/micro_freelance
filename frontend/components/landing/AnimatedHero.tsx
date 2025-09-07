@@ -43,11 +43,11 @@ export function AnimatedHero() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
           className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mt-8"
         >
-          <Link href="/tasks/new" passHref>
+          <Link href="/dashboard/tasks/new" passHref>
             <Button
               size="lg"
               variant="gradient"
-              className="shadow-lg shadow-primary dark:shadow-primary-dark-500/30 group px-8 py-3 text-h6 font-semibold"
+              className=" shadow-primary dark:shadow-primary-dark-500/30 group px-8 py-3 text-h6 font-semibold"
             >
               Post a Project
               <MoveRightIcon className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

@@ -98,6 +98,7 @@ export interface Task {
   deadline: Date;
   createdAt: Date;
   updatedAt: Date;
+  skills: String[];
   clientId: string;
   freelancerId?: string | null;
   categoryId: string;

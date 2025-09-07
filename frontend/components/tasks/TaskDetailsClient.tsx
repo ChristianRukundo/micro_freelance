@@ -18,6 +18,7 @@ import {
   TriangleAlertIcon,
   PencilIcon,
   Trash2Icon,
+  TagIcon,
 } from "lucide-react";
 import { formatRelativeTime, formatDate } from "@/lib/date";
 import { Badge } from "@/components/ui/badge";
@@ -175,6 +176,23 @@ export function TaskDetailsClient({
                     {task.category?.name || "Uncategorized"}
                   </Badge>
                 </div>
+                {task.skills && task.skills.length > 0 && (
+                  <div
+                    className="flex items-center flex-wrap gap-2"
+                    title="Required Skills"
+                  >
+                    <TagIcon className="mr-1 h-4 w-4 text-primary" />
+                    {task.skills.map((skill, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="text-body-sm"
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </Card>
             <article className="prose prose-sm dark:prose-invert max-w-none">

@@ -119,6 +119,8 @@ model Task {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
+  skills      String[]
+
   attachments   Attachment[]
   bids          Bid[]
   milestones    Milestone[]

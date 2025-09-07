@@ -7,7 +7,7 @@ import { NotificationType } from '@prisma/client';
 
 class TaskService {
   public async createTask(clientId: string, data: CreateTaskInput): Promise<{ task: any; attachments: Attachment[] }> {
-    const { attachments, deadline, ...taskData } = data;
+    const { attachments, deadline, skills, ...taskData } = data;
 
     const task = await prisma.task.create({
       data: {
@@ -15,6 +15,7 @@ class TaskService {
         deadline: deadline ? new Date(deadline) : null, // ✅ pass null instead of undefined
         clientId,
         status: TaskStatus.OPEN,
+        skills: skills,
       },
     });
 
@@ -168,7 +169,7 @@ class TaskService {
       throw new AppError('Cannot update a completed or cancelled task.', 400);
     }
 
-    const { deadline, attachments, ...updateData } = data;
+    const { deadline, attachments, skills, ...updateData } = data;
     const dataToUpdate: Prisma.TaskUpdateInput = {};
     if (updateData.title) dataToUpdate.title = updateData.title;
     if (updateData.description) dataToUpdate.description = updateData.description;
@@ -177,6 +178,9 @@ class TaskService {
     if (deadline) dataToUpdate.deadline = new Date(deadline);
     if (updateData.categoryId) {
       dataToUpdate.category = { connect: { id: updateData.categoryId } };
+    }
+    if (skills) {
+      dataToUpdate.skills = skills;
     }
 
     const updatedTask = await prisma.task.update({

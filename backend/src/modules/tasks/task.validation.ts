@@ -10,6 +10,7 @@ export const attachmentSchema = z.object({
 export const createTaskSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long').max(200, 'Title cannot exceed 200 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters long'),
+  skills: z.array(z.string().min(1)).optional(),
   budget: z.number().min(10, 'Budget must be at least 10').max(1000000, 'Budget cannot exceed 1,000,000'),
   deadline: z
     .string()
@@ -30,6 +31,7 @@ export const updateTaskSchema = z.object({
     .max(200, 'Title cannot exceed 200 characters')
     .optional(),
   description: z.string().min(20, 'Description must be at least 20 characters long').optional(),
+  skills: z.array(z.string().min(1)).optional(),
   budget: z.number().min(10, 'Budget must be at least 10').max(1_000_000, 'Budget cannot exceed 1,000,000').optional(),
   deadline: z
     .string()
@@ -74,4 +76,3 @@ export const taskIdSchema = z.object({
 });
 
 export type TaskIdInput = z.infer<typeof taskIdSchema>;
-

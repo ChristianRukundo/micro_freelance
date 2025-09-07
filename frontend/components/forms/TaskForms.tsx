@@ -54,6 +54,7 @@ import * as actions from "@/lib/actions";
 import { createTaskSchema } from "@/lib/schemas";
 import { useCategories } from "@/hooks/useTasks"; // Reusing categories hook
 import { motion } from "framer-motion";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 // Zod Schema for Task Creation
 const taskFormSchema = createTaskSchema;
@@ -64,6 +65,15 @@ interface TaskFormsProps {
   initialData?: TaskFormInput & { id?: string }; // For edit mode, includes task id
   taskId?: string; // For edit mode, passed separately
 }
+
+const mockSkills = [
+  { value: "react", label: "React" },
+  { value: "nextjs", label: "Next.js" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "nodejs", label: "Node.js" },
+  { value: "graphql", label: "GraphQL" },
+  { value: "postgresql", label: "PostgreSQL" },
+];
 
 export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
   const router = useRouter();
@@ -93,15 +103,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
       budget: initialData?.budget || 100,
       deadline: initialData?.deadline || "",
       categoryId: initialData?.categoryId || "",
-      attachments: initialData?.attachments || [],
-    },
-    values: {
-      // Keep form values synced for edit mode
-      title: initialData?.title || "",
-      description: initialData?.description || "",
-      budget: initialData?.budget || 100,
-      deadline: initialData?.deadline || "",
-      categoryId: initialData?.categoryId || "",
+      skills: initialData?.skills || [],
       attachments: initialData?.attachments || [],
     },
   });
@@ -356,7 +358,7 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                             disabled={isFormPending}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(new Date(field.value), "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -417,6 +419,26 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
                       )}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="skills"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Skills</FormLabel>
+                  <MultiSelect
+                    options={mockSkills}
+                    onValueChange={field.onChange}
+                    defaultValue={field.value || []}
+                    placeholder="Select required skills"
+                    animation={1}
+                    maxCount={5}
+                    disabled={isFormPending}
+                    className="shadow-soft dark:shadow-soft-dark"
+                  />
                   <FormMessage />
                 </FormItem>
               )}

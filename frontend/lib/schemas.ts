@@ -77,12 +77,21 @@ export const attachmentSchema = z.object({
 });
 
 export const createTaskSchema = z.object({
-  title: z.string().min(5).max(200),
-  description: z.string().min(50),
-  budget: z.number().min(10).max(1000000),
-  deadline: z.string().datetime(),
-  categoryId: z.string(),
-  attachments: z.array(attachmentSchema).optional(),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  budget: z.coerce.number().min(1, "Budget must be at least 1"),
+  deadline: z.string().min(1, "Deadline is required"),
+  categoryId: z.string().min(1, "Category is required"),
+  skills: z.array(z.string()).optional(),
+  attachments: z
+    .array(
+      z.object({
+        url: z.string(),
+        fileName: z.string(),
+        fileType: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export const submitBidSchema = z.object({
