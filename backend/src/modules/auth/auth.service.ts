@@ -1,4 +1,4 @@
-import { User, UserRole } from '@prisma/client';
+import { Profile, User, UserRole } from '@prisma/client';
 import prisma from '@shared/database/prisma';
 import { hashPassword, comparePasswords } from '@shared/utils/password';
 import { generateOTP } from '@shared/utils/otp';
@@ -9,6 +9,8 @@ import { createNotification } from '@modules/notifications/notification.service'
 import { NotificationType } from '@prisma/client';
 import { verifyToken } from '@shared/utils/jwt';
 import config from '@config/index';
+
+type UserWithProfile = User & { profile: Profile | null };
 
 class AuthService {
   public async register(
@@ -108,9 +110,12 @@ class AuthService {
     await nodemailerService.sendVerificationEmail(user.email, user.profile?.firstName || user.email, newOtp);
   }
 
-  public async login(email: string, passwordPlain: string): Promise<User> {
+  public async login(email: string, passwordPlain: string): Promise<UserWithProfile> {
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        profile: true,
+      },
     });
 
     if (!user || !(await comparePasswords(passwordPlain, user.password))) {
@@ -190,7 +195,7 @@ class AuthService {
     );
   }
 
-  public async getCurrentUser(userId: string): Promise<User | null> {
+  public async getCurrentUser(userId: string): Promise<UserWithProfile | null> {
     return prisma.user.findUnique({
       where: { id: userId },
       include: {

@@ -15,13 +15,18 @@ const nextConfig = {
                 port: '',
                 pathname: '**',
             },
-                    {
+            {
                 protocol: 'http',
                 hostname: 'localhost',
-                port: '5000', 
+                port: '5000',
                 pathname: '/uploads/**',
             },
-
+            {
+                protocol: 'https',
+                hostname: 'micro-freelance.onrender.com',
+                port: '',
+                pathname: '/uploads/**',
+            },
         ],
     },
     experimental: {

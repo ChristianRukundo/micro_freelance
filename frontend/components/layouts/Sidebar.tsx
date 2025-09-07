@@ -1,4 +1,3 @@
-// components/layouts/Sidebar.tsx
 "use client";
 
 import Link from "next/link";
@@ -15,16 +14,13 @@ import {
   DollarSignIcon,
   BellIcon,
   XIcon,
-  BriefcaseBusinessIcon,
   UserCogIcon,
   LogOutIcon,
-  SearchIcon,
   MenuIcon,
   SparklesIcon,
   ListChecksIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { UserRole } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,11 +29,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
+import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle"; // Assuming this is correctly named and imported
 import { useNotifications } from "@/hooks/useNotifications";
 import { Logo } from "../common/Logo";
 
-// --- Navigation Link Interface ---
 interface NavLinkItem {
   href: string;
   icon: React.ReactNode;
@@ -46,7 +41,6 @@ interface NavLinkItem {
   badge?: string;
 }
 
-// --- Enhanced Badge Component ---
 const Badge = ({
   children,
   variant = "primary",
@@ -60,7 +54,6 @@ const Badge = ({
     success: "bg-gradient-to-r from-emerald-500 to-teal-600 text-white",
     warning: "bg-gradient-to-r from-amber-500 to-orange-600 text-white",
   };
-
   return (
     <motion.span
       initial={{ scale: 0 }}
@@ -76,7 +69,6 @@ const Badge = ({
   );
 };
 
-// --- Enhanced Sidebar Navigation Link Component ---
 interface SidebarNavLinkProps {
   href: string;
   icon: React.ReactNode;
@@ -99,27 +91,20 @@ function SidebarNavLink({
     pathname === href || (pathname.startsWith(href) && href !== "/");
   const { setSidebarOpen } = useUIStore();
   const isMobile = useIsMobile();
-
   const handleClick = () => {
     if (isMobile) {
       setSidebarOpen(false);
     }
     onClick?.();
   };
-
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         <Link href={href} passHref>
           <motion.div
             initial={false}
-            animate={{
-              scale: isActive ? 1.02 : 1,
-            }}
-            whileHover={{
-              scale: 1.03,
-              x: isCollapsed ? 0 : 4,
-            }}
+            animate={{ scale: isActive ? 1.02 : 1 }}
+            whileHover={{ scale: 1.03, x: isCollapsed ? 0 : 4 }}
             whileTap={{ scale: 0.98 }}
             transition={{
               type: "spring",
@@ -149,7 +134,6 @@ function SidebarNavLink({
             onClick={handleClick}
             aria-current={isActive ? "page" : undefined}
           >
-            {/* Active indicator */}
             {isActive && !isCollapsed && (
               <motion.div
                 layoutId="activeTab"
@@ -158,7 +142,6 @@ function SidebarNavLink({
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               />
             )}
-
             <div className="relative flex items-center">
               {cloneElement(icon as ReactElement<SVGProps<SVGSVGElement>>, {
                 className: cn(
@@ -167,7 +150,6 @@ function SidebarNavLink({
                   !isCollapsed && "mr-3"
                 ),
               })}
-
               <AnimatePresence>
                 {!isCollapsed && (
                   <motion.div
@@ -195,8 +177,6 @@ function SidebarNavLink({
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Hover glow effect */}
             <motion.div
               className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
               initial={false}
@@ -216,7 +196,6 @@ function SidebarNavLink({
   );
 }
 
-// --- Main Sidebar Component ---
 export function Sidebar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const { isSidebarOpen, toggleSidebar, setSidebarOpen } = useUIStore();
@@ -224,9 +203,17 @@ export function Sidebar() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
 
+  const displayName =
+    user?.profile?.firstName || user?.email?.split("@")[0] || "User";
+  const avatarUrl = user?.profile?.avatarUrl;
+  const avatarFallback = (user?.profile?.firstName || user?.email || "U")
+    ?.charAt(0)
+    .toUpperCase();
+
+  console.log("the avatar url is", avatarUrl);
+
   const mainNavLinks: NavLinkItem[] = React.useMemo(
     () => [
-      // --- Client Dashboard Links ---
       {
         href: "/dashboard/client",
         icon: <LayoutDashboardIcon className="h-5 w-5" />,
@@ -234,10 +221,16 @@ export function Sidebar() {
         roles: [UserRole.CLIENT],
       },
       {
-        href: "/dashboard/client/projects", // NEW LINK FOR CLIENTS
+        href: "/dashboard/client/projects",
         icon: <ListChecksIcon className="h-5 w-5" />,
         label: "My Projects",
         roles: [UserRole.CLIENT],
+      },
+      {
+        href: "/dashboard/freelancer/projects",
+        icon: <ListChecksIcon className="h-5 w-5" />,
+        label: "My Projects",
+        roles: [UserRole.FREELANCER],
       },
       {
         href: "/tasks/new",
@@ -252,17 +245,10 @@ export function Sidebar() {
         label: "Spending History",
         roles: [UserRole.CLIENT],
       },
-      // --- Freelancer Dashboard Links ---
       {
         href: "/dashboard/freelancer",
         icon: <LayoutDashboardIcon className="h-5 w-5" />,
         label: "Freelancer Dashboard",
-        roles: [UserRole.FREELANCER],
-      },
-      {
-        href: "/dashboard/freelancer/projects", // NEW LINK FOR FREELANCERS
-        icon: <ListChecksIcon className="h-5 w-5" />,
-        label: "My Projects",
         roles: [UserRole.FREELANCER],
       },
       {
@@ -272,19 +258,17 @@ export function Sidebar() {
         roles: [UserRole.FREELANCER],
       },
       {
-        href: "/dashboard/payouts",
+        href: "/dashboard/client/payouts",
         icon: <DollarSignIcon className="h-5 w-5" />,
         label: "Payout Settings",
         roles: [UserRole.FREELANCER],
       },
-      // --- Admin Links ---
       {
         href: "/admin/users",
         icon: <UserCogIcon className="h-5 w-5" />,
         label: "Manage Users",
         roles: [UserRole.ADMIN],
       },
-      // --- Common Links for all Authenticated Users ---
       {
         href: "/dashboard/profile",
         icon: <UserIcon className="h-5 w-5" />,
@@ -307,7 +291,6 @@ export function Sidebar() {
       setSidebarOpen(true);
     }
   }, [isMobile, setSidebarOpen]);
-
   useEffect(() => {
     if (isMobile && isSidebarOpen) {
       setSidebarOpen(false);
@@ -316,24 +299,33 @@ export function Sidebar() {
 
   const filteredNavLinks = React.useMemo(() => {
     if (!isAuthenticated || !user) return [];
-    return mainNavLinks.filter((link) => {
-      if (!link.roles) return true;
-      return link.roles.includes(user.role!);
-    });
+    if (user.role === "CLIENT") {
+      return mainNavLinks.filter(
+        (link) => link.roles?.includes(UserRole.CLIENT) || !link.roles
+      );
+    }
+    if (user.role === "FREELANCER") {
+      return mainNavLinks.filter(
+        (link) => link.roles?.includes(UserRole.FREELANCER) || !link.roles
+      );
+    }
+    if (user.role === "ADMIN") {
+      return mainNavLinks.filter(
+        (link) => link.roles?.includes(UserRole.ADMIN) || !link.roles
+      );
+    }
+    return mainNavLinks.filter((link) => !link.roles);
   }, [user, isAuthenticated, mainNavLinks]);
 
-  const desktopExpandedWidth = "18rem"; // Increased from 16rem
-  const desktopCollapsedWidth = "4.5rem"; // Increased from 4rem
-
+  const desktopExpandedWidth = "18rem";
+  const desktopCollapsedWidth = "4.5rem";
   const isDesktopCollapsed = !isSidebarOpen && !isMobile;
-
   const sidebarAnimateProps = isMobile
     ? { x: isSidebarOpen ? 0 : "-100%" }
     : { width: isSidebarOpen ? desktopExpandedWidth : desktopCollapsedWidth };
 
   return (
     <>
-      {/* Mobile overlay with enhanced blur */}
       {isSidebarOpen && isMobile && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -345,7 +337,6 @@ export function Sidebar() {
           aria-label="Close sidebar"
         />
       )}
-
       <motion.aside
         initial={false}
         animate={sidebarAnimateProps}
@@ -367,11 +358,8 @@ export function Sidebar() {
           !isMobile && !isSidebarOpen && "md:w-18"
         )}
       >
-        {/* Enhanced gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
         <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
-
-        {/* Sidebar Header */}
         <div
           className={cn(
             "relative flex items-center px-6 py-4 border-b border-border/30",
@@ -408,8 +396,6 @@ export function Sidebar() {
               )}
             </AnimatePresence>
           </Link>
-
-          {/* Enhanced toggle button */}
           {!isMobile && (
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
@@ -441,8 +427,6 @@ export function Sidebar() {
               </TooltipContent>
             </Tooltip>
           )}
-
-          {/* Mobile close button */}
           {isSidebarOpen && isMobile && (
             <Button
               variant="ghost"
@@ -455,8 +439,6 @@ export function Sidebar() {
             </Button>
           )}
         </div>
-
-        {/* Enhanced User Profile Section */}
         {isAuthenticated && user && (
           <div
             className={cn(
@@ -481,24 +463,21 @@ export function Sidebar() {
                 >
                   <AvatarImage
                     src={
-                      user?.profile?.avatarUrl ||
-                      `https://api.dicebear.com/7.x/initials/svg?seed=${user?.email || "User"}`
+                      avatarUrl ||
+                      `https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`
                     }
-                    alt={user?.email || "User"}
+                    alt={displayName}
                   />
                   <AvatarFallback className="text-sm font-bold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
-                    {(user?.email || "U").charAt(0).toUpperCase()}
+                    {avatarFallback}
                   </AvatarFallback>
                 </Avatar>
-
-                {/* Online status indicator */}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background shadow-sm"
                 />
               </div>
-
               <AnimatePresence>
                 {isSidebarOpen && (
                   <motion.div
@@ -509,7 +488,7 @@ export function Sidebar() {
                     className="flex flex-col flex-1 min-w-0"
                   >
                     <span className="text-base font-semibold truncate text-foreground">
-                      {user.profile?.firstName || user.email}
+                      {displayName}
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground capitalize">
@@ -525,8 +504,6 @@ export function Sidebar() {
             </div>
           </div>
         )}
-
-        {/* Main Navigation Links */}
         <nav className="flex-1 overflow-y-auto py-6 px-4">
           <div className={cn("space-y-2", isDesktopCollapsed && "space-y-3")}>
             {filteredNavLinks.map((link, index) => (
@@ -547,8 +524,6 @@ export function Sidebar() {
             ))}
           </div>
         </nav>
-
-        {/* Enhanced Footer */}
         <div className="p-4 border-t border-border/30 bg-gradient-to-r from-muted/20 to-transparent">
           <div
             className={cn(
@@ -556,7 +531,6 @@ export function Sidebar() {
               isDesktopCollapsed && "flex-col space-y-3"
             )}
           >
-            {/* Theme toggle */}
             <div
               className={cn(
                 isDesktopCollapsed ? "w-full flex justify-center" : "flex-1"
@@ -575,8 +549,6 @@ export function Sidebar() {
                 <ShadcnThemeToggle />
               )}
             </div>
-
-            {/* Logout button */}
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button

@@ -2,7 +2,6 @@
 "use client";
 
 import Link from "next/link";
-// import Image from "next/image"; // Not used directly in this snippet, but keep if used elsewhere
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,13 +19,12 @@ import {
   BriefcaseBusinessIcon,
   UsersIcon,
   MenuIcon,
-  XIcon,
   UserCogIcon,
   BellIcon,
 } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
 import { ShadcnThemeToggle } from "@/components/common/ShadcnThemeToggle";
-import { useAuthStore, useUIStore } from "@/lib/zustand"; // Still need useUIStore for Sheet
+import { useAuthStore, useUIStore } from "@/lib/zustand";
 import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { toast } from "sonner";
@@ -46,9 +44,16 @@ import React from "react";
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const { isSidebarOpen } = useUIStore(); // No longer need toggleSidebar here
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const router = useRouter();
+
+  const displayName =
+    user?.profile?.firstName || user?.email?.split("@")[0] || "User";
+  const avatarUrl = user?.profile?.avatarUrl;
+  const avatarFallback = (user?.profile?.firstName || user?.email || "U")
+    .charAt(0)
+    .toUpperCase();
+  // --- END FIX ---
 
   const handleLogout = async () => {
     try {
@@ -122,11 +127,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-background/90 backdrop-blur-sm shadow-soft dark:shadow-soft-dark transition-all duration-300 ease-in-out-quad">
       <div className="container flex h-16 items-center justify-between">
-        {/* Removed the desktop sidebar toggle button from here */}
-
         <div className="flex items-center space-x-2">
-          {" "}
-          {/* Reduced space-x here as there's no button now */}
           <Link
             href="/"
             className="flex items-center space-x-2"
@@ -138,7 +139,6 @@ export function Header() {
             </span>
           </Link>
         </div>
-
         <nav className="flex-1 hidden items-center justify-center space-x-6 md:flex">
           <Link
             href="/tasks"
@@ -164,10 +164,8 @@ export function Header() {
             </Link>
           )}
         </nav>
-
         <div className="flex items-center space-x-3 ml-auto md:ml-0">
           <ShadcnThemeToggle />
-
           {isAuthenticated && user ? (
             <>
               <NotificationBell />
@@ -181,13 +179,13 @@ export function Header() {
                     <Avatar className="h-9 w-9 border border-neutral-200 transition-all duration-200 group-hover:border-primary-500">
                       <AvatarImage
                         src={
-                          user?.profile?.avatarUrl ||
-                          `https://api.dicebear.com/7.x/initials/svg?seed=${user?.firstName || user?.email}`
+                          avatarUrl ||
+                          `https://api.dicebear.com/7.x/initials/svg?seed=${displayName}`
                         }
-                        alt={user?.email || "User"}
+                        alt={displayName}
                       />
                       <AvatarFallback className="text-body-md font-semibold bg-primary-100 text-primary-700">
-                        {(user?.email || "U").charAt(0).toUpperCase()}
+                        {avatarFallback}
                       </AvatarFallback>
                     </Avatar>
                     <span className="sr-only">User menu</span>
@@ -200,7 +198,7 @@ export function Header() {
                 >
                   <DropdownMenuLabel className="flex flex-col space-y-1 p-2">
                     <p className="text-body-md font-semibold leading-none">
-                      {user?.profile?.firstName || user?.email}
+                      {displayName}
                     </p>
                     <p className="text-caption">{user?.email}</p>
                   </DropdownMenuLabel>
@@ -271,7 +269,6 @@ export function Header() {
               </Link>
             </motion.div>
           )}
-
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" aria-label="Open mobile menu">

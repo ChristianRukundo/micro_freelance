@@ -9,6 +9,17 @@ interface JwtPayload extends JsonWebTokenPayload {
   role: UserRole;
 }
 
+interface UserWithProfileData {
+  id: string;
+  email: string;
+  role: UserRole;
+  profile: {
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+  } | null;
+}
+
 /**
  * Signs a JWT token with the given payload and options.
  */
@@ -21,11 +32,7 @@ export const signToken = (id: string, email: string, role: UserRole, secret: str
 /**
  * Creates and sends authentication tokens (access and refresh) to the client.
  */
-export const createSendToken = (
-  user: { id: string; email: string; role: UserRole },
-  statusCode: number,
-  res: Response,
-) => {
+export const createSendToken = (user: UserWithProfileData, statusCode: number, res: Response) => {
   const accessToken = signToken(user.id, user.email, user.role, config.JWT_SECRET, config.ACCESS_TOKEN_EXPIRATION);
   const refreshToken = signToken(
     user.id,
@@ -40,12 +47,9 @@ export const createSendToken = (
 
   const cookieOptions: any = {
     httpOnly: true,
-    // --- PRODUCTION FIX for CROSS-DOMAIN ---
     secure: config.NODE_ENV === 'production',
     sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
-    // The `domain` property should NOT be set for cross-domain cookies to work reliably
   };
-  // --- END FIX ---
 
   res.cookie('refreshToken', refreshToken, {
     ...cookieOptions,
@@ -65,6 +69,8 @@ export const createSendToken = (
         id: user.id,
         email: user.email,
         role: user.role,
+
+        profile: user.profile,
       },
     },
   });

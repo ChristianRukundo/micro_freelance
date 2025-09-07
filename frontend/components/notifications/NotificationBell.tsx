@@ -1,3 +1,4 @@
+// components/notifications/NotificationBell.tsx
 "use client";
 
 import React from "react";
@@ -15,37 +16,14 @@ import { useNotifications } from "@/hooks/useNotifications";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/date";
-import { NotificationType } from "@/lib/types";
-import {
-  MessageSquareTextIcon,
-  CheckCircle2Icon,
-  DollarSignIcon,
-  AlertCircleIcon,
-} from "lucide-react";
 import { Badge } from "../ui/badge";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { motion, AnimatePresence } from "framer-motion";
+import { NotificationIcon } from "../common/NotificationIcon";
 
 interface NotificationBellProps {
   className?: string;
 }
-
-const getNotificationShortIcon = (type: NotificationType) => {
-  switch (type) {
-    case NotificationType.NEW_BID:
-      return <MessageSquareTextIcon className="h-4 w-4 text-primary-500" />;
-    case NotificationType.BID_ACCEPTED:
-      return <CheckCircle2Icon className="h-4 w-4 text-success-500" />;
-    case NotificationType.MILESTONE_APPROVED:
-      return <CheckCircle2Icon className="h-4 w-4 text-success-500" />;
-    case NotificationType.PAYMENT_SUCCEEDED:
-      return <DollarSignIcon className="h-4 w-4 text-success-500" />;
-    case NotificationType.REVISION_REQUESTED:
-      return <AlertCircleIcon className="h-4 w-4 text-error-500" />;
-    default:
-      return <BellIcon className="h-4 w-4" />;
-  }
-};
 
 export function NotificationBell({ className }: NotificationBellProps) {
   const {
@@ -61,11 +39,10 @@ export function NotificationBell({ className }: NotificationBellProps) {
     url: string
   ) => {
     try {
-      await markNotificationAsRead(notificationId);
-      window.location.href = url; // Client-side navigation after marking read
+      markNotificationAsRead(notificationId);
+      window.location.href = url;
     } catch (error) {
-      // Toast handled by hook
-      window.location.href = url; // Still navigate even if marking read fails
+      window.location.href = url;
     }
   };
 
@@ -104,12 +81,11 @@ export function NotificationBell({ className }: NotificationBellProps) {
         <DropdownMenuSeparator />
         {isLoadingNotifications ? (
           <div className="p-4 text-center">
-            <LoadingSpinner size="sm" className="mr-2" /> Loading
-            notifications...
+            <LoadingSpinner size="sm" className="mr-2" /> Loading...
           </div>
         ) : isErrorNotifications ? (
           <div className="p-4 text-center text-destructive-500">
-            Error loading notifications.
+            Error loading.
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-body-sm">
@@ -117,39 +93,38 @@ export function NotificationBell({ className }: NotificationBellProps) {
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto">
-            {notifications.slice(0, 5).map(
-              (
-                notification // Show top 5 recent notifications
-              ) => (
-                <DropdownMenuItem
-                  key={notification.id}
-                  className={cn(
-                    "flex cursor-pointer items-start space-x-3 py-3",
-                    !notification.isRead && "bg-primary-50"
-                  )}
-                  onClick={() =>
-                    handleNotificationClick(notification.id, notification.url)
-                  }
-                >
-                  <div className="flex-shrink-0 mt-0.5">
-                    {getNotificationShortIcon(notification.type)}
-                  </div>
-                  <div className="flex-1">
-                    <p
-                      className={cn(
-                        "text-body-sm",
-                        !notification.isRead && "font-medium text-primary-800"
-                      )}
-                    >
-                      {notification.message}
-                    </p>
-                    <p className="text-caption mt-1">
-                      {formatRelativeTime(notification.createdAt)}
-                    </p>
-                  </div>
-                </DropdownMenuItem>
-              )
-            )}
+            {notifications.slice(0, 5).map((notification) => (
+              <DropdownMenuItem
+                key={notification.id}
+                className={cn(
+                  "flex cursor-pointer items-start space-x-3 py-3",
+                  !notification.isRead && "bg-primary-50"
+                )}
+                onSelect={() =>
+                  handleNotificationClick(notification.id, notification.url)
+                }
+              >
+                <div className="flex-shrink-0 mt-0.5">
+                  <NotificationIcon
+                    type={notification.type}
+                    className="h-4 w-4"
+                  />
+                </div>
+                <div className="flex-1">
+                  <p
+                    className={cn(
+                      "text-body-sm",
+                      !notification.isRead && "font-medium text-primary-800"
+                    )}
+                  >
+                    {notification.message}
+                  </p>
+                  <p className="text-caption mt-1">
+                    {formatRelativeTime(notification.createdAt)}
+                  </p>
+                </div>
+              </DropdownMenuItem>
+            ))}
             {notifications.length > 0 && (
               <>
                 <DropdownMenuSeparator />

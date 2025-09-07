@@ -48,7 +48,7 @@ export default function FreelancerDashboardPage() {
         transition={{ duration: 0.5 }}
         className="text-display-md font-extrabold"
       >
-        Welcome, {user?.firstName || user?.email?.split("@")[0]}!
+        Welcome, {user?.profile?.firstName || user?.email?.split("@")[0]}!
       </motion.h1>
       <p className="text-body-md">Your freelancer dashboard overview.</p>
 

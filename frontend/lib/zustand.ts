@@ -5,20 +5,22 @@ import {
   PersistStorage,
   StorageValue,
 } from "zustand/middleware";
-import { UserRole, UserProfile } from "./types";
+import { UserRole } from "./types";
+
+export interface ProfileState {
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+}
 
 export interface UserState {
   id: string | null;
   email: string | null;
   role: UserRole | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  avatarUrl?: string | null;
+  profile?: ProfileState | null; 
   stripeAccountId?: string | null;
   stripeAccountCompleted?: boolean;
-  profile?: UserProfile;
 }
-
 interface AuthStore {
   user: UserState | null;
   isAuthenticated: boolean;

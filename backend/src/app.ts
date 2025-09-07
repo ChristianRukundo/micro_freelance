@@ -20,14 +20,19 @@ import messageRoutes from '@modules/messaging/message.route';
 import notificationRoutes from '@modules/notifications/notification.route';
 import adminRoutes from '@modules/admin/admin.route';
 import uploadRoutes from '@modules/uploads/upload.route';
-import freelancerRoutes from '@modules/freelancers/freelancer.route'; 
+import freelancerRoutes from '@modules/freelancers/freelancer.route';
 
 import swaggerDocument from '@docs/swagger.json';
 import path from 'path';
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
+
 if (config.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
@@ -50,8 +55,12 @@ app.use((req, res, next) => {
     express.json({ limit: '10kb' })(req, res, next);
   }
 });
-app.use(express.static(path.join(__dirname, '../public')));
 
+app.use('/uploads', (_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', config.CORS_ORIGIN);
+  next();
+});
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(cookieParser());
 
@@ -67,7 +76,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/freelancers', freelancerRoutes); 
+app.use('/api/freelancers', freelancerRoutes);
 app.use('/api/uploads', uploadRoutes);
 
 app.all('*', (req, _res, next) => {
