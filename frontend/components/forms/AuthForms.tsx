@@ -41,6 +41,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { EyeIcon, EyeOffIcon, RefreshCcwIcon } from "lucide-react";
 import React, { useState } from "react";
 import { Input } from "../ui/input";
+import api from "@/lib/api";
 
 // Schemas imported from non-server module
 
@@ -154,9 +155,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
 
   const { mutate: submitRegister, isPending: isRegisterPending } = useMutation({
     mutationFn: async (data: RegisterFormInput) => {
-      const res = await (
-        await import("@/lib/api")
-      ).default.post("/auth/register", data);
+      const res = await api.post("/auth/register", data);
       return {
         success: true,
         message: "Registration successful. Please verify your email.",
@@ -175,13 +174,12 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       toast.error(error.message || "Registration failed.");
     },
   });
-
+  
+  // --- VERIFY EMAIL ---
   const { mutate: submitVerifyEmail, isPending: isVerifyEmailPending } =
     useMutation({
       mutationFn: async (data: VerifyEmailFormInput) => {
-        await (
-          await import("@/lib/api")
-        ).default.post("/auth/verify-email", data);
+        await api.post("/auth/verify-email", data);
         return {
           success: true,
           message: "Email verified successfully!",
@@ -200,12 +198,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
     });
 
+  // --- RESEND OTP ---
   const { mutate: submitResendOtp, isPending: isResendOtpPending } =
     useMutation({
       mutationFn: async (email: string) => {
-        await (
-          await import("@/lib/api")
-        ).default.post("/auth/resend-verification-email", { email });
+        await api.post("/auth/resend-verification-email", { email });
         return {
           success: true,
           message: "New verification OTP sent to your email.",
@@ -223,12 +220,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
     });
 
+  // --- FORGOT PASSWORD ---
   const { mutate: submitForgotPassword, isPending: isForgotPasswordPending } =
     useMutation({
       mutationFn: async (data: ForgotPasswordFormInput) => {
-        await (
-          await import("@/lib/api")
-        ).default.post("/auth/forgot-password", data);
+        await api.post("/auth/forgot-password", data);
         return {
           success: true,
           message:
@@ -248,12 +244,11 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
     });
 
+  // --- RESET PASSWORD ---
   const { mutate: submitResetPassword, isPending: isResetPasswordPending } =
     useMutation({
       mutationFn: async (data: ResetPasswordFormInput) => {
-        await (
-          await import("@/lib/api")
-        ).default.post("/auth/reset-password", data);
+        await api.post("/auth/reset-password", data);
         return {
           success: true,
           message: "Password has been reset successfully!",
