@@ -1,4 +1,3 @@
-// File: backend/src/socket.ts
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { verifyToken } from '@shared/utils/jwt';
@@ -20,10 +19,9 @@ interface AuthenticatedSocketData {
   };
 }
 
-let io: SocketIOServer;
+let io: SocketIOServer | null = null; // Initialize as null
 
 const getAccessTokenFromSocket = (socket: Socket): string | undefined => {
-  // 1. Prioritize auth header (for non-browser clients or specific setups)
   const authHeader = socket.handshake.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
@@ -32,13 +30,9 @@ const getAccessTokenFromSocket = (socket: Socket): string | undefined => {
     }
   }
 
-  // 2. Fallback to parsing cookies (primary method for browsers)
   const cookies = socket.handshake.headers.cookie;
-
-  // This check is still valid and important
   if (typeof cookies === 'string' && cookies.length > 0) {
     try {
-      // The `cookie.parse` call will now work correctly
       const parsedCookies = cookie.parse(cookies);
       return parsedCookies.accessToken;
     } catch (error) {
@@ -177,7 +171,7 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
         });
 
         // Broadcast the new message to EVERYONE in the room. This is the simplest and most reliable way.
-        io.to(taskId).emit('receive_message', newMessage);
+        io?.to(taskId).emit('receive_message', newMessage); // Use optional chaining for io
         logger.info(`Message sent and broadcasted in room ${taskId} by ${user.email}`);
 
         // Notify the OTHER party
@@ -219,7 +213,8 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
 
 export const getSocketIO = () => {
   if (!io) {
-    throw new Error('Socket.IO not initialized. Call initSocket(httpServer) first.');
+    logger.warn('Socket.IO not initialized when getSocketIO() was called. Returning null.');
+    return null;
   }
   return io;
 };

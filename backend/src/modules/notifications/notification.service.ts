@@ -1,7 +1,8 @@
 import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
 import { Notification, NotificationType } from '@prisma/client';
-import { getSocketIO } from '../../socket';
+import { getSocketIO } from '../../socket'; // Corrected path to socket.ts
+import { logger } from '@shared/utils/logger'; // Import logger
 
 export async function createNotification(
   userId: string,
@@ -25,21 +26,50 @@ export async function createNotification(
       },
     });
 
-    // Attempt to emit real-time notification
+    // Attempt to emit real-time notification via Socket.IO
     try {
       const io = getSocketIO();
-      // Emitting to a specific user's socket ID or a room named after their ID
-      io.to(userId).emit('new_notification', notification);
-    } catch (socketError) {
-      console.warn(`Socket.IO not initialized or failed to emit notification to user ${userId}:`, socketError);
-      // It's okay if socket fails, email/DB notification is fallback
+      if (io) {
+        // Check if Socket.IO is initialized
+        // Emitting to a specific user's socket ID or a room named after their ID
+        io.to(userId).emit('new_notification', notification);
+        logger.debug(`Socket.IO: Emitted '${type}' notification to user ${userId}.`, {
+          userId,
+          type,
+          message: notification.message,
+        });
+      } else {
+        logger.warn(`Socket.IO: Not initialized. Could not emit notification to user ${userId}.`, {
+          userId,
+          type,
+          message,
+        });
+      }
+    } catch (socketError: any) {
+      // Log the socket error but DO NOT re-throw,
+      // as the database notification has already been created.
+      logger.error(`Socket.IO: Failed to emit notification to user ${userId}: ${socketError.message}`, {
+        userId,
+        type,
+        message,
+        socketError: socketError instanceof Error ? socketError.message : String(socketError),
+        stack: socketError instanceof Error ? socketError.stack : undefined,
+      });
     }
 
     return notification;
   } catch (error: any) {
-    console.error(`Failed to create notification for user ${userId}:`, error);
-    // Do not throw AppError here as it might halt main request flow. Log and continue.
-    throw new Error('Failed to create notification internally.');
+    logger.error(`Failed to create database notification for user ${userId}: ${error.message}`, {
+      userId,
+      type,
+      message,
+      errorDetails: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    // This is the critical line. If the DB notification fails, we should re-throw.
+    // The previous error was a problem in the *socket* part, which should not block the DB.
+    // This error is if the *DB* part fails.
+    throw new AppError(`Failed to create notification: ${error.message}`, 500);
   }
 }
 

@@ -119,7 +119,7 @@ model Task {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
-  skills      String[]
+  skills String[]
 
   attachments   Attachment[]
   bids          Bid[]
@@ -157,17 +157,31 @@ model Bid {
 }
 
 model Milestone {
-  id          String          @id @default(cuid())
-  description String
-  dueDate     DateTime
-  amount      Float
-  status      MilestoneStatus @default(PENDING)
-  comments    String?
+  id              String          @id @default(cuid())
+  description     String
+  dueDate         DateTime
+  amount          Float
+  status          MilestoneStatus @default(PENDING)
+  revisionNotes   String?         @db.Text // RENAMED: from 'comments' for clarity
+  submissionNotes String?         @db.Text // ADDED: Freelancer's submission notes
 
   taskId        String
-  task          Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task          Task                  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   transactions  Transaction[]
-  notifications Notification[] @relation("MilestoneNotifications")
+  notifications Notification[]        @relation("MilestoneNotifications")
+  attachments   MilestoneAttachment[]
+}
+
+model MilestoneAttachment {
+  id        String   @id @default(cuid())
+  url       String
+  fileName  String
+  fileType  String
+  createdAt DateTime @default(now())
+  comments  String?  @db.Text // ADDED: Client's comments on this specific attachment
+
+  milestoneId String
+  milestone   Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
 }
 
 model Transaction {

@@ -109,6 +109,16 @@ export const createMultipleMilestonesSchema = z.object({
   milestones: z.array(createMilestoneSchema),
 });
 
+export const submitMilestoneSchema = z.object({
+  attachments: z.array(attachmentSchema).min(1, 'At least one attachment is required for submission.'),
+  submissionNotes: z.string().max(2000, 'Submission notes cannot exceed 2000 characters.').optional(),
+});
+
+export const addAttachmentCommentSchema = z.object({
+  comment: z.string().min(1, 'Comment cannot be empty').max(1000, 'Comment cannot exceed 1000 characters'),
+});
+
+
 export const requestRevisionSchema = z.object({
   comments: z.string().min(10).max(500),
 });

@@ -272,11 +272,13 @@ class PaymentService {
             `/dashboard/tasks/${taskId}`,
             taskId,
           );
-          io.to(clientId).emit('new_notification', {
-            message: `Payment successful for task "${taskId}"`,
-            type: NotificationType.PAYMENT_SUCCEEDED,
-            url: `/dashboard/tasks/${taskId}`,
-          });
+          if (io) {
+            io.to(clientId).emit('new_notification', {
+              message: `Payment successful for task "${taskId}"`,
+              type: NotificationType.PAYMENT_SUCCEEDED,
+              url: `/dashboard/tasks/${taskId}`,
+            });
+          }
         }
         break;
       }
@@ -290,7 +292,8 @@ class PaymentService {
         });
 
         if (user) {
-          const newStripeAccountCompleted = account.details_submitted && account.charges_enabled && account.payouts_enabled;
+          const newStripeAccountCompleted =
+            account.details_submitted && account.charges_enabled && account.payouts_enabled;
 
           if (user.stripeAccountCompleted !== newStripeAccountCompleted) {
             await prisma.user.update({
@@ -305,11 +308,13 @@ class PaymentService {
                 `Your Stripe Connect account onboarding is complete! You can now receive payouts.`,
                 `/dashboard/payouts`,
               );
-              io.to(user.id).emit('new_notification', {
-                message: `Stripe account onboarding complete!`,
-                type: NotificationType.STRIPE_ACCOUNT_UPDATED,
-                url: `/dashboard/payouts`,
-              });
+              if (io) {
+                io.to(user.id).emit('new_notification', {
+                  message: `Stripe account onboarding complete!`,
+                  type: NotificationType.STRIPE_ACCOUNT_UPDATED,
+                  url: `/dashboard/payouts`,
+                });
+              }
             }
           }
         }

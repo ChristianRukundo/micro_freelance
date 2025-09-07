@@ -123,17 +123,27 @@ export interface Bid {
   task?: Task; // Added for convenience in some contexts
 }
 
+export interface MilestoneAttachment {
+  id: string;
+  url: string;
+  fileName: string;
+  fileType: string;
+  createdAt: Date;
+  comments?: string | null; // ADDED
+}
+
 export interface Milestone {
   id: string;
   description: string;
   dueDate: Date;
   amount: number;
   status: MilestoneStatus;
-  comments?: string | null;
+  revisionNotes?: string | null; // RENAMED from comments
+  submissionNotes?: string | null; // ADDED
   taskId: string;
-  task?: Task; // Added for convenience
+  task?: Task;
+  attachments?: MilestoneAttachment[];
 }
-
 export interface Message {
   id: string;
   content: string;

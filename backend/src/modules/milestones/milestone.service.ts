@@ -1,14 +1,17 @@
 import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
 import { Milestone, TaskStatus, MilestoneStatus } from '@prisma/client';
-import { CreateMilestoneInput } from './milestone.validation';
+import { CreateMilestoneInput, SubmitMilestoneInput } from './milestone.validation';
 import { createNotification } from '@modules/notifications/notification.service';
 import { NotificationType } from '@prisma/client';
-import paymentService from '@modules/payments/payment.service';
-import { getSocketIO } from 'socket';
+import { getSocketIO } from '../../socket';
 
 class MilestoneService {
-  public async createMilestones(clientId: string, taskId: string, milestonesData: CreateMilestoneInput[]): Promise<Milestone[]> {
+  public async createMilestones(
+    clientId: string,
+    taskId: string,
+    milestonesData: CreateMilestoneInput[],
+  ): Promise<Milestone[]> {
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       select: { id: true, clientId: true, status: true, freelancerId: true, title: true },
@@ -30,30 +33,26 @@ class MilestoneService {
     const createdMilestones = await prisma.$transaction(
       milestonesData.map((data) =>
         prisma.milestone.create({
-          data: {
-            ...data,
-            taskId,
-            dueDate: new Date(data.dueDate),
-            status: MilestoneStatus.PENDING,
-          },
+          data: { ...data, taskId, dueDate: new Date(data.dueDate), status: MilestoneStatus.PENDING },
         }),
       ),
     );
 
-    // Notify the freelancer about new milestones
     await createNotification(
       task.freelancerId,
       NotificationType.MILESTONE_CREATED,
       `New milestones have been created for your task "${task.title}".`,
-      `/dashboard/tasks/${taskId}/milestones`,
+      `/tasks/${taskId}`, // Standardized URL
       taskId,
     );
     const io = getSocketIO();
-    io.to(task.freelancerId).emit('new_notification', {
-      message: `New milestones for "${task.title}"`,
-      type: NotificationType.MILESTONE_CREATED,
-      url: `/dashboard/tasks/${taskId}/milestones`,
-    });
+    if (io) {
+      io.to(task.freelancerId).emit('new_notification', {
+        message: `New milestones for "${task.title}"`,
+        type: NotificationType.MILESTONE_CREATED,
+        url: `/tasks/${taskId}`, // Standardized URL
+      });
+    }
 
     return createdMilestones;
   }
@@ -73,18 +72,20 @@ class MilestoneService {
 
     return prisma.milestone.findMany({
       where: { taskId },
+      include: { attachments: true },
       orderBy: { dueDate: 'asc' },
     });
   }
 
-  public async submitMilestone(freelancerId: string, milestoneId: string): Promise<Milestone> {
+  public async submitMilestone(
+    freelancerId: string,
+    milestoneId: string,
+    attachments: SubmitMilestoneInput['attachments'],
+    submissionNotes?: string,
+  ): Promise<Milestone> {
     const milestone = await prisma.milestone.findUnique({
       where: { id: milestoneId },
-      include: {
-        task: {
-          select: { id: true, freelancerId: true, clientId: true, title: true },
-        },
-      },
+      include: { task: { select: { id: true, freelancerId: true, clientId: true, title: true } } },
     });
 
     if (!milestone) {
@@ -97,26 +98,31 @@ class MilestoneService {
       throw new AppError(`Milestone cannot be submitted in status: ${milestone.status}.`, 400);
     }
 
-    const updatedMilestone = await prisma.milestone.update({
-      where: { id: milestoneId },
-      data: { status: MilestoneStatus.SUBMITTED },
+    const updatedMilestone = await prisma.$transaction(async (tx) => {
+      await tx.milestoneAttachment.deleteMany({ where: { milestoneId } });
+      await tx.milestoneAttachment.createMany({ data: attachments.map((att) => ({ ...att, milestoneId })) });
+      return tx.milestone.update({
+        where: { id: milestoneId },
+        data: { status: MilestoneStatus.SUBMITTED, submissionNotes: submissionNotes },
+      });
     });
 
-    // Notify client
     await createNotification(
       milestone.task.clientId,
       NotificationType.MILESTONE_SUBMITTED,
       `Freelancer submitted milestone "${milestone.description}" for task "${milestone.task.title}".`,
-      `/dashboard/tasks/${milestone.task.id}/milestones`,
+      `/tasks/${milestone.task.id}`, // Standardized URL
       milestone.task.id,
       milestoneId,
     );
     const io = getSocketIO();
-    io.to(milestone.task.clientId).emit('new_notification', {
-      message: `Milestone submitted for "${milestone.task.title}"`,
-      type: NotificationType.MILESTONE_SUBMITTED,
-      url: `/dashboard/tasks/${milestone.task.id}/milestones`,
-    });
+    if (io) {
+      io.to(milestone.task.clientId).emit('new_notification', {
+        message: `Milestone submitted for "${milestone.task.title}"`,
+        type: NotificationType.MILESTONE_SUBMITTED,
+        url: `/tasks/${milestone.task.id}`, // Standardized URL
+      });
+    }
 
     return updatedMilestone;
   }
@@ -124,11 +130,7 @@ class MilestoneService {
   public async requestMilestoneRevision(clientId: string, milestoneId: string, comments: string): Promise<Milestone> {
     const milestone = await prisma.milestone.findUnique({
       where: { id: milestoneId },
-      include: {
-        task: {
-          select: { id: true, clientId: true, freelancerId: true, title: true },
-        },
-      },
+      include: { task: { select: { id: true, clientId: true, freelancerId: true, title: true } } },
     });
 
     if (!milestone) {
@@ -141,29 +143,30 @@ class MilestoneService {
       throw new AppError('Revision can only be requested for submitted milestones.', 400);
     }
     if (!milestone.task.freelancerId) {
-        throw new AppError('Task has no assigned freelancer.', 400);
+      throw new AppError('Task has no assigned freelancer.', 400);
     }
 
     const updatedMilestone = await prisma.milestone.update({
       where: { id: milestoneId },
-      data: { status: MilestoneStatus.REVISION_REQUESTED, comments },
+      data: { status: MilestoneStatus.REVISION_REQUESTED, revisionNotes: comments },
     });
 
-    // Notify freelancer
     await createNotification(
       milestone.task.freelancerId,
       NotificationType.REVISION_REQUESTED,
       `Client requested revision for milestone "${milestone.description}" in task "${milestone.task.title}".`,
-      `/dashboard/tasks/${milestone.task.id}/milestones`,
+      `/tasks/${milestone.task.id}`, // Standardized URL
       milestone.task.id,
       milestoneId,
     );
     const io = getSocketIO();
-    io.to(milestone.task.freelancerId).emit('new_notification', {
-      message: `Revision requested for milestone "${milestone.task.title}"`,
-      type: NotificationType.REVISION_REQUESTED,
-      url: `/dashboard/tasks/${milestone.task.id}/milestones`,
-    });
+    if (io) {
+      io.to(milestone.task.freelancerId).emit('new_notification', {
+        message: `Revision requested for milestone "${milestone.task.title}"`,
+        type: NotificationType.REVISION_REQUESTED,
+        url: `/tasks/${milestone.task.id}`, // Standardized URL
+      });
+    }
 
     return updatedMilestone;
   }
@@ -171,11 +174,7 @@ class MilestoneService {
   public async approveMilestone(clientId: string, milestoneId: string): Promise<Milestone> {
     const milestone = await prisma.milestone.findUnique({
       where: { id: milestoneId },
-      include: {
-        task: {
-          select: { id: true, clientId: true, freelancerId: true, status: true, title: true },
-        },
-      },
+      include: { task: { select: { id: true, clientId: true, freelancerId: true, status: true, title: true } } },
     });
 
     if (!milestone) {
@@ -185,60 +184,87 @@ class MilestoneService {
       throw new AppError('You are not authorized to approve this milestone.', 403);
     }
     if (milestone.status !== MilestoneStatus.SUBMITTED && milestone.status !== MilestoneStatus.REVISION_REQUESTED) {
+      // Allow approval from REVISION_REQUESTED
       throw new AppError(`Milestone cannot be approved in status: ${milestone.status}.`, 400);
     }
     if (!milestone.task.freelancerId) {
-        throw new AppError('Task has no assigned freelancer.', 400);
+      throw new AppError('Task has no assigned freelancer.', 400);
     }
 
     const updatedMilestone = await prisma.$transaction(async (tx) => {
-      // 1. Update milestone status
       const updated = await tx.milestone.update({
         where: { id: milestoneId },
         data: { status: MilestoneStatus.APPROVED },
       });
 
-      // 2. Process payment payout for this milestone
-      await paymentService.processMilestonePayout(milestone.id);
+      // MOCKED PAYMENT: Logic remains mocked as requested.
+      console.log(`[MOCK] Payment of $${milestone.amount} processed for milestone ${milestone.id}`);
 
-      // 3. Check if all milestones for the task are approved
       const remainingPendingMilestones = await tx.milestone.count({
-        where: {
-          taskId: milestone.task.id,
-          status: {
-            in: [MilestoneStatus.PENDING, MilestoneStatus.SUBMITTED, MilestoneStatus.REVISION_REQUESTED],
-          },
-        },
+        where: { taskId: milestone.task.id, status: { notIn: [MilestoneStatus.APPROVED] } },
       });
 
       if (remainingPendingMilestones === 0) {
-        // All milestones are approved, update task status to IN_REVIEW or COMPLETED
-        await tx.task.update({
-          where: { id: milestone.task.id },
-          data: { status: TaskStatus.IN_REVIEW }, // Client reviews final delivery, then sets to COMPLETED
-        });
+        await tx.task.update({ where: { id: milestone.task.id }, data: { status: TaskStatus.IN_REVIEW } });
+        await createNotification(
+          milestone.task.freelancerId!,
+          NotificationType.MILESTONE_APPROVED, // Re-use for simplicity
+          `All milestones for "${milestone.task.title}" are approved! The project is now in review.`,
+          `/tasks/${milestone.task.id}`, // Standardized URL
+          milestone.task.id,
+        );
       }
-
       return updated;
     });
 
-    // Notify freelancer
     await createNotification(
       milestone.task.freelancerId,
       NotificationType.MILESTONE_APPROVED,
-      `Your milestone "${milestone.description}" for task "${milestone.task.title}" has been approved and payment released!`,
-      `/dashboard/tasks/${milestone.task.id}/milestones`,
+      `Your milestone "${milestone.description}" for task "${milestone.task.title}" has been approved!`,
+      `/tasks/${milestone.task.id}`, // Standardized URL
       milestone.task.id,
       milestoneId,
     );
     const io = getSocketIO();
-    io.to(milestone.task.freelancerId).emit('new_notification', {
-      message: `Milestone "${milestone.description}" approved for "${milestone.task.title}"!`,
-      type: NotificationType.MILESTONE_APPROVED,
-      url: `/dashboard/tasks/${milestone.task.id}/milestones`,
-    });
+    if (io) {
+      io.to(milestone.task.freelancerId).emit('new_notification', {
+        message: `Milestone "${milestone.description}" approved for "${milestone.task.title}"!`,
+        type: NotificationType.MILESTONE_APPROVED,
+        url: `/tasks/${milestone.task.id}`, // Standardized URL
+      });
+    }
 
     return updatedMilestone;
+  }
+
+  public async addCommentToAttachment(clientId: string, attachmentId: string, comment: string) {
+    const attachment = await prisma.milestoneAttachment.findUnique({
+      where: { id: attachmentId },
+      include: { milestone: { include: { task: true } } },
+    });
+
+    if (!attachment) {
+      throw new AppError('Attachment not found.', 404);
+    }
+    if (attachment.milestone.task.clientId !== clientId) {
+      throw new AppError('You are not authorized to comment on this attachment.', 403);
+    }
+
+    const updatedAttachment = await prisma.milestoneAttachment.update({
+      where: { id: attachmentId },
+      data: { comments: comment },
+    });
+
+    await createNotification(
+      attachment.milestone.task.freelancerId!,
+      NotificationType.REVISION_REQUESTED, // Re-use this type for simplicity
+      `Client commented on a file for milestone "${attachment.milestone.description}" in task "${attachment.milestone.task.title}".`,
+      `/tasks/${attachment.milestone.task.id}`, // Standardized URL
+      attachment.milestone.task.id,
+      attachment.milestoneId,
+    );
+
+    return updatedAttachment;
   }
 }
 

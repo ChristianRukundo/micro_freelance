@@ -32,6 +32,8 @@ import {
   updateUserStatusSchema,
   newsletterSchema,
   updateBidSchema,
+  addAttachmentCommentSchema,
+  submitMilestoneSchema
 } from "./schemas";
 
 // --- Server Actions Implementations ---
@@ -362,11 +364,16 @@ export async function createMilestonesAction(
 }
 
 export async function submitMilestoneAction(
-  milestoneId: string
+  milestoneId: string,
+  values: z.infer<typeof submitMilestoneSchema>
 ): Promise<ServerActionResponse<any>> {
   try {
     const api = await getApiWithAuth();
-    const response = await api.patch(`/milestones/${milestoneId}/submit`);
+    const validatedData = submitMilestoneSchema.parse(values);
+    const response = await api.patch(
+      `/milestones/${milestoneId}/submit`,
+      validatedData
+    );
     revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
     return {
       success: true,
@@ -416,6 +423,32 @@ export async function approveMilestoneAction(
     return handleServerActionError(error);
   }
 }
+
+export async function addAttachmentCommentAction(
+  attachmentId: string,
+  values: z.infer<typeof addAttachmentCommentSchema>
+): Promise<ServerActionResponse<any>> {
+  try {
+    const api = await getApiWithAuth();
+    const validatedData = addAttachmentCommentSchema.parse(values);
+    const response = await api.patch(
+      `/milestones/attachments/${attachmentId}/comment`,
+      validatedData
+    );
+    const milestone = response.data.data.milestone;
+    if (milestone) {
+      revalidatePath(`/dashboard/projects/${milestone.taskId}`);
+    }
+    return {
+      success: true,
+      message: "Comment added successfully!",
+      data: response.data.data,
+    };
+  } catch (error: any) {
+    return handleServerActionError(error);
+  }
+}
+
 // --- PAYMENT ACTIONS ---
 export async function createStripeConnectAccountAction(
   values: z.infer<typeof createStripeConnectAccountSchema>

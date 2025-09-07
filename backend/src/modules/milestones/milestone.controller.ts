@@ -5,6 +5,9 @@ import {
   taskIdParamSchema,
   milestoneIdParamSchema,
   RequestRevisionInput,
+  SubmitMilestoneInput,
+  attachmentIdParamSchema, // ADDED
+  addAttachmentCommentSchema, // ADDED
 } from './milestone.validation';
 import { z } from 'zod';
 
@@ -38,13 +41,14 @@ class MilestoneController {
   }
 
   public async submitMilestone(
-    req: Request<z.infer<typeof milestoneIdParamSchema>>,
+    req: Request<z.infer<typeof milestoneIdParamSchema>, unknown, SubmitMilestoneInput>,
     res: Response,
     next: NextFunction,
   ) {
     try {
       const { milestoneId } = req.params;
-      const milestone = await milestoneService.submitMilestone(req.user!.id, milestoneId);
+      const { attachments, submissionNotes } = req.body;
+      const milestone = await milestoneService.submitMilestone(req.user!.id, milestoneId, attachments, submissionNotes);
       res.status(200).json({ success: true, message: 'Milestone submitted for review.', data: milestone });
     } catch (error) {
       next(error);
@@ -74,7 +78,22 @@ class MilestoneController {
     try {
       const { milestoneId } = req.params;
       const milestone = await milestoneService.approveMilestone(req.user!.id, milestoneId);
-      res.status(200).json({ success: true, message: 'Milestone approved and payment released.', data: milestone });
+      res.status(200).json({ success: true, message: 'Milestone approved.', data: milestone });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async addCommentToAttachment(
+    req: Request<z.infer<typeof attachmentIdParamSchema>, unknown, z.infer<typeof addAttachmentCommentSchema>>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { attachmentId } = req.params;
+      const { comment } = req.body;
+      const updatedAttachment = await milestoneService.addCommentToAttachment(req.user!.id, attachmentId, comment);
+      res.status(200).json({ success: true, message: 'Comment added successfully.', data: updatedAttachment });
     } catch (error) {
       next(error);
     }

@@ -6,21 +6,16 @@ import * as actions from "@/lib/actions";
 import {
   createMultipleMilestonesSchema,
   requestRevisionSchema,
+  submitMilestoneSchema,
+  addAttachmentCommentSchema,
 } from "@/lib/schemas";
 import { z } from "zod";
 
-/**
- * Custom hook to manage milestones for a specific task.
- * It handles fetching, creating, and updating the status of milestones.
- *
- * @param taskId The ID of the task whose milestones are being managed.
- */
 export function useMilestones(taskId?: string) {
   const queryClient = useQueryClient();
 
-  // --- DATA FETCHING ---
   const {
-    data: milestones,
+    data: milestones = [],
     isLoading: isLoadingMilestones,
     isError: isErrorMilestones,
     error: errorMilestones,
@@ -30,21 +25,16 @@ export function useMilestones(taskId?: string) {
     queryFn: async () => {
       if (!taskId)
         throw new Error("Task ID is required for fetching milestones.");
-      // The backend should return all milestones for a task in a single array.
       const response = await api.get(`/tasks/${taskId}/milestones`);
       return response.data.data;
     },
-    // Sort the milestones by due date once fetched.
     select: (data) =>
       data.sort(
         (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
       ),
-    enabled: !!taskId, // Only run the query if taskId is provided.
+    enabled: !!taskId,
   });
 
-  // --- MUTATIONS ---
-
-  // Mutation for creating new milestones
   const createMilestonesMutation = useMutation({
     mutationFn: (values: z.infer<typeof createMultipleMilestonesSchema>) => {
       if (!taskId) throw new Error("Task ID is required to create milestones.");
@@ -53,19 +43,15 @@ export function useMilestones(taskId?: string) {
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
-        // Invalidate both milestones and the parent task queries to refetch fresh data.
         queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
         queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       } else {
         toast.error(response.message || "Failed to create milestones.");
       }
     },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
-  // Generic factory for updating a milestone's status with optimistic updates.
   const updateMilestoneStatusMutation = (
     action: (milestoneId: string, values?: any) => Promise<any>,
     optimisticStatus: MilestoneStatus,
@@ -85,8 +71,6 @@ export function useMilestones(taskId?: string) {
           "milestones",
           taskId,
         ]);
-
-        // Optimistically update the milestone in the cache.
         queryClient.setQueryData<Milestone[]>(
           ["milestones", taskId],
           (oldData) => {
@@ -96,8 +80,10 @@ export function useMilestones(taskId?: string) {
                 ? {
                     ...m,
                     status: optimisticStatus,
-                    // If revision comments are provided, add them optimistically.
-                    ...(values?.comments && { comments: values.comments }),
+                    ...(values?.comments && { revisionNotes: values.comments }),
+                    ...(values?.attachments && {
+                      attachments: values.attachments,
+                    }),
                   }
                 : m
             );
@@ -114,40 +100,73 @@ export function useMilestones(taskId?: string) {
       },
       onError: (error: Error, _variables, context) => {
         toast.error(error.message || "An error occurred.");
-        // Roll back to the previous state on error.
         queryClient.setQueryData(
           ["milestones", taskId],
           context?.previousMilestones
         );
       },
       onSettled: () => {
-        // Always refetch after mutation is settled to ensure data consistency.
         queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
         queryClient.invalidateQueries({ queryKey: ["task", taskId] });
       },
     });
   };
 
-  const submitMilestoneMutation = updateMilestoneStatusMutation(
-    actions.submitMilestoneAction,
-    MilestoneStatus.SUBMITTED,
-    "Milestone submitted for review!"
-  );
+  const submitMilestoneMutation = useMutation({
+    mutationFn: ({
+      milestoneId,
+      values,
+    }: {
+      milestoneId: string;
+      values: z.infer<typeof submitMilestoneSchema>;
+    }) => actions.submitMilestoneAction(milestoneId, values),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success("Milestone submitted for review!");
+      } else {
+        toast.error(response.message);
+      }
+    },
+    onError: (error: Error) => toast.error(error.message),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
+      queryClient.invalidateQueries({ queryKey: ["task", taskId] });
+    },
+  });
 
   const requestMilestoneRevisionMutation = updateMilestoneStatusMutation(
     actions.requestMilestoneRevisionAction,
     MilestoneStatus.REVISION_REQUESTED,
     "Revision requested for milestone!"
   );
-
   const approveMilestoneMutation = updateMilestoneStatusMutation(
     actions.approveMilestoneAction,
     MilestoneStatus.APPROVED,
-    "Milestone approved and payment released!"
+    "Milestone approved!"
   );
 
+  // ADDED: Mutation for adding attachment comments
+  const addAttachmentCommentMutation = useMutation({
+    mutationFn: ({
+      attachmentId,
+      values,
+    }: {
+      attachmentId: string;
+      values: z.infer<typeof addAttachmentCommentSchema>;
+    }) => actions.addAttachmentCommentAction(attachmentId, values),
+    onSuccess: (response) => {
+      if (response.success) {
+        toast.success(response.message);
+        queryClient.invalidateQueries({ queryKey: ["milestones", taskId] });
+      } else {
+        toast.error(response.message);
+      }
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return {
-    milestones: milestones || [],
+    milestones,
     isLoadingMilestones,
     isErrorMilestones,
     errorMilestones,
@@ -160,5 +179,7 @@ export function useMilestones(taskId?: string) {
     isRequestingMilestoneRevision: requestMilestoneRevisionMutation.isPending,
     approveMilestone: approveMilestoneMutation.mutateAsync,
     isApprovingMilestone: approveMilestoneMutation.isPending,
+    addAttachmentComment: addAttachmentCommentMutation.mutateAsync,
+    isAddingAttachmentComment: addAttachmentCommentMutation.isPending,
   };
 }

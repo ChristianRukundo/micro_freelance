@@ -58,12 +58,13 @@ class BidService {
     );
 
     const io = getSocketIO();
-    io.to(task.clientId).emit('new_notification', {
-      message: `${freelancerName} submitted a new bid for "${task.title}"`,
-      type: NotificationType.NEW_BID,
-      url: `/dashboard/tasks/${taskId}`,
-    });
-
+    if (io) {
+      io.to(task.clientId).emit('new_notification', {
+        message: `${freelancerName} submitted a new bid for "${task.title}"`,
+        type: NotificationType.NEW_BID,
+        url: `/dashboard/tasks/${taskId}`,
+      });
+    }
     return bid;
   }
 
@@ -156,11 +157,13 @@ class BidService {
     );
 
     const io = getSocketIO();
-    io.to(bid.freelancerId).emit('new_notification', {
-      message: `Your bid for "${bid.task.title}" was accepted!`,
-      type: NotificationType.BID_ACCEPTED,
-      url: `/dashboard/tasks/${bid.taskId}`,
-    });
+    if (io) {
+      io.to(bid.freelancerId).emit('new_notification', {
+        message: `Your bid for "${bid.task.title}" was accepted!`,
+        type: NotificationType.BID_ACCEPTED,
+        url: `/dashboard/tasks/${bid.taskId}`,
+      });
+    }
 
     return acceptedBid;
   }
