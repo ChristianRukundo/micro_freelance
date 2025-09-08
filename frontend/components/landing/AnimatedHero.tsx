@@ -11,7 +11,7 @@ export function AnimatedHero() {
   return (
     <section className="relative flex w-full flex-col items-center justify-center bg-background py-20 text-center md:py-32 overflow-hidden">
       <Image
-        src="/images/hero-background.jpg"
+        src="/hero.avif"
         alt="Connecting freelancers and clients"
         fill
         priority
