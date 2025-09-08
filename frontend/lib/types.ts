@@ -1,56 +1,56 @@
 // Shared Frontend Types (Mirroring Backend Prisma Schema)
 
 export enum UserRole {
-  CLIENT = 'CLIENT',
-  FREELANCER = 'FREELANCER',
-  ADMIN = 'ADMIN',
+  CLIENT = "CLIENT",
+  FREELANCER = "FREELANCER",
+  ADMIN = "ADMIN",
 }
 
 export enum TaskStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  IN_REVIEW = 'IN_REVIEW',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  OPEN = "OPEN",
+  IN_PROGRESS = "IN_PROGRESS",
+  IN_REVIEW = "IN_REVIEW",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export enum MilestoneStatus {
-  PENDING = 'PENDING',
-  SUBMITTED = 'SUBMITTED',
-  IN_REVIEW = 'IN_REVIEW',
-  APPROVED = 'APPROVED',
-  REVISION_REQUESTED = 'REVISION_REQUESTED',
-  COMPLETED = 'COMPLETED',
+  PENDING = "PENDING",
+  SUBMITTED = "SUBMITTED",
+  IN_REVIEW = "IN_REVIEW",
+  APPROVED = "APPROVED",
+  REVISION_REQUESTED = "REVISION_REQUESTED",
+  COMPLETED = "COMPLETED",
 }
 
 export enum TransactionStatus {
-  PENDING = 'PENDING',
-  SUCCEEDED = 'SUCCEEDED',
-  FAILED = 'FAILED',
-  REFUNDED = 'REFUNDED',
+  PENDING = "PENDING",
+  SUCCEEDED = "SUCCEEDED",
+  FAILED = "FAILED",
+  REFUNDED = "REFUNDED",
 }
 
 export enum TransactionType {
-  PLATFORM_FEE = 'PLATFORM_FEE',
-  PAYOUT = 'PAYOUT',
-  ESCROW_FUNDING = 'ESCROW_FUNDING',
-  ESCROW_RELEASE = 'ESCROW_RELEASE',
+  PLATFORM_FEE = "PLATFORM_FEE",
+  PAYOUT = "PAYOUT",
+  ESCROW_FUNDING = "ESCROW_FUNDING",
+  ESCROW_RELEASE = "ESCROW_RELEASE",
 }
 
 export enum NotificationType {
-  NEW_BID = 'NEW_BID',
-  BID_ACCEPTED = 'BID_ACCEPTED',
-  MILESTONE_CREATED = 'MILESTONE_CREATED',
-  MILESTONE_SUBMITTED = 'MILESTONE_SUBMITTED',
-  MILESTONE_APPROVED = 'MILESTONE_APPROVED',
-  REVISION_REQUESTED = 'REVISION_REQUESTED',
-  COMPLETED = 'COMPLETED',
-  NEW_MESSAGE = 'NEW_MESSAGE',
-  TASK_CANCELLED = 'TASK_CANCELLED',
-  PAYMENT_SUCCEEDED = 'PAYMENT_SUCCEEDED',
-  EMAIL_VERIFIED = 'EMAIL_VERIFIED',
-  PASSWORD_RESET = 'PASSWORD_RESET',
-  STRIPE_ACCOUNT_UPDATED = 'STRIPE_ACCOUNT_UPDATED',
+  NEW_BID = "NEW_BID",
+  BID_ACCEPTED = "BID_ACCEPTED",
+  MILESTONE_CREATED = "MILESTONE_CREATED",
+  MILESTONE_SUBMITTED = "MILESTONE_SUBMITTED",
+  MILESTONE_APPROVED = "MILESTONE_APPROVED",
+  REVISION_REQUESTED = "REVISION_REQUESTED",
+  COMPLETED = "COMPLETED",
+  NEW_MESSAGE = "NEW_MESSAGE",
+  TASK_CANCELLED = "TASK_CANCELLED",
+  PAYMENT_SUCCEEDED = "PAYMENT_SUCCEEDED",
+  EMAIL_VERIFIED = "EMAIL_VERIFIED",
+  PASSWORD_RESET = "PASSWORD_RESET",
+  STRIPE_ACCOUNT_UPDATED = "STRIPE_ACCOUNT_UPDATED",
 }
 
 export interface UserProfile {
@@ -109,6 +109,15 @@ export interface Task {
   _count?: {
     bids: number;
   };
+}
+
+export interface TaskStats {
+  OPEN: number;
+  IN_PROGRESS: number;
+  IN_REVIEW: number;
+  COMPLETED: number;
+  CANCELLED: number;
+  TOTAL: number;
 }
 
 export interface Bid {
@@ -186,7 +195,6 @@ export interface Transaction {
   milestone?: Milestone;
 }
 
-
 // API Response Structures (for paginated endpoints)
 export interface PaginatedResponse<T> {
   data: T[]; // Renamed to data for consistency with `api` interceptor
@@ -200,6 +208,36 @@ export interface StripeCustomerData {
   clientSecret?: string;
   paymentIntentId?: string;
 }
+
+export interface ClientDashboardStats {
+  totalProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  totalSpending: number;
+  recentProjects: Array<
+    Task & {
+      freelancer?: Pick<User, "id"> & {
+        profile?: Pick<UserProfile, "firstName" | "lastName" | "avatarUrl">;
+      };
+    }
+  >;
+}
+
+export interface FreelancerDashboardStats {
+  totalAssignedProjects: number;
+  activeProjects: number;
+  completedProjects: number;
+  totalEarnings: number;
+  recentProjects: Array<
+    Task & {
+      client?: Pick<User, "id"> & {
+        profile?: Pick<UserProfile, "firstName" | "lastName" | "avatarUrl">;
+      };
+    }
+  >;
+  earningsByMonth: { month: string; earnings: number }[];
+}
+
 // Specific paginated responses matching backend
 export interface TasksPaginatedResponse extends PaginatedResponse<Task> {
   tasks: Task[];
@@ -209,7 +247,8 @@ export interface BidsPaginatedResponse extends PaginatedResponse<Bid> {
   bids: Bid[];
 }
 
-export interface MilestonesPaginatedResponse extends PaginatedResponse<Milestone> {
+export interface MilestonesPaginatedResponse
+  extends PaginatedResponse<Milestone> {
   milestones: Milestone[];
 }
 
@@ -217,10 +256,12 @@ export interface UsersPaginatedResponse extends PaginatedResponse<User> {
   users: User[];
 }
 
-export interface NotificationsPaginatedResponse extends PaginatedResponse<Notification> {
+export interface NotificationsPaginatedResponse
+  extends PaginatedResponse<Notification> {
   notifications: Notification[];
 }
 
-export interface TransactionsPaginatedResponse extends PaginatedResponse<Transaction> {
+export interface TransactionsPaginatedResponse
+  extends PaginatedResponse<Transaction> {
   transactions: Transaction[];
 }

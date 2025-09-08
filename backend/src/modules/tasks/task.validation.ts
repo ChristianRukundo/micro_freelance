@@ -55,13 +55,13 @@ export const getTasksQuerySchema = z.object({
   minBudget: z.preprocess(Number, z.number().min(0)).optional(),
   maxBudget: z.preprocess(Number, z.number().min(0)).optional(),
   status: z
-    .enum(Object.values(TaskStatus) as [string, ...string[]], {
+    .enum(['ALL', ...Object.values(TaskStatus)] as [string, ...string[]], {
       error: 'Invalid task status specified',
     })
     .optional(),
   q: z.string().optional(),
   sortBy: z
-    .enum(['createdAt', 'budget', 'deadline'], {
+    .enum(['createdAt', 'updatedAt', 'budget', 'deadline'], {
       error: 'Invalid sortBy field',
     })
     .default('createdAt')
@@ -72,7 +72,7 @@ export const getTasksQuerySchema = z.object({
 export type GetTasksQueryInput = z.infer<typeof getTasksQuerySchema>;
 
 export const taskIdSchema = z.object({
-  id: z.string().cuid("Invalid task ID format"),
+  id: z.string().cuid('Invalid task ID format'),
 });
 
 export type TaskIdInput = z.infer<typeof taskIdSchema>;

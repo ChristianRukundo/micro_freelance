@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import userService from './user.service';
 import { z } from 'zod';
 import { ChangePasswordInput } from './user.validation';
+import { UserRole } from '@prisma/client';
+import AppError from '@shared/utils/appError';
 
 // Schema for updating a user's profile
 const updateProfileSchema = z.object({
@@ -33,7 +35,7 @@ class UserController {
   public async updateMe(
     req: Request<unknown, unknown, UpdateProfileInput>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       if (!req.user) {
@@ -57,7 +59,7 @@ class UserController {
   public async changePassword(
     req: Request<unknown, unknown, ChangePasswordInput>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     try {
       if (!req.user) {
@@ -69,6 +71,31 @@ class UserController {
       await userService.changePassword(req.user.id, currentPassword, newPassword);
 
       res.status(200).json({ success: true, message: 'Password changed successfully.' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public async getClientDashboardStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user || req.user.role !== UserRole.CLIENT) {
+        throw new AppError('Access denied. Client role required.', 403);
+      }
+      const stats = await userService.getClientDashboardStats(req.user.id);
+      res.status(200).json({ success: true, data: stats });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // ADDED: Get Freelancer Dashboard Stats
+  public async getFreelancerDashboardStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user || req.user.role !== UserRole.FREELANCER) {
+        throw new AppError('Access denied. Freelancer role required.', 403);
+      }
+      const stats = await userService.getFreelancerDashboardStats(req.user.id);
+      res.status(200).json({ success: true, data: stats });
     } catch (error) {
       next(error);
     }

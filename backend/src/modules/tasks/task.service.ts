@@ -51,10 +51,14 @@ class TaskService {
         where.freelancerId = user.id;
       }
     } else {
+      // For public 'browse tasks' page, default to OPEN
       where.status = status ? (status as TaskStatus) : TaskStatus.OPEN;
     }
 
+    // Allow filtering by status for all users if provided.
+    // If multiple statuses are passed, ensure they are handled correctly.
     if (status) {
+
       where.status = status as TaskStatus;
     }
 
@@ -103,6 +107,37 @@ class TaskService {
       limit,
       totalPages: Math.ceil(totalTasks / limit),
     };
+  }
+  // ADDED: New service to get task stats for the current user
+  public async getMyTaskStats(userId: string, role: UserRole) {
+    const commonWhere = role === UserRole.CLIENT ? { clientId: userId } : { freelancerId: userId };
+
+    const statusCounts = await prisma.task.groupBy({
+      by: ['status'],
+      where: commonWhere,
+      _count: {
+        status: true,
+      },
+    });
+
+    // Initialize all stats to 0
+    const stats = {
+      [TaskStatus.OPEN]: 0,
+      [TaskStatus.IN_PROGRESS]: 0,
+      [TaskStatus.IN_REVIEW]: 0,
+      [TaskStatus.COMPLETED]: 0,
+      [TaskStatus.CANCELLED]: 0,
+      TOTAL: 0,
+    };
+
+    // Populate stats with actual counts
+    statusCounts.forEach((item) => {
+      stats[item.status] = item._count.status;
+    });
+
+    stats.TOTAL = Object.values(stats).reduce((sum, count) => sum + count, 0);
+
+    return stats;
   }
 
   public async getTaskById(taskId: string, requesterId: string, _requesterRole: string) {

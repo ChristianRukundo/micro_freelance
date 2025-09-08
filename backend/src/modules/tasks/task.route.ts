@@ -14,6 +14,8 @@ import {
 const router = Router();
 
 router.get('/', validateRequest({ query: getTasksQuerySchema }), taskController.getTasks);
+router.get('/my-stats', protect, taskController.getMyTaskStats);
+
 router.get('/:id', protect, validateRequest({ params: taskIdSchema }), taskController.getTaskById);
 
 router.use(protect); // All routes below this use authentication

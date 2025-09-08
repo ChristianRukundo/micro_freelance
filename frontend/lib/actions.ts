@@ -10,6 +10,9 @@ import {
   StripeCustomerData,
   Task as TaskType,
   User as UserType,
+  TaskStats,
+  ClientDashboardStats,
+  FreelancerDashboardStats
 } from "./types";
 import { logger } from "./utils";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -33,7 +36,7 @@ import {
   newsletterSchema,
   updateBidSchema,
   addAttachmentCommentSchema,
-  submitMilestoneSchema
+  submitMilestoneSchema,
 } from "./schemas";
 
 // --- Server Actions Implementations ---
@@ -284,6 +287,18 @@ export async function cancelTaskAction(
     return handleServerActionError(error);
   }
 }
+export async function getMyTaskStatsAction(): Promise<
+  ServerActionResponse<TaskStats>
+> {
+  try {
+    const api = await getApiWithAuth();
+    const response = await api.get("/tasks/my-stats");
+    return { success: true, data: response.data.data };
+  } catch (error: any) {
+    // Return default stats on error to prevent crashing the page
+    return handleServerActionError(error);
+  }
+}
 
 export async function completeTaskAction(
   taskId: string
@@ -524,6 +539,31 @@ export async function adminDeleteUserAction(
     await api.delete(`/admin/users/${userId}`);
     revalidatePath("/admin/users");
     return { success: true, message: "User deleted successfully!" };
+  } catch (error: any) {
+    return handleServerActionError(error);
+  }
+}
+
+export async function getClientDashboardStatsAction(): Promise<
+  ServerActionResponse<ClientDashboardStats>
+> {
+  try {
+    const api = await getApiWithAuth();
+    const response = await api.get("/users/dashboard/client-stats");
+    return { success: true, data: response.data.data };
+  } catch (error: any) {
+    return handleServerActionError(error);
+  }
+}
+
+// ADDED: Server Action to fetch Freelancer Dashboard Stats
+export async function getFreelancerDashboardStatsAction(): Promise<
+  ServerActionResponse<FreelancerDashboardStats>
+> {
+  try {
+    const api = await getApiWithAuth();
+    const response = await api.get("/users/dashboard/freelancer-stats");
+    return { success: true, data: response.data.data };
   } catch (error: any) {
     return handleServerActionError(error);
   }

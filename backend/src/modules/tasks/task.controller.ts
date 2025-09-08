@@ -31,6 +31,15 @@ class TaskController {
     }
   }
 
+  public async getMyTaskStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await taskService.getMyTaskStats(req.user!.id, req.user!.role);
+      res.status(200).json({ success: true, data: stats });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public async getTaskById(req: Request<z.infer<typeof taskIdSchema>>, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;

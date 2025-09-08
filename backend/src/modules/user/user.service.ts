@@ -1,3 +1,4 @@
+import { TaskStatus, TransactionStatus, TransactionType } from '@prisma/client';
 import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
 import { comparePasswords, hashPassword } from '@shared/utils/password'; 
@@ -74,6 +75,109 @@ class UserService {
     });
   }
 
+
+    public async getClientDashboardStats(clientId: string) {
+    const totalProjects = await prisma.task.count({ where: { clientId } });
+    const activeProjects = await prisma.task.count({
+      where: {
+        clientId,
+        status: { in: [TaskStatus.OPEN, TaskStatus.IN_PROGRESS, TaskStatus.IN_REVIEW] },
+      },
+    });
+    const completedProjects = await prisma.task.count({ where: { clientId, status: TaskStatus.COMPLETED } });
+
+    const totalSpendingResult = await prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: {
+        userId: clientId,
+        status: TransactionStatus.SUCCEEDED,
+        type: { in: [TransactionType.ESCROW_FUNDING, TransactionType.ESCROW_RELEASE, TransactionType.PLATFORM_FEE] },
+      },
+    });
+    const totalSpending = totalSpendingResult._sum.amount || 0;
+
+    const recentProjects = await prisma.task.findMany({
+      where: { clientId },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        budget: true,
+        createdAt: true,
+        freelancer: { select: { id: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
+      },
+    });
+
+    return {
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      totalSpending,
+      recentProjects,
+    };
+  }
+
+  // ADDED: Get dashboard statistics for Freelancer
+  public async getFreelancerDashboardStats(freelancerId: string) {
+    const totalAssignedProjects = await prisma.task.count({ where: { freelancerId } });
+    const activeProjects = await prisma.task.count({
+      where: {
+        freelancerId,
+        status: { in: [TaskStatus.IN_PROGRESS, TaskStatus.IN_REVIEW] },
+      },
+    });
+    const completedProjects = await prisma.task.count({ where: { freelancerId, status: TaskStatus.COMPLETED } });
+
+    const totalEarningsResult = await prisma.transaction.aggregate({
+      _sum: { amount: true },
+      where: {
+        userId: freelancerId,
+        status: TransactionStatus.SUCCEEDED,
+        type: TransactionType.PAYOUT,
+      },
+    });
+    const totalEarnings = totalEarningsResult._sum.amount || 0;
+
+    const recentProjects = await prisma.task.findMany({
+      where: { freelancerId },
+      orderBy: { updatedAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        budget: true,
+        updatedAt: true,
+        client: { select: { id: true, profile: { select: { firstName: true, lastName: true, avatarUrl: true } } } },
+      },
+    });
+
+    // Dummy earnings data for chart
+    const earningsByMonth = [
+      { month: 'Jan', earnings: Math.floor(Math.random() * 500) + 100 },
+      { month: 'Feb', earnings: Math.floor(Math.random() * 700) + 200 },
+      { month: 'Mar', earnings: Math.floor(Math.random() * 600) + 150 },
+      { month: 'Apr', earnings: Math.floor(Math.random() * 800) + 300 },
+      { month: 'May', earnings: Math.floor(Math.random() * 900) + 400 },
+      { month: 'Jun', earnings: Math.floor(Math.random() * 1200) + 500 },
+    ];
+
+
+    return {
+      totalAssignedProjects,
+      activeProjects,
+      completedProjects,
+      totalEarnings,
+      recentProjects,
+      earningsByMonth,
+    };
+  }
 }
+
+
+
+
 
 export default new UserService();

@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import userController from './user.controller';
-import { protect } from '@shared/middleware/auth.middleware';
+import { authorize, protect } from '@shared/middleware/auth.middleware';
 import { validateRequest } from '@shared/middleware/validateRequest';
 import { z } from 'zod';
 import { changePasswordSchema } from './user.validation';
+import { UserRole } from '@prisma/client';
 
 const router = Router();
 
@@ -21,5 +22,8 @@ router.use(protect); // All routes below this use authentication
 
 router.get('/me', userController.getMe);
 router.put('/me', validateRequest({ body: updateProfileSchema }), userController.updateMe);
+
+router.get('/dashboard/client-stats', authorize(UserRole.CLIENT), userController.getClientDashboardStats);
+router.get('/dashboard/freelancer-stats', authorize(UserRole.FREELANCER), userController.getFreelancerDashboardStats);
 
 export default router;
