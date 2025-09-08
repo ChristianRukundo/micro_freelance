@@ -122,7 +122,7 @@ function CheckoutForm({
       elements,
       clientSecret,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard/projects/${taskId}?payment_success=true`, // Redirect after payment
+        return_url: `${window.location.origin}/tasks/${taskId}?payment_success=true`, // Redirect after payment
         // You can include more custom data here if needed for your return_url handler
       },
     });

@@ -292,10 +292,7 @@ export default function FreelancerDashboardPage() {
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
                       >
-                        <Link
-                          href={`/dashboard/projects/${project.id}`}
-                          passHref
-                        >
+                        <Link href={`/tasks/${project.id}`} passHref>
                           <Card className="p-4 flex flex-col sm:flex-row items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-50/70 dark:bg-neutral-800/70 shadow-sm transition-all hover:bg-primary-50 dark:hover:bg-neutral-700">
                             <BriefcaseIcon className="h-8 w-8 text-primary-600 flex-shrink-0" />
                             <div className="flex-1 text-center sm:text-left">

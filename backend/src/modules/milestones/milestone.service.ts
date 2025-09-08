@@ -42,15 +42,17 @@ class MilestoneService {
       task.freelancerId,
       NotificationType.MILESTONE_CREATED,
       `New milestones have been created for your task "${task.title}".`,
-      `/tasks/${taskId}`, // Standardized URL
+      `/tasks${taskId}`,
       taskId,
+      undefined,
+      undefined,
     );
     const io = getSocketIO();
     if (io) {
       io.to(task.freelancerId).emit('new_notification', {
         message: `New milestones for "${task.title}"`,
         type: NotificationType.MILESTONE_CREATED,
-        url: `/tasks/${taskId}`, // Standardized URL
+        url: `/tasks${taskId}`,
       });
     }
 
@@ -111,8 +113,9 @@ class MilestoneService {
       milestone.task.clientId,
       NotificationType.MILESTONE_SUBMITTED,
       `Freelancer submitted milestone "${milestone.description}" for task "${milestone.task.title}".`,
-      `/tasks/${milestone.task.id}`, // Standardized URL
+      `/tasks${milestone.task.id}`,
       milestone.task.id,
+      undefined,
       milestoneId,
     );
     const io = getSocketIO();
@@ -120,7 +123,7 @@ class MilestoneService {
       io.to(milestone.task.clientId).emit('new_notification', {
         message: `Milestone submitted for "${milestone.task.title}"`,
         type: NotificationType.MILESTONE_SUBMITTED,
-        url: `/tasks/${milestone.task.id}`, // Standardized URL
+        url: `/tasks${milestone.task.id}`,
       });
     }
 
@@ -155,8 +158,9 @@ class MilestoneService {
       milestone.task.freelancerId,
       NotificationType.REVISION_REQUESTED,
       `Client requested revision for milestone "${milestone.description}" in task "${milestone.task.title}".`,
-      `/tasks/${milestone.task.id}`, // Standardized URL
+      `/tasks${milestone.task.id}`,
       milestone.task.id,
+      undefined,
       milestoneId,
     );
     const io = getSocketIO();
@@ -164,7 +168,7 @@ class MilestoneService {
       io.to(milestone.task.freelancerId).emit('new_notification', {
         message: `Revision requested for milestone "${milestone.task.title}"`,
         type: NotificationType.REVISION_REQUESTED,
-        url: `/tasks/${milestone.task.id}`, // Standardized URL
+        url: `/tasks${milestone.task.id}`,
       });
     }
 
@@ -174,7 +178,18 @@ class MilestoneService {
   public async approveMilestone(clientId: string, milestoneId: string): Promise<Milestone> {
     const milestone = await prisma.milestone.findUnique({
       where: { id: milestoneId },
-      include: { task: { select: { id: true, clientId: true, freelancerId: true, status: true, title: true } } },
+      include: {
+        task: {
+          select: {
+            id: true,
+            clientId: true,
+            freelancerId: true,
+            status: true,
+            title: true,
+            freelancer: { select: { stripeAccountCompleted: true } },
+          },
+        },
+      },
     });
 
     if (!milestone) {
@@ -184,7 +199,6 @@ class MilestoneService {
       throw new AppError('You are not authorized to approve this milestone.', 403);
     }
     if (milestone.status !== MilestoneStatus.SUBMITTED && milestone.status !== MilestoneStatus.REVISION_REQUESTED) {
-      // Allow approval from REVISION_REQUESTED
       throw new AppError(`Milestone cannot be approved in status: ${milestone.status}.`, 400);
     }
     if (!milestone.task.freelancerId) {
@@ -197,8 +211,11 @@ class MilestoneService {
         data: { status: MilestoneStatus.APPROVED },
       });
 
-      // MOCKED PAYMENT: Logic remains mocked as requested.
-      console.log(`[MOCK] Payment of $${milestone.amount} processed for milestone ${milestone.id}`);
+      // try {
+      //   await paymentService.processMilestonePayout(milestone.id);
+      // } catch (paymentError) {
+      //   throw new AppError('Payment processing failed. Please try again or contact support.', 500);
+      // }
 
       const remainingPendingMilestones = await tx.milestone.count({
         where: { taskId: milestone.task.id, status: { notIn: [MilestoneStatus.APPROVED] } },
@@ -208,10 +225,12 @@ class MilestoneService {
         await tx.task.update({ where: { id: milestone.task.id }, data: { status: TaskStatus.IN_REVIEW } });
         await createNotification(
           milestone.task.freelancerId!,
-          NotificationType.MILESTONE_APPROVED, // Re-use for simplicity
+          NotificationType.MILESTONE_APPROVED,
           `All milestones for "${milestone.task.title}" are approved! The project is now in review.`,
-          `/tasks/${milestone.task.id}`, // Standardized URL
+          `/tasks${milestone.task.id}`,
           milestone.task.id,
+          undefined,
+          milestoneId,
         );
       }
       return updated;
@@ -220,9 +239,10 @@ class MilestoneService {
     await createNotification(
       milestone.task.freelancerId,
       NotificationType.MILESTONE_APPROVED,
-      `Your milestone "${milestone.description}" for task "${milestone.task.title}" has been approved!`,
-      `/tasks/${milestone.task.id}`, // Standardized URL
+      `Your milestone "${milestone.description}" for task "${milestone.task.title}" has been approved and payment is on its way!`,
+      `/tasks${milestone.task.id}`,
       milestone.task.id,
+      undefined,
       milestoneId,
     );
     const io = getSocketIO();
@@ -230,7 +250,7 @@ class MilestoneService {
       io.to(milestone.task.freelancerId).emit('new_notification', {
         message: `Milestone "${milestone.description}" approved for "${milestone.task.title}"!`,
         type: NotificationType.MILESTONE_APPROVED,
-        url: `/tasks/${milestone.task.id}`, // Standardized URL
+        url: `/tasks${milestone.task.id}`,
       });
     }
 
@@ -257,10 +277,11 @@ class MilestoneService {
 
     await createNotification(
       attachment.milestone.task.freelancerId!,
-      NotificationType.REVISION_REQUESTED, // Re-use this type for simplicity
-      `Client commented on a file for milestone "${attachment.milestone.description}" in task "${attachment.milestone.task.title}".`,
-      `/tasks/${attachment.milestone.task.id}`, // Standardized URL
+      NotificationType.REVISION_REQUESTED,
+      `Client commented on a file for milestone "${attachment.milestone.description}".`,
+      `/tasks${attachment.milestone.task.id}`,
       attachment.milestone.task.id,
+      undefined,
       attachment.milestoneId,
     );
 

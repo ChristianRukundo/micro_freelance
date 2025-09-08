@@ -182,7 +182,7 @@ export const initSocket = (httpServer: HttpServer): SocketIOServer => {
             recipientId,
             NotificationType.NEW_MESSAGE,
             `${senderName} sent a new message in task "${task.title}".`,
-            `/dashboard/projects/${taskId}`,
+            `/tasks/${taskId}`,
           );
         }
       } catch (error: any) {

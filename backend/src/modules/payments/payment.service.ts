@@ -188,15 +188,10 @@ class PaymentService {
     }
 
     try {
-      // Create a transfer to the connected account (freelancer)
       const transfer = await stripe.transfers.create({
-        amount: Math.round(amountToFreelancer * 100), // Amount to transfer to freelancer in cents
+        amount: Math.round(amountToFreelancer * 100), 
         currency: 'usd',
         destination: milestone.task.freelancer.stripeAccountId,
-        // application_fee_amount is if your platform account is taking the fee directly
-        // If funds are already in your platform's balance, then the fee is implicit in the transfer amount.
-        // For simplicity, we assume the platform account first holds the full amount (from PaymentIntent)
-        // then transfers a portion to the freelancer and keeps the fee.
         metadata: {
           milestoneId: milestone.id,
           taskId: milestone.task.id,

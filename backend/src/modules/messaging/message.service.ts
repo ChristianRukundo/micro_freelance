@@ -132,7 +132,7 @@ class MessageService {
     if (recipientId) {
       const senderName = newMessage.sender.profile?.firstName || newMessage.sender.email;
       const notificationMessage = `${senderName} sent a new message in task "${task.title}".`;
-      const notificationUrl = `/dashboard/projects/${taskId}`;
+      const notificationUrl = `/tasks/${taskId}`;
 
       await createNotification(recipientId, NotificationType.NEW_MESSAGE, notificationMessage, notificationUrl, taskId);
       logger.debug(

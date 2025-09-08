@@ -12,7 +12,7 @@ import {
   User as UserType,
   TaskStats,
   ClientDashboardStats,
-  FreelancerDashboardStats
+  FreelancerDashboardStats,
 } from "./types";
 import { logger } from "./utils";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
@@ -367,7 +367,7 @@ export async function createMilestonesAction(
       `/tasks/${taskId}/milestones`,
       validatedData
     );
-    revalidatePath(`/dashboard/projects/${taskId}`);
+    revalidatePath(`/tasks/${taskId}`);
     return {
       success: true,
       message: "Milestones created successfully!",
@@ -389,7 +389,7 @@ export async function submitMilestoneAction(
       `/milestones/${milestoneId}/submit`,
       validatedData
     );
-    revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
+    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Milestone submitted for review!",
@@ -411,7 +411,7 @@ export async function requestMilestoneRevisionAction(
       `/milestones/${milestoneId}/request-revision`,
       validatedData
     );
-    revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
+    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Revision requested for milestone!",
@@ -428,7 +428,7 @@ export async function approveMilestoneAction(
   try {
     const api = await getApiWithAuth();
     const response = await api.patch(`/milestones/${milestoneId}/approve`);
-    revalidatePath(`/dashboard/projects/${response.data.data.taskId}`);
+    revalidatePath(`/tasks/${response.data.data.taskId}`);
     return {
       success: true,
       message: "Milestone approved and payment released!",
@@ -452,7 +452,7 @@ export async function addAttachmentCommentAction(
     );
     const milestone = response.data.data.milestone;
     if (milestone) {
-      revalidatePath(`/dashboard/projects/${milestone.taskId}`);
+      revalidatePath(`/tasks/${milestone.taskId}`);
     }
     return {
       success: true,
