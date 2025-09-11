@@ -29,6 +29,18 @@ export const signToken = (id: string, email: string, role: UserRole, secret: str
   return jwt.sign(payload, secret, options);
 };
 
+
+const getCookieOptions = (): any => {
+  const isProduction = config.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax', 
+    domain: config.COOKIE_DOMAIN || undefined, 
+  };
+};
+
+
 /**
  * Creates and sends authentication tokens (access and refresh) to the client.
  */
@@ -45,12 +57,7 @@ export const createSendToken = (user: UserWithProfileData, statusCode: number, r
   const accessTokenCookieExpirationMs = 15 * 60 * 1000;
   const refreshTokenCookieExpirationMs = 7 * 24 * 60 * 60 * 1000;
 
-  const cookieOptions: any = {
-    httpOnly: true,
-    secure: config.NODE_ENV === 'production',
-    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
-    domain: config.COOKIE_DOMAIN,
-  };
+  const cookieOptions = getCookieOptions();
 
   res.cookie('refreshToken', refreshToken, {
     ...cookieOptions,

@@ -74,7 +74,7 @@ export function AnimatedHero() {
           <Input
             type="search"
             placeholder="What project are you looking for?"
-            className="w-full pl-12 pr-4 py-3 rounded-full bg-white/95 border-none shadow-medium dark:shadow-medium-dark focus:ring-primary-500 focus:ring-2"
+            className="w-full pl-12 pr-4 py-3 rounded-full bg-white/95 border-none shadow-medium dark:bg-neutral-800/95 focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-2"
             aria-label="Quick search projects"
           />
           <Button

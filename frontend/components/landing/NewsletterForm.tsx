@@ -68,7 +68,7 @@ export function NewsletterForm() {
                     placeholder="Your email address"
                     {...field}
                     disabled={isPending}
-                    className="rounded-full shadow-soft dark:shadow-soft-dark"
+                    className="rounded-full shadow-soft dark:shadow-soft-dark dark:bg-neutral-800 dark:text-neutral-200"
                   />
                 </FormControl>
                 <FormMessage />

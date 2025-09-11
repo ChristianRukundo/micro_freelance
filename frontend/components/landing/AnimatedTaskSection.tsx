@@ -22,8 +22,8 @@ export function AnimatedTaskSection({
         transition={{ duration: 0.6, delay: 0.1 }}
         className="mb-12 text-center"
       >
-        <h2 className="text-display-md font-bold">Popular Projects</h2>
-        <p className="text-body-lg mt-4 max-w-2xl mx-auto">
+        <h2 className="text-display-md font-bold dark:text-neutral-100">Popular Projects</h2>
+        <p className="text-body-lg mt-4 max-w-2xl mx-auto dark:text-neutral-400">
           Explore some of the most exciting and in-demand projects on our
           platform.
         </p>
@@ -47,8 +47,8 @@ export function AnimatedTaskSection({
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       ) : (
-        <div className="flex items-center justify-center h-40 rounded-lg bg-muted/50">
-          <p className="text-body-md text-muted-foreground">
+        <div className="flex items-center justify-center h-40 rounded-lg bg-muted/50 dark:bg-neutral-800/50">
+          <p className="text-body-md text-muted-foreground dark:text-neutral-400">
             No popular projects available at the moment.
           </p>
         </div>

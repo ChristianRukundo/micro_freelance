@@ -6,7 +6,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full border-t border-neutral-200 bg-neutral-50 py-12">
+    <footer className="w-full border-t border-neutral-200 bg-neutral-50 py-12 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
       <div className="container grid grid-cols-1 gap-8 md:grid-cols-4">
         <div className="space-y-4">
           <Link
@@ -26,7 +26,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-h6 font-semibold mb-4">Company</h3>
+          <h3 className="text-h6 font-semibold mb-4 dark:text-neutral-100">Company</h3>
           <ul className="space-y-2 text-body-sm">
             <li>
               <Link
@@ -64,7 +64,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-h6 font-semibold mb-4">Support</h3>
+          <h3 className="text-h6 font-semibold mb-4 dark:text-neutral-100">Support</h3>
           <ul className="space-y-2 text-body-sm">
             <li>
               <Link
@@ -102,7 +102,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-h6 font-semibold mb-4">Connect</h3>
+          <h3 className="text-h6 font-semibold mb-4 dark:text-neutral-100">Connect</h3>
           <ul className="space-y-2 text-body-sm">
             <li>
               <a

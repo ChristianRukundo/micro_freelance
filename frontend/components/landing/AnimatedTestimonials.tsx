@@ -6,17 +6,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AnimatedTestimonials() {
   return (
-    <section className="w-full bg-gradient-to-br from-blue-500/10 to-blue-200/5 py-24">
+    <section className="w-full bg-gradient-to-br from-blue-500/10 to-blue-200/5 py-24 dark:from-blue-900/20 dark:to-blue-700/10">
       <div className="container text-center max-w-4xl">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
-          className="text-display-md font-bold mb-12"
+          className="text-display-md font-bold mb-12 dark:text-neutral-100"
         >
-          What Our Users Say
-        </motion.h2>
         <div className="grid gap-8 md:grid-cols-2">
           {[1, 2].map((item, index) => (
             <motion.div
@@ -26,12 +24,12 @@ export function AnimatedTestimonials() {
               viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 0.6, delay: 0.1 * index }}
             >
-              <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 text-left relative overflow-hidden group">
+              <Card className="shadow-medium dark:shadow-medium-dark border-neutral-200 p-6 text-left relative overflow-hidden group dark:bg-neutral-900 dark:border-neutral-700">
                 <span className="absolute top-0 right-0 h-24 w-24 translate-x-1/4 -translate-y-1/4 rotate-45 transform bg-primary-500/5 text-primary-500/10 text-display-lg font-extrabold -z-10 opacity-70">
                   &quot;
                 </span>
                 <CardContent className="p-0 space-y-4">
-                  <p className="text-body-lg italic">
+                  <p className="text-body-lg italic dark:text-neutral-300">
                     &ldquo;This platform has revolutionized how I find and
                     manage my freelance projects. The escrow system gives me
                     peace of mind, and the talent pool is exceptional!&rdquo;
@@ -45,8 +43,8 @@ export function AnimatedTestimonials() {
                       <AvatarFallback>JD</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-h6">Jane Doe</p>
-                      <p className="text-body-sm">CEO, Startup X</p>
+                      <p className="font-semibold text-h6 dark:text-neutral-100">Jane Doe</p>
+                      <p className="text-body-sm dark:text-neutral-400">CEO, Startup X</p>
                     </div>
                   </div>
                 </CardContent>
@@ -54,6 +52,7 @@ export function AnimatedTestimonials() {
             </motion.div>
           ))}
         </div>
+        </motion.div>
       </div>
     </section>
   );

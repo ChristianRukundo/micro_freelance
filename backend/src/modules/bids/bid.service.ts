@@ -151,7 +151,7 @@ class BidService {
       bid.freelancerId,
       NotificationType.BID_ACCEPTED,
       `Your bid for task "${bid.task.title}" has been accepted!`,
-      `/dashboard/tasks/${bid.taskId}`,
+      `/tasks/${bid.taskId}`,
       bid.taskId,
       bid.id,
     );
@@ -161,7 +161,7 @@ class BidService {
       io.to(bid.freelancerId).emit('new_notification', {
         message: `Your bid for "${bid.task.title}" was accepted!`,
         type: NotificationType.BID_ACCEPTED,
-        url: `/dashboard/tasks/${bid.taskId}`,
+        url: `/tasks/${bid.taskId}`,
       });
     }
 

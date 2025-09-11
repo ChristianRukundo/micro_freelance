@@ -37,20 +37,20 @@ export function HowItWorksCard({
       transition={{ duration: 0.6 }}
       className="space-y-6"
     >
-      <Card className="h-full shadow-medium dark:shadow-medium-dark border-neutral-200 p-8 flex flex-col justify-between">
+      <Card className="h-full shadow-medium dark:shadow-medium-dark border-neutral-200 p-8 flex flex-col justify-between dark:bg-neutral-900 dark:border-neutral-700">
         <CardHeader className="p-0 pb-6">
-          <h3 className="text-h3 font-bold">{title}</h3>
-          <CardDescription className="text-body-md mt-2">
+          <h3 className="text-h3 font-bold dark:text-neutral-100">{title}</h3>
+          <CardDescription className="text-body-md mt-2 dark:text-neutral-400">
             {description}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 space-y-4 flex-grow">
           {steps.map((step, index) => (
             <div key={index} className="flex items-center space-x-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600 shadow-sm">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600 shadow-sm dark:bg-primary-900">
                 {step.icon}
               </div>
-              <p className="text-body-md">{step.text}</p>
+              <p className="text-body-md dark:text-neutral-300">{step.text}</p>
             </div>
           ))}
         </CardContent>

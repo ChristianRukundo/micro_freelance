@@ -26,7 +26,7 @@ export function AnimatedCTA() {
             <Button
               size="lg"
               variant="default"
-              className="text-primary-500 bg-white hover:bg-neutral-100 shadow-lg shadow-white/30 px-8 py-3 text-h6 font-semibold"
+              className="text-primary-500 bg-white hover:bg-neutral-100 shadow-lg shadow-white/30 dark:shadow-primary-dark/50 px-8 py-3 text-h6 font-semibold"
             >
               Get Started Free
             </Button>

@@ -32,21 +32,17 @@ export interface ChatPaginatedResponse {
   totalPages: number;
 }
 
-const getAccessTokenFromCookie = (): string => {
-  if (typeof document === "undefined") return "";
-  const name = "accessToken=";
-  const decodedCookie = decodeURIComponent(document.cookie);
-  const ca = decodedCookie.split(";");
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === " ") {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) === 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return "";
+/**
+ * Retrieves a cookie by name from the browser's document.cookie.
+ * This is a client-side utility.
+ * @param name The name of the cookie to retrieve.
+ * @returns The cookie value or undefined if not found.
+ */
+const getCookie = (name: string): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
 };
 
 export function useChat(taskId?: string) {
@@ -111,21 +107,19 @@ export function useChat(taskId?: string) {
   });
 
   const historicalMessages = data?.pages.flatMap((page) => page.messages) || [];
-
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated || !taskId) {
       return;
     }
 
-    // FIX: This pattern is robust against React Strict Mode's double invocation.
-    // The socket instance is created only once and stored in the ref.
     if (!socketRef.current) {
-      logger.info("useChat: Initializing Socket.IO connection.", { taskId });
+      logger.info("useChat: Initializing Socket.IO connection.");
       setIsSocketConnecting(true);
       setSocketError(null);
 
+      // Revert to the simple initialization. The browser will handle attaching the HttpOnly cookie.
       socketRef.current = io(process.env.NEXT_PUBLIC_WS_BASE_URL!, {
-        withCredentials: true,
+        withCredentials: true, // This is the key.
         transports: ["websocket"],
       });
 
@@ -139,18 +133,15 @@ export function useChat(taskId?: string) {
 
       socketRef.current.on("receive_message", (newMessage: ChatMessage) => {
         logger.info("Received new message via socket", { message: newMessage });
-
-        // Use setQueryData to instantly and surgically update the cache
         queryClient.setQueryData<InfiniteData<ChatPaginatedResponse>>(
           ["chatMessages", taskId],
           (oldData) => {
             if (!oldData) {
-              // If there's no data yet, create the initial structure
               return {
                 pages: [
                   {
                     messages: [newMessage],
-                    currentPage: 1, // Corrected property name
+                    currentPage: 1,
                     totalPages: 1,
                     totalMessages: 1,
                     limit: 20,
@@ -159,10 +150,8 @@ export function useChat(taskId?: string) {
                 pageParams: [1],
               };
             }
-            // Create a deep copy to avoid mutation issues
             const newData = { ...oldData, pages: [...oldData.pages] };
             const lastPageIndex = newData.pages.length - 1;
-            // Add the new message to the end of the last page's message list
             newData.pages[lastPageIndex] = {
               ...newData.pages[lastPageIndex],
               messages: [...newData.pages[lastPageIndex].messages, newMessage],
@@ -178,7 +167,7 @@ export function useChat(taskId?: string) {
         setIsSocketConnecting(false);
         if (err.message.includes("Authentication error")) {
           toast.error(
-            "Authentication token missing for real-time chat. Please refresh or log in again."
+            "Authentication failed for real-time chat. Please refresh the page."
           );
         }
       });
@@ -186,12 +175,10 @@ export function useChat(taskId?: string) {
       socketRef.current.on("disconnect", (reason) => {
         logger.info("Socket.IO disconnected for chat", { reason });
         setIsSocketConnecting(false);
-        socketRef.current = null; // Allow reconnection on next render
+        socketRef.current = null;
       });
     }
 
-    // The cleanup function will run when the component unmounts for real,
-    // or when the dependencies (like taskId) change.
     return () => {
       if (socketRef.current) {
         logger.info("useChat: Disconnecting socket on cleanup.");

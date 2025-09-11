@@ -28,10 +28,10 @@ export function useNotifications() {
       return;
     }
 
-    // FIX: Robust pattern for Strict Mode
     if (!socketRef.current) {
       logger.info("useNotifications: Initializing Socket.IO connection.");
 
+      // Revert to the simple initialization. Let the browser handle the cookie.
       socketRef.current = io(process.env.NEXT_PUBLIC_WS_BASE_URL!, {
         withCredentials: true,
         transports: ["websocket"],
@@ -41,7 +41,6 @@ export function useNotifications() {
         logger.info("Socket.IO connected for notifications:", {
           socketId: socketRef.current?.id,
         });
-        // The backend automatically joins the personal room based on authenticated user ID
       });
 
       socketRef.current.on("new_notification", (notification: Notification) => {
@@ -74,7 +73,6 @@ export function useNotifications() {
       }
     };
   }, [isAuthenticated, isAuthLoading, user?.id, queryClient]);
-
   // --- TanStack Query for Historical Notifications ---
   const {
     data,

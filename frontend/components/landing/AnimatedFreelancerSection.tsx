@@ -22,8 +22,8 @@ export function AnimatedFreelancerSection({
         transition={{ duration: 0.6, delay: 0.1 }}
         className="mb-12 text-center"
       >
-        <h2 className="text-display-md font-bold">Our Top Freelancers</h2>
-        <p className="text-body-lg mt-4 max-w-2xl mx-auto">
+        <h2 className="text-display-md font-bold dark:text-neutral-100">Our Top Freelancers</h2>
+        <p className="text-body-lg mt-4 max-w-2xl mx-auto dark:text-neutral-400">
           Meet the highly-rated and skilled professionals ready to bring your
           ideas to life.
         </p>
@@ -47,8 +47,8 @@ export function AnimatedFreelancerSection({
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       ) : (
-        <div className="flex items-center justify-center h-40 rounded-lg bg-muted/50">
-          <p className="text-body-md text-muted-foreground">
+        <div className="flex items-center justify-center h-40 rounded-lg bg-muted/50 dark:bg-neutral-800/50">
+          <p className="text-body-md text-muted-foreground dark:text-neutral-400">
             No top freelancers found at the moment.
           </p>
         </div>

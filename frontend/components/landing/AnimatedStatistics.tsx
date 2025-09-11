@@ -11,7 +11,7 @@ const statistics = [
 
 export function AnimatedStatistics() {
   return (
-    <section className="w-full py-16 bg-gradient-to-br from-neutral-50 to-neutral-100">
+    <section className="w-full py-16 bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900">
       <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
         {statistics.map((stat, index) => (
           <motion.div
@@ -25,7 +25,7 @@ export function AnimatedStatistics() {
             <p className="text-display-lg font-extrabold text-primary-500">
               {stat.value}
             </p>
-            <h3 className="text-h4 font-bold">{stat.label}</h3>
+            <h3 className="text-h4 font-bold dark:text-neutral-100">{stat.label}</h3>
           </motion.div>
         ))}
       </div>

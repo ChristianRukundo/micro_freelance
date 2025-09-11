@@ -22,27 +22,43 @@ interface AuthenticatedSocketData {
 let io: SocketIOServer | null = null; // Initialize as null
 
 const getAccessTokenFromSocket = (socket: Socket): string | undefined => {
+  // 1. Prioritize 'auth.token' sent explicitly from the client
+  const tokenFromAuth = socket.handshake.auth.token as string | undefined;
+  if (tokenFromAuth) {
+    logger.debug('Socket.IO Auth: Found token in handshake.auth.');
+    return tokenFromAuth;
+  }
+
+  // 2. Fallback to Authorization header (good practice for non-browser clients)
   const authHeader = socket.handshake.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.split(' ')[1];
     if (token && token !== 'undefined') {
+      logger.debug('Socket.IO Auth: Found token in Authorization header.');
       return token;
     }
   }
 
+  // 3. Fallback to cookies (original method)
   const cookies = socket.handshake.headers.cookie;
   if (typeof cookies === 'string' && cookies.length > 0) {
     try {
       const parsedCookies = cookie.parse(cookies);
-      return parsedCookies.accessToken;
+      if (parsedCookies.accessToken) {
+        logger.debug('Socket.IO Auth: Found token in cookies.');
+        return parsedCookies.accessToken;
+      }
     } catch (error) {
       logger.error('Socket.IO: Failed to parse cookies.', { cookieHeader: cookies, error });
       return undefined;
     }
   }
 
+  logger.warn('Socket.IO Auth: No access token found in any source (auth, headers, or cookies).');
   return undefined;
 };
+
+
 
 export const initSocket = (httpServer: HttpServer): SocketIOServer => {
   io = new SocketIOServer(httpServer, {
