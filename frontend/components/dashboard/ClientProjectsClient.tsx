@@ -276,7 +276,7 @@ export function ClientProjectsClient({
           <ListChecksIcon className="h-16 w-16 mb-4 mx-auto text-muted-foreground" />
           <h2 className="text-h3 font-bold">No Projects Found</h2>
           <p className="text-body-md mt-2 text-muted-foreground">
-            You haven't posted any projects that match the current filters.
+            You haven&apos;t posted any projects that match the current filters.
           </p>
           <Link
             href="/dashboard/tasks/new"

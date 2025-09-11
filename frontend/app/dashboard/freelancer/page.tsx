@@ -324,7 +324,7 @@ export default function FreelancerDashboardPage() {
               <div className="text-center py-6">
                 <FileTextIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-body-md text-muted-foreground">
-                  You haven't been assigned to any projects recently.
+                  You haven&apos;t been assigned to any projects recently.
                 </p>
                 <Link href="/tasks" passHref className="mt-4 inline-block">
                   <Button variant="gradient" className="group">

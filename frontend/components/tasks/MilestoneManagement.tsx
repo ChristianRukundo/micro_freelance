@@ -385,11 +385,11 @@ function SubmitWorkDialog({
             Submit Work for Review
           </DialogTitle>
           <DialogDescription className="text-body-md text-muted-foreground">
-            Upload your completed files and add any final notes for milestone: "
+            Upload your completed files and add any final notes for milestone: &quot;
             <span className="font-semibold text-foreground">
               {milestone.description}
             </span>
-            "
+            &quot;
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -824,8 +824,8 @@ function MilestoneCard({
             >
               <MessageCircleIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
               <p className="text-body-sm italic text-blue-800 dark:text-blue-200 bg-blue-50/50 dark:bg-blue-900/30 border-l-4 border-blue-500 pl-3 py-1 rounded-r-lg shadow-inner">
-                <span className="font-semibold">Freelancer's Note:</span> "
-                {milestone.submissionNotes}"
+                <span className="font-semibold">Freelancer&apos;s Note:</span> &quot;
+                {milestone.submissionNotes}&quot;
               </p>
             </motion.div>
           )}

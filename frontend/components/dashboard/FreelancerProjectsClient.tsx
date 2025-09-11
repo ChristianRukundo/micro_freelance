@@ -273,7 +273,7 @@ export function FreelancerProjectsClient({
           <BriefcaseIcon className="h-16 w-16 mb-4 mx-auto text-muted-foreground" />
           <h2 className="text-h3 font-bold">No Projects Here Yet</h2>
           <p className="text-body-md mt-2 text-muted-foreground">
-            You haven't been assigned to any projects that match these filters.
+            You haven&apos;t been assigned to any projects that match these filters.
           </p>
           <Link href="/tasks" passHref className="mt-6 inline-block">
             <Button
