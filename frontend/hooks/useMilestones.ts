@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { Milestone, MilestoneStatus } from "@/lib/types";
 import { toast } from "sonner";
-import * as actions from "@/lib/actions";
+
 import {
   createMultipleMilestonesSchema,
   requestRevisionSchema,
@@ -36,9 +36,10 @@ export function useMilestones(taskId?: string) {
   });
 
   const createMilestonesMutation = useMutation({
-    mutationFn: (values: z.infer<typeof createMultipleMilestonesSchema>) => {
+    mutationFn: async (values: z.infer<typeof createMultipleMilestonesSchema>) => {
       if (!taskId) throw new Error("Task ID is required to create milestones.");
-      return actions.createMilestonesAction(taskId, values);
+      const response = await api.post(`/tasks/${taskId}/milestones`, values);
+      return response.data;
     },
     onSuccess: (response) => {
       if (response.success) {
@@ -113,13 +114,19 @@ export function useMilestones(taskId?: string) {
   };
 
   const submitMilestoneMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       milestoneId,
       values,
     }: {
       milestoneId: string;
       values: z.infer<typeof submitMilestoneSchema>;
-    }) => actions.submitMilestoneAction(milestoneId, values),
+    }) => {
+      const response = await api.patch(
+        `/milestones/${milestoneId}/submit`,
+        values
+      );
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success("Milestone submitted for review!");
@@ -135,25 +142,32 @@ export function useMilestones(taskId?: string) {
   });
 
   const requestMilestoneRevisionMutation = updateMilestoneStatusMutation(
-    actions.requestMilestoneRevisionAction,
+    (milestoneId: string, values: any) =>
+      api.patch(`/milestones/${milestoneId}/request-revision`, values),
     MilestoneStatus.REVISION_REQUESTED,
     "Revision requested for milestone!"
   );
   const approveMilestoneMutation = updateMilestoneStatusMutation(
-    actions.approveMilestoneAction,
+    (milestoneId: string) => api.patch(`/milestones/${milestoneId}/approve`),
     MilestoneStatus.APPROVED,
     "Milestone approved!"
   );
 
   // ADDED: Mutation for adding attachment comments
   const addAttachmentCommentMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       attachmentId,
       values,
     }: {
       attachmentId: string;
       values: z.infer<typeof addAttachmentCommentSchema>;
-    }) => actions.addAttachmentCommentAction(attachmentId, values),
+    }) => {
+      const response = await api.patch(
+        `/milestones/attachments/${attachmentId}/comment`,
+        values
+      );
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);

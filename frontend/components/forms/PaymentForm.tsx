@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import * as actions from "@/lib/actions";
+import api from "@/lib/api";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import {
@@ -81,8 +81,13 @@ function CheckoutForm({
     mutateAsync: createPaymentIntentMutation,
     isPending: isCreatingIntent,
   } = useMutation({
-    mutationFn: (amount: number) =>
-      actions.createPaymentIntentAction(taskId, { amount }),
+    mutationFn: async (amount: number) => {
+      const response = await api.post(
+        `/payments/tasks/${taskId}/create-payment-intent`,
+        { amount }
+      );
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success && response.data?.clientSecret) {
         setClientSecret(response.data.clientSecret);

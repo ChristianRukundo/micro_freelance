@@ -25,19 +25,20 @@ api.interceptors.response.use(
         console.error("Unauthorized API call:", message);
 
         if (window.location.pathname !== "/login") {
-          toast.error("Session expired. Please log in again.");
+          toast.error(message || "Session expired. Please log in again.");
         }
       } else if (status === 403) {
         console.error("Forbidden API call:", message);
-        toast.error("You do not have permission to perform this action.");
+        toast.error(message || "You do not have permission to perform this action.");
       } else if (status === 404) {
         console.error("Not Found API call:", message);
+        toast.error(message || "Resource not found.");
       } else if (status === 429) {
         console.error("Rate Limit Exceeded:", message);
-        toast.error("Too many requests. Please try again later.");
+        toast.error(message || "Too many requests. Please try again later.");
       } else if (status >= 500) {
         console.error("Server Error:", message);
-        toast.error("A server error occurred. Please try again.");
+        toast.error(message || "A server error occurred. Please try again.");
       } else if (status >= 400) {
         console.error("Client Error:", message);
         try {

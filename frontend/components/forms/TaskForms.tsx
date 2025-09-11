@@ -50,7 +50,7 @@ import { useDropzone } from "react-dropzone";
 import { useUpload } from "@/hooks/useUpload";
 import ReactMarkdown from "react-markdown";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import * as actions from "@/lib/actions";
+
 import { createTaskSchema } from "@/lib/schemas";
 import { useCategories } from "@/hooks/useTasks"; // Reusing categories hook
 import { motion } from "framer-motion";
@@ -228,13 +228,15 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
           : "",
       };
       if (formType === "new") {
-        return actions.createTaskAction(dataToSend);
+        const response = await api.post("/tasks", dataToSend);
+        return response.data;
       } else {
         if (!taskId) throw new Error("Task ID is required for updating.");
-        return actions.updateTaskAction(taskId, dataToSend);
+        const response = await api.put(`/tasks/${taskId}`, dataToSend);
+        return response.data;
       }
     },
-    onSuccess: (response) => {
+    onSuccess: (response: { success: boolean; message: string; data?: any; errors?: any[] }) => {
       if (response.success && response.data?.task) {
         toast.success(
           `Task ${formType === "new" ? "created" : "updated"} successfully!`
@@ -245,14 +247,14 @@ export function TaskForms({ formType, initialData, taskId }: TaskFormsProps) {
           response.message ||
             `Failed to ${formType === "new" ? "create" : "update"} task.`
         );
-        response.errors?.forEach((err) =>
+        response.errors?.forEach((err: { path: string | number; message: string; }) =>
           toast.error(`${err.path}: ${err.message}`)
         );
       }
     },
     onError: (error: any) => {
       toast.error(
-        error.message ||
+        error.response?.data?.message || error.message ||
           `Failed to ${formType === "new" ? "create" : "update"} task.`
       );
     },

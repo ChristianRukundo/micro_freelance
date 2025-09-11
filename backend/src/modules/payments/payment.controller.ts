@@ -6,7 +6,7 @@ import AppError from '@shared/utils/appError';
 import { CreateConnectAccountInput } from './payment.validation';
 import { z } from 'zod';
 import Stripe from 'stripe';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 const taskIdParamSchema = z.object({
   taskId: z.string().cuid('Invalid task ID format'),

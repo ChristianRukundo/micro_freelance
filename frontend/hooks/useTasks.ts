@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import api from '@/lib/api';
 import { Task, PaginatedResponse, UserRole } from '@/lib/types';
 import { toast } from 'sonner';
-import * as actions from '@/lib/actions';
+
 import { createTaskSchema } from '@/lib/schemas';
 import { z } from "zod";
 import { TaskStatus } from "@/lib/types";
@@ -70,7 +70,10 @@ export function useTasks(filters?: TaskQueryFilters) {
 
   // Mutation for creating a new task
   const createTaskMutation = useMutation({
-    mutationFn: (values: z.infer<typeof createTaskSchema>) => actions.createTaskAction(values),
+    mutationFn: async (values: z.infer<typeof createTaskSchema>) => {
+      const response = await api.post("/tasks", values);
+      return response.data;
+    },
     onMutate: async (newTask) => {
       // Optimistic update (optional, but good for instant feedback)
       // For infinite queries, this can be complex. Simpler to invalidate.
@@ -98,8 +101,10 @@ export function useTasks(filters?: TaskQueryFilters) {
 
   // Mutation for updating an existing task
   const updateTaskMutation = useMutation({
-    mutationFn: ({ taskId, values }: { taskId: string; values: Partial<z.infer<typeof createTaskSchema>> }) =>
-      actions.updateTaskAction(taskId, values),
+    mutationFn: async ({ taskId, values }: { taskId: string; values: Partial<z.infer<typeof createTaskSchema>> }) => {
+      const response = await api.put(`/tasks/${taskId}`, values);
+      return response.data;
+    },
     onMutate: async ({ taskId, values }) => {
       await queryClient.cancelQueries({ queryKey: ['task', taskId] });
       const previousTask = queryClient.getQueryData<Task>(['task', taskId]);
@@ -132,7 +137,10 @@ export function useTasks(filters?: TaskQueryFilters) {
 
   // Mutation for deleting a task
   const deleteTaskMutation = useMutation({
-    mutationFn: (taskId: string) => actions.deleteTaskAction(taskId),
+    mutationFn: async (taskId: string) => {
+      const response = await api.delete(`/tasks/${taskId}`);
+      return response.data;
+    },
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: ['tasks'] });
       const previousTasks = queryClient.getQueryData(['tasks']);
@@ -161,7 +169,10 @@ export function useTasks(filters?: TaskQueryFilters) {
 
   // Mutation for canceling a task
   const cancelTaskMutation = useMutation({
-    mutationFn: (taskId: string) => actions.cancelTaskAction(taskId),
+    mutationFn: async (taskId: string) => {
+      const response = await api.patch(`/tasks/${taskId}/cancel`);
+      return response.data;
+    },
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: ['task', taskId] });
       const previousTask = queryClient.getQueryData<Task>(['task', taskId]);
@@ -185,7 +196,10 @@ export function useTasks(filters?: TaskQueryFilters) {
 
   // Mutation for completing a task
   const completeTaskMutation = useMutation({
-    mutationFn: (taskId: string) => actions.completeTaskAction(taskId),
+    mutationFn: async (taskId: string) => {
+      const response = await api.patch(`/tasks/${taskId}/complete`);
+      return response.data;
+    },
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: ['task', taskId] });
       const previousTask = queryClient.getQueryData<Task>(['task', taskId]);
@@ -239,11 +253,8 @@ export function useCategories() {
   const { data, isLoading, isError, error } = useQuery<any, Error>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await actions.getCategoriesAction();
-      if (!response.success) {
-        throw new Error(response.message);
-      }
-      return response.data;
+      const response = await api.get("/categories");
+      return response.data.data;
     },
     staleTime: Infinity, // Categories rarely change
   });

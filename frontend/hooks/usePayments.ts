@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import * as actions from '@/lib/actions';
+
 import { createStripeConnectAccountSchema, fundTaskBodySchema } from '@/lib/schemas';
 import z from 'zod';
 
@@ -30,9 +30,11 @@ export function usePayments() {
 
   // Mutation to create/onboard Stripe Connect account
   const createStripeConnectAccountMutation = useMutation({
-    mutationFn: (values: z.infer<typeof createStripeConnectAccountSchema>) =>
-      actions.createStripeConnectAccountAction(values),
-    onSuccess: (response) => {
+    mutationFn: async (values: z.infer<typeof createStripeConnectAccountSchema>) => {
+      const response = await api.post("/payments/stripe/connect-account", values);
+      return response.data;
+    },
+    onSuccess: (response: { success: boolean; message: string; data?: { onboardingUrl: string } }) => {
       if (response.success) {
         toast.success(response.message);
         if (response.data?.onboardingUrl) {
@@ -50,9 +52,14 @@ export function usePayments() {
 
   // Mutation to create a Payment Intent for task funding (escrow)
   const createPaymentIntentMutation = useMutation({
-    mutationFn: ({ taskId, amount }: { taskId: string; amount: number }) =>
-      actions.createPaymentIntentAction(taskId, { amount }),
-    onSuccess: (response, variables) => {
+    mutationFn: async ({ taskId, amount }: { taskId: string; amount: number }) => {
+      const response = await api.post(
+        `/payments/tasks/${taskId}/create-payment-intent`,
+        { amount }
+      );
+      return response.data;
+    },
+    onSuccess: (response: { success: boolean; message: string; }, variables) => {
       if (response.success) {
         toast.success(response.message);
         queryClient.invalidateQueries({ queryKey: ['task', variables.taskId] });

@@ -1,10 +1,8 @@
-"use client";
-
 import { useQuery } from "@tanstack/react-query";
-import * as actions from "@/lib/actions";
 import { ClientDashboardStats, FreelancerDashboardStats } from "@/lib/types";
 import { useAuthStore } from "@/lib/zustand";
 import { UserRole } from "@/lib/types";
+import api from "@/lib/api";
 
 /**
  * Custom hook to fetch and manage dashboard statistics based on user role.
@@ -21,13 +19,8 @@ export function useDashboardStats() {
     queryKey: ["clientDashboardStats", user?.id],
     queryFn: async (): Promise<ClientDashboardStats> => {
       if (!user?.id) throw new Error("User not authenticated.");
-      const response = await actions.getClientDashboardStatsAction();
-      if (!response.success || !response.data) {
-        throw new Error(
-          response.message || "Failed to fetch client dashboard stats."
-        );
-      }
-      return response.data;
+      const response = await api.get("/users/dashboard/client-stats");
+      return response.data.data;
     },
     enabled:
       isAuthenticated && !isAuthLoading && user?.role === UserRole.CLIENT,
@@ -44,13 +37,8 @@ export function useDashboardStats() {
     queryKey: ["freelancerDashboardStats", user?.id],
     queryFn: async (): Promise<FreelancerDashboardStats> => {
       if (!user?.id) throw new Error("User not authenticated.");
-      const response = await actions.getFreelancerDashboardStatsAction();
-      if (!response.success || !response.data) {
-        throw new Error(
-          response.message || "Failed to fetch freelancer dashboard stats."
-        );
-      }
-      return response.data;
+      const response = await api.get("/users/dashboard/freelancer-stats");
+      return response.data.data;
     },
     enabled:
       isAuthenticated && !isAuthLoading && user?.role === UserRole.FREELANCER,

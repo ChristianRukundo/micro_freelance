@@ -70,7 +70,7 @@ import {
   Skeleton,
   AvatarTextSkeleton,
 } from "@/components/common/SkeletonLoaders";
-import * as actions from "@/lib/actions";
+
 import { updateUserStatusSchema } from "@/lib/schemas";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
@@ -157,17 +157,18 @@ export default function AdminUsersPage() {
 
   // --- Mutations for User Actions ---
   const updateUserStatusMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       userId,
       isSuspended,
     }: {
       userId: string;
       isSuspended: boolean;
-    }) =>
-      actions.adminUpdateUserStatusAction(
-        userId,
-        updateUserStatusSchema.parse({ isSuspended })
-      ),
+    }) => {
+      const response = await api.patch(`/admin/users/${userId}/status`, {
+        isSuspended,
+      });
+      return response.data;
+    },
     onMutate: async ({ userId, isSuspended }) => {
       await queryClient.cancelQueries({ queryKey: ["adminUsers"] });
       const previousUsers = queryClient.getQueryData<UsersPaginatedResponse>([
@@ -205,7 +206,10 @@ export default function AdminUsersPage() {
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: (userId: string) => actions.adminDeleteUserAction(userId),
+    mutationFn: async (userId: string) => {
+      const response = await api.delete(`/admin/users/${userId}`);
+      return response.data;
+    },
     onMutate: async (userId) => {
       await queryClient.cancelQueries({ queryKey: ["adminUsers"] });
       const previousUsers = queryClient.getQueryData<UsersPaginatedResponse>([

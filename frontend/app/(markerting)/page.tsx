@@ -1,4 +1,6 @@
 import Link from "next/link";
+
+export const dynamic = 'force-dynamic';
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle2Icon,
@@ -17,11 +19,8 @@ import {
 import { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { Suspense } from "react";
-import {
-  fetchPopularTasks,
-  fetchTopFreelancers,
-  newsletterSubscribeAction,
-} from "@/lib/actions";
+import { getApiWithAuth } from "@/lib/api-server";
+
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import { HowItWorksCard } from "@/components/landing/HowItWorksCard";
 import { AnimatedHero } from "@/components/landing/AnimatedHero";
@@ -67,8 +66,16 @@ export const metadata: Metadata = {
 // Server-side data fetching functions
 async function getPopularTasks(): Promise<TaskType[] | undefined> {
   try {
-    const response = await fetchPopularTasks();
-    return response.success ? response.data : [];
+    const api = await getApiWithAuth();
+    const response = await api.get("/tasks", {
+      params: {
+        limit: 6,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        status: "OPEN",
+      },
+    });
+    return response.data.data.tasks;
   } catch (error) {
     console.error("Failed to fetch popular tasks on homepage:", error);
     return [];
@@ -77,8 +84,15 @@ async function getPopularTasks(): Promise<TaskType[] | undefined> {
 
 async function getTopFreelancers(): Promise<UserType[] | undefined> {
   try {
-    const response = await fetchTopFreelancers();
-    return response.success ? response.data : [];
+    const api = await getApiWithAuth();
+    const response = await api.get("/freelancers", {
+      params: {
+        limit: 6,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      },
+    });
+    return response.data.data.users;
   } catch (error) {
     console.error("Failed to fetch top freelancers on homepage:", error);
     return [];

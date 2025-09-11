@@ -4,7 +4,7 @@ import { IEmailService } from './email.types';
 import AppError from '@shared/utils/appError';
 import fs from 'fs';
 import path from 'path';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 class NodemailerService implements IEmailService {
   private transporter!: nodemailer.Transporter;

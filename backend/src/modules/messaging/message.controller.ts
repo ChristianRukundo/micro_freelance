@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import messageService from './message.service';
 import { taskIdParamSchema, getMessagesQuerySchema, createMessageSchema } from './message.validation';
 import { z } from 'zod';
-import { logger } from '@shared/utils/logger'; // <--- Import logger
+import logger from '@shared/utils/logger'; // <--- Import logger
 import AppError from '@shared/utils/appError';
 
 class MessageController {

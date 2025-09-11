@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/zustand";
-import * as actions from "@/lib/actions";
+
 import { updateProfileSchema, changePasswordSchema } from "@/lib/schemas";
 import api from "@/lib/api";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -127,18 +127,19 @@ export function ProfileForm() {
 
   const { mutate: submitProfileUpdate, isPending: isUpdatingProfile } =
     useMutation({
-      mutationFn: (values: UpdateProfileInput) => {
+      mutationFn: async (values: UpdateProfileInput) => {
         if (!authUser?.id) throw new Error("User not authenticated.");
         // Ensure avatarUrl is set to null if it's an empty string or undefined to clear it
         const dataToSend = {
           ...values,
           avatarUrl: values.avatarUrl === "" ? null : values.avatarUrl,
         };
-        return actions.updateProfileInfoAction(authUser.id, dataToSend);
+        const response = await api.put("/users/me", dataToSend);
+        return response.data;
       },
-      onSuccess: (response) => {
+      onSuccess: (response: { success: boolean; message: string; data?: any; errors?: any[] }) => {
         if (response.success) {
-          toast.success(response.message);
+          toast.success(response.message || "Profile updated successfully!");
           // Update Zustand store with the latest profile data if applicable
           if (response.data) {
             setUser({ ...authUser, profile: response.data.profile } as any); // Update profile part of user object
@@ -148,35 +149,36 @@ export function ProfileForm() {
           });
         } else {
           toast.error(response.message || "Failed to update profile.");
-          response.errors?.forEach((err) =>
+          response.errors?.forEach((err: { path: string | number; message: string; }) =>
             toast.error(`${err.path}: ${err.message}`)
           );
         }
       },
       onError: (error: any) => {
-        toast.error(error.message || "Failed to update profile.");
+        toast.error(error.response?.data?.message || error.message || "Failed to update profile.");
       },
     });
 
   const { mutate: submitPasswordChange, isPending: isChangingPassword } =
     useMutation({
-      mutationFn: (values: ChangePasswordInput) => {
+      mutationFn: async (values: ChangePasswordInput) => {
         if (!authUser?.id) throw new Error("User not authenticated.");
-        return actions.changePasswordAction(authUser.id, values);
+        const response = await api.patch("/users/me/change-password", values);
+        return response.data;
       },
-      onSuccess: (response) => {
+      onSuccess: (response: { success: boolean; message: string; errors?: any[] }) => {
         if (response.success) {
-          toast.success(response.message);
+          toast.success(response.message || "Password changed successfully!");
           changePasswordForm.reset();
         } else {
           toast.error(response.message || "Failed to change password.");
-          response.errors?.forEach((err) =>
+          response.errors?.forEach((err: { path: string | number; message: string; }) =>
             toast.error(`${err.path}: ${err.message}`)
           );
         }
       },
       onError: (error: any) => {
-        toast.error(error.message || "Failed to change password.");
+        toast.error(error.response?.data?.message || error.message || "Failed to change password.");
       },
     });
 

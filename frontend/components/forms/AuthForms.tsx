@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/zustand";
-import * as actions from "@/lib/actions";
+
 import {
   loginSchema,
   registerSchema,
@@ -129,7 +129,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
     onSuccess: (response) => {
       if (response.success && response.data?.user) {
         authStoreLogin(response.data.user);
-        toast.success(response.message);
+        toast.success(response.message || "Logged in successfully!");
         switch (response.data.user.role) {
           case UserRole.CLIENT:
             router.push("/dashboard/client");
@@ -149,7 +149,7 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || "Login failed.");
+      // Error is handled by the axios interceptor
     },
   });
 
@@ -164,14 +164,14 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
     },
     onSuccess: (response) => {
       if (response.success) {
-        toast.success(response.message);
+        toast.success(response.message || "Registration successful. Please verify your email.");
         router.push(`/verify-email?email=${form.getValues("email")}`);
       } else {
         toast.error(response.message || "Registration failed.");
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || "Registration failed.");
+      // Error is handled by the axios interceptor
     },
   });
   
@@ -187,14 +187,14 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
       onSuccess: (response) => {
         if (response.success) {
-          toast.success(response.message);
+          toast.success(response.message || "Email verified successfully!");
           router.push("/login");
         } else {
           toast.error(response.message || "Email verification failed.");
         }
       },
       onError: (error: any) => {
-        toast.error(error.message || "Email verification failed.");
+        // Error is handled by the axios interceptor
       },
     });
 
@@ -210,13 +210,13 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
       onSuccess: (response) => {
         if (response.success) {
-          toast.success(response.message);
+          toast.success(response.message || "New verification OTP sent to your email.");
         } else {
           toast.error(response.message || "Failed to resend OTP.");
         }
       },
       onError: (error: any) => {
-        toast.error(error.message || "Failed to resend OTP.");
+        // Error is handled by the axios interceptor
       },
     });
 
@@ -233,14 +233,14 @@ export function AuthForms({ formType, initialEmail }: AuthFormsProps) {
       },
       onSuccess: (response) => {
         if (response.success) {
-          toast.success(response.message);
+          toast.success(response.message || "If an account with that email exists, a password reset OTP has been sent.");
           router.push(`/reset-password?email=${form.getValues("email")}`);
         } else {
           toast.error(response.message || "Password reset request failed.");
         }
       },
       onError: (error: any) => {
-        toast.error(error.message || "Password reset request failed.");
+        // Error is handled by the axios interceptor
       },
     });
 

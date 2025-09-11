@@ -3,7 +3,7 @@ import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
 import { NotificationType } from '@prisma/client';
 import { createNotification } from '@modules/notifications/notification.service';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 class MessageService {
   public async getMessagesForTask(

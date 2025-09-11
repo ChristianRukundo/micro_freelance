@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import AppError from '@shared/utils/appError';
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 const errorHandler = (err: any, _req: Request, res: Response, _next: NextFunction) => {
   err.statusCode = err.statusCode || 500;

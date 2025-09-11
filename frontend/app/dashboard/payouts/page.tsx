@@ -42,7 +42,7 @@ export default function PayoutsPage() {
 
   const handleConnectStripe = async () => {
     try {
-      const response = await createStripeConnectAccount({});
+      const response: { success: boolean; data?: { onboardingUrl: string } } = await createStripeConnectAccount({});
       if (response.success && response.data?.onboardingUrl) {
         toast.info("Redirecting to Stripe to complete onboarding...");
         window.location.href = response.data.onboardingUrl;

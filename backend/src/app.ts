@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
+import morgan from 'morgan';
 
 import config from '@config/index';
 import errorHandler from '@shared/middleware/errorHandler';
@@ -24,6 +25,7 @@ import freelancerRoutes from '@modules/freelancers/freelancer.route';
 
 import swaggerDocument from '@docs/swagger.json';
 import path from 'path';
+import logger from '@shared/utils/logger';
 
 const app = express();
 
@@ -32,6 +34,10 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   }),
 );
+
+if (config.NODE_ENV === 'development') {
+  app.use(morgan('dev', { stream: { write: (message) => logger.info(message.trim()) } }));
+}
 
 if (config.NODE_ENV === 'production') {
   app.set('trust proxy', 1);

@@ -36,7 +36,8 @@ import {
 import { cn } from "@/lib/utils";
 import React, { useEffect } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import * as actions from "@/lib/actions";
+import api from "@/lib/api";
+
 
 // The schema expects an object with a 'milestones' array property
 type MilestonesFormInput = z.infer<typeof createMultipleMilestonesSchema>;
@@ -88,8 +89,10 @@ export function MilestoneForm({ taskId, onSuccess }: MilestoneFormProps) {
 
   const { mutate: createMilestones, isPending: isCreatingMilestones } =
     useMutation({
-      mutationFn: (values: MilestonesFormInput) =>
-        actions.createMilestonesAction(taskId, values),
+      mutationFn: async (values: MilestonesFormInput) => {
+        const response = await api.post(`/tasks/${taskId}/milestones`, values);
+        return response.data;
+      },
       onSuccess: (response) => {
         if (response.success) {
           toast.success(response.message);

@@ -1,19 +1,18 @@
-// frontend/hooks/useBids.ts
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import * as actions from "@/lib/actions";
 import { z } from "zod";
 import { submitBidSchema, updateBidSchema } from "@/lib/schemas";
+import api from "@/lib/api";
 
 
 export function useBids(taskId?: string) {
   const queryClient = useQueryClient();
 
   const submitBidMutation = useMutation({
-    mutationFn: (values: z.infer<typeof submitBidSchema>) => {
+    mutationFn: async (values: z.infer<typeof submitBidSchema>) => {
       if (!taskId) throw new Error("Task ID is required to submit a bid.");
-      return actions.submitBidAction(taskId, values);
+      const response = await api.post(`/tasks/${taskId}/bids`, values);
+      return response.data;
     },
     onSuccess: (response) => {
       if (response.success) {
@@ -28,13 +27,16 @@ export function useBids(taskId?: string) {
   });
 
   const updateBidMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       bidId,
       values,
     }: {
       bidId: string;
       values: z.infer<typeof updateBidSchema>;
-    }) => actions.updateBidAction(bidId, values),
+    }) => {
+      const response = await api.put(`/bids/${bidId}`, values);
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
@@ -47,7 +49,10 @@ export function useBids(taskId?: string) {
   });
 
   const withdrawBidMutation = useMutation({
-    mutationFn: (bidId: string) => actions.withdrawBidAction(bidId),
+    mutationFn: async (bidId: string) => {
+      const response = await api.delete(`/bids/${bidId}`);
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);
@@ -60,7 +65,10 @@ export function useBids(taskId?: string) {
   });
 
   const acceptBidMutation = useMutation({
-    mutationFn: (bidId: string) => actions.acceptBidAction(bidId),
+    mutationFn: async (bidId: string) => {
+      const response = await api.post(`/bids/${bidId}/accept`);
+      return response.data;
+    },
     onSuccess: (response) => {
       if (response.success) {
         toast.success(response.message);

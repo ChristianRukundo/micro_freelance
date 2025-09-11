@@ -2,7 +2,7 @@ import prisma from '@shared/database/prisma';
 import AppError from '@shared/utils/appError';
 import { Notification, NotificationType } from '@prisma/client';
 import { getSocketIO } from '../../socket'; // Corrected path to socket.ts
-import { logger } from '@shared/utils/logger'; // Import logger
+import logger from '@shared/utils/logger'; // Import logger
 
 export async function createNotification(
   userId: string,
