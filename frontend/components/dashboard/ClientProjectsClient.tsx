@@ -32,8 +32,7 @@ import {
   AwardIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { cn } from '@/lib/utils';
-
+import { cn } from "@/lib/utils";
 
 interface TaskQueryFilters {
   q?: string;
@@ -278,11 +277,7 @@ export function ClientProjectsClient({
           <p className="text-body-md mt-2 text-muted-foreground">
             You haven&apos;t posted any projects that match the current filters.
           </p>
-          <Link
-            href="/dashboard/tasks/new"
-            passHref
-            className="mt-6 inline-block"
-          >
+          <Link href="/tasks/new" passHref className="mt-6 inline-block">
             <Button
               variant="gradient"
               className="shadow-primary dark:shadow-primary-dark group"

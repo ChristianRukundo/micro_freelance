@@ -58,7 +58,6 @@ class TaskService {
     // Allow filtering by status for all users if provided.
     // If multiple statuses are passed, ensure they are handled correctly.
     if (status) {
-
       where.status = status as TaskStatus;
     }
 
@@ -280,7 +279,7 @@ class TaskService {
         cancelledTask.freelancerId,
         NotificationType.TASK_CANCELLED,
         `Task "${cancelledTask.title}" has been cancelled by the client.`,
-        `/dashboard/tasks/${taskId}`,
+        `/tasks/${taskId}`,
         taskId,
       );
     }

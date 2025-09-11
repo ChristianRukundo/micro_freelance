@@ -302,7 +302,7 @@ export default function TaskBrowsePage() {
               Reset Filters
             </Button>
             {user?.role === UserRole.CLIENT && (
-              <Link href="/dashboard/tasks/new" passHref className="mt-4">
+              <Link href="/tasks/new" passHref className="mt-4">
                 <Button variant="gradient">Post Your First Project</Button>
               </Link>
             )}

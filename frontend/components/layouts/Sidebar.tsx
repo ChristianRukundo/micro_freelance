@@ -233,7 +233,7 @@ export function Sidebar() {
         roles: [UserRole.FREELANCER],
       },
       {
-        href: "/dashboard/tasks/new",
+        href: "/tasks/new",
         icon: <BriefcaseIcon className="h-5 w-5" />,
         label: "Post New Project",
         roles: [UserRole.CLIENT],

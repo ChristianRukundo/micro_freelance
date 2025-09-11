@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle2Icon,
@@ -181,7 +181,7 @@ export default async function MarketingPage() {
               },
             ]}
             cta={
-              <Link href="/dashboard/tasks/new" passHref>
+              <Link href="/tasks/new" passHref>
                 <Button
                   variant="gradient"
                   className="group shadow-primary dark:shadow-primary-dark"

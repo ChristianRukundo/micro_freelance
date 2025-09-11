@@ -189,7 +189,7 @@ class PaymentService {
 
     try {
       const transfer = await stripe.transfers.create({
-        amount: Math.round(amountToFreelancer * 100), 
+        amount: Math.round(amountToFreelancer * 100),
         currency: 'usd',
         destination: milestone.task.freelancer.stripeAccountId,
         metadata: {
@@ -264,14 +264,14 @@ class PaymentService {
             clientId,
             NotificationType.PAYMENT_SUCCEEDED,
             `Your payment for task "${taskId}" was successful!`,
-            `/dashboard/tasks/${taskId}`,
+            `/tasks/${taskId}`,
             taskId,
           );
           if (io) {
             io.to(clientId).emit('new_notification', {
               message: `Payment successful for task "${taskId}"`,
               type: NotificationType.PAYMENT_SUCCEEDED,
-              url: `/dashboard/tasks/${taskId}`,
+              url: `/tasks/${taskId}`,
             });
           }
         }

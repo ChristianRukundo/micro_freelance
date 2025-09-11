@@ -52,7 +52,7 @@ class BidService {
       task.clientId,
       NotificationType.NEW_BID,
       `${freelancerName} submitted a new bid for your task "${task.title}".`,
-      `/dashboard/tasks/${taskId}`,
+      `/tasks/${taskId}`,
       taskId,
       bid.id,
     );
@@ -62,7 +62,7 @@ class BidService {
       io.to(task.clientId).emit('new_notification', {
         message: `${freelancerName} submitted a new bid for "${task.title}"`,
         type: NotificationType.NEW_BID,
-        url: `/dashboard/tasks/${taskId}`,
+        url: `/tasks/${taskId}`,
       });
     }
     return bid;

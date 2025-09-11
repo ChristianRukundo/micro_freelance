@@ -16,15 +16,15 @@ import {
   FileTextIcon,
   PlusCircleIcon,
   TriangleAlertIcon,
-} from "lucide-react"; 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/zustand";
-import { motion, AnimatePresence, Variants } from "framer-motion"; 
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useDashboardStats } from "@/hooks/useDashboard";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Task, TaskStatus } from "@/lib/types"; 
+import { Task, TaskStatus } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/date";
 import { TaskCardSkeleton } from "@/components/common/SkeletonLoaders";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -197,7 +197,7 @@ export default function ClientDashboardPage() {
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
         >
           <motion.div variants={itemVariants}>
-            <Link href="/dashboard/tasks/new" passHref>
+            <Link href="/tasks/new" passHref>
               <Button
                 variant="gradient"
                 size="lg"
@@ -264,10 +264,7 @@ export default function ClientDashboardPage() {
                         exit={{ opacity: 0, y: -20 }}
                         transition={{ duration: 0.4, delay: index * 0.05 }}
                       >
-                        <Link
-                          href={`/tasks/${project.id}`}
-                          passHref
-                        >
+                        <Link href={`/tasks/${project.id}`} passHref>
                           <Card className="p-4 flex flex-col sm:flex-row items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-50/70 dark:bg-neutral-800/70 shadow-sm transition-all hover:bg-primary-50 dark:hover:bg-neutral-700">
                             <BriefcaseIcon className="h-8 w-8 text-primary-600 flex-shrink-0" />
                             <div className="flex-1 text-center sm:text-left">
@@ -300,11 +297,7 @@ export default function ClientDashboardPage() {
                 <p className="text-body-md text-muted-foreground">
                   You haven&apos;t posted any projects recently.
                 </p>
-                <Link
-                  href="/dashboard/tasks/new"
-                  passHref
-                  className="mt-4 inline-block"
-                >
+                <Link href="/tasks/new" passHref className="mt-4 inline-block">
                   <Button variant="gradient" className="group">
                     <PlusCircleIcon className="mr-2 h-4 w-4" /> Post Your First
                     Project

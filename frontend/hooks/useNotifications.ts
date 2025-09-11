@@ -110,7 +110,7 @@ export function useNotifications() {
       const response = await api.get("/notifications", {
         params: { isRead: false, limit: 1 },
       }); // Just need count
-      return response.data.data.totalItems;
+      return response.data.data.totalNotifications;
     },
     enabled: isAuthenticated,
     refetchInterval: 1000 * 60 * 2, // Refetch every 2 minutes
