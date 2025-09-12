@@ -7,8 +7,8 @@
     },
     "servers": [
         {
-            "url": "http://localhost:5000/api",
-            "description": "Development Server"
+            "url": "https://micro-freelance.onrender.com/api",
+            "description": "Production Server"
         }
     ],
     "components": {
