@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { TaskForms } from "@/components/forms/TaskForms";
 import {
   Card,
   CardContent,
@@ -8,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { TaskForms } from "@/components/forms/TaskForms";
 
 export const metadata: Metadata = {
   title: "Post New Task - Micro Freelance Marketplace",
