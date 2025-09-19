@@ -197,7 +197,7 @@ export default function ClientDashboardPage() {
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
         >
           <motion.div variants={itemVariants}>
-            <Link href="/tasks/new" passHref>
+            <Link href="/dashboard/tasks/new" passHref>
               <Button
                 variant="gradient"
                 size="lg"

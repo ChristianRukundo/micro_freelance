@@ -66,9 +66,6 @@ export async function createNotification(
       errorDetails: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     });
-    // This is the critical line. If the DB notification fails, we should re-throw.
-    // The previous error was a problem in the *socket* part, which should not block the DB.
-    // This error is if the *DB* part fails.
     throw new AppError(`Failed to create notification: ${error.message}`, 500);
   }
 }
