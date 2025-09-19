@@ -181,7 +181,7 @@ export default async function MarketingPage() {
               },
             ]}
             cta={
-              <Link href="/tasks/new" passHref>
+              <Link href="/dashboard/tasks/new" passHref>
                 <Button
                   variant="gradient"
                   className="group shadow-primary dark:shadow-primary-dark"

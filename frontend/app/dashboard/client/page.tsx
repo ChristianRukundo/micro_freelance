@@ -297,7 +297,7 @@ export default function ClientDashboardPage() {
                 <p className="text-body-md text-muted-foreground">
                   You haven&apos;t posted any projects recently.
                 </p>
-                <Link href="/tasks/new" passHref className="mt-4 inline-block">
+                <Link href="/dashboard/tasks/new" passHref className="mt-4 inline-block">
                   <Button variant="gradient" className="group">
                     <PlusCircleIcon className="mr-2 h-4 w-4" /> Post Your First
                     Project

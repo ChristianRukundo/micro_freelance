@@ -43,7 +43,7 @@ export function AnimatedHero() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
           className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 mt-8"
         >
-          <Link href="/tasks/new" passHref>
+          <Link href="/dashboard/tasks/new" passHref>
             <Button
               size="lg"
               variant="gradient"
