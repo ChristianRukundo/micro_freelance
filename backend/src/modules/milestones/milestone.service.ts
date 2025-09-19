@@ -42,7 +42,7 @@ class MilestoneService {
       task.freelancerId,
       NotificationType.MILESTONE_CREATED,
       `New milestones have been created for your task "${task.title}".`,
-      `/tasks${taskId}`,
+      `/tasks/${taskId}`,
       taskId,
       undefined,
       undefined,
@@ -52,7 +52,7 @@ class MilestoneService {
       io.to(task.freelancerId).emit('new_notification', {
         message: `New milestones for "${task.title}"`,
         type: NotificationType.MILESTONE_CREATED,
-        url: `/tasks${taskId}`,
+        url: `/tasks/${taskId}`,
       });
     }
 
@@ -113,7 +113,7 @@ class MilestoneService {
       milestone.task.clientId,
       NotificationType.MILESTONE_SUBMITTED,
       `Freelancer submitted milestone "${milestone.description}" for task "${milestone.task.title}".`,
-      `/tasks${milestone.task.id}`,
+      `/tasks/${milestone.task.id}`,
       milestone.task.id,
       undefined,
       milestoneId,
@@ -123,7 +123,7 @@ class MilestoneService {
       io.to(milestone.task.clientId).emit('new_notification', {
         message: `Milestone submitted for "${milestone.task.title}"`,
         type: NotificationType.MILESTONE_SUBMITTED,
-        url: `/tasks${milestone.task.id}`,
+        url: `/tasks/${milestone.task.id}`,
       });
     }
 
@@ -158,7 +158,7 @@ class MilestoneService {
       milestone.task.freelancerId,
       NotificationType.REVISION_REQUESTED,
       `Client requested revision for milestone "${milestone.description}" in task "${milestone.task.title}".`,
-      `/tasks${milestone.task.id}`,
+      `/tasks/${milestone.task.id}`,
       milestone.task.id,
       undefined,
       milestoneId,
@@ -168,7 +168,7 @@ class MilestoneService {
       io.to(milestone.task.freelancerId).emit('new_notification', {
         message: `Revision requested for milestone "${milestone.task.title}"`,
         type: NotificationType.REVISION_REQUESTED,
-        url: `/tasks${milestone.task.id}`,
+        url: `/tasks/${milestone.task.id}`,
       });
     }
 
@@ -227,7 +227,7 @@ class MilestoneService {
           milestone.task.freelancerId!,
           NotificationType.MILESTONE_APPROVED,
           `All milestones for "${milestone.task.title}" are approved! The project is now in review.`,
-          `/tasks${milestone.task.id}`,
+          `/tasks/${milestone.task.id}`,
           milestone.task.id,
           undefined,
           milestoneId,
@@ -240,7 +240,7 @@ class MilestoneService {
       milestone.task.freelancerId,
       NotificationType.MILESTONE_APPROVED,
       `Your milestone "${milestone.description}" for task "${milestone.task.title}" has been approved and payment is on its way!`,
-      `/tasks${milestone.task.id}`,
+      `/tasks/${milestone.task.id}`,
       milestone.task.id,
       undefined,
       milestoneId,
@@ -250,7 +250,7 @@ class MilestoneService {
       io.to(milestone.task.freelancerId).emit('new_notification', {
         message: `Milestone "${milestone.description}" approved for "${milestone.task.title}"!`,
         type: NotificationType.MILESTONE_APPROVED,
-        url: `/tasks${milestone.task.id}`,
+        url: `/tasks/${milestone.task.id}`,
       });
     }
 
@@ -279,7 +279,7 @@ class MilestoneService {
       attachment.milestone.task.freelancerId!,
       NotificationType.REVISION_REQUESTED,
       `Client commented on a file for milestone "${attachment.milestone.description}".`,
-      `/tasks${attachment.milestone.task.id}`,
+      `/tasks/${attachment.milestone.task.id}`,
       attachment.milestone.task.id,
       undefined,
       attachment.milestoneId,
